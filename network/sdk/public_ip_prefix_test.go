@@ -18,7 +18,7 @@ func TestPublicIPPrefix(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
-	publicIpPrefixName := config.GenerateGroupName("publicipprefix")
+	publicIpPrefixName := config.AppendRandomSuffix("pipperfix")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()

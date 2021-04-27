@@ -18,7 +18,7 @@ func TestPublicIPAddress(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
-	publicIpAddressName := config.GenerateGroupName("publicipaddress")
+	publicIpAddressName := config.AppendRandomSuffix("pipaddress")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()

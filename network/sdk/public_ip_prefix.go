@@ -8,7 +8,6 @@ package network
 import (
 	"context"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
@@ -55,12 +54,9 @@ func CreatePublicIPPrefix(ctx context.Context, prefixName string) error {
 		return err
 	}
 
-	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return err
-	}
-	if resp.RawResponse != nil {
-		log.Printf("create public ip prefix, name: %v", prefixName)
 	}
 	return nil
 }
@@ -68,11 +64,10 @@ func CreatePublicIPPrefix(ctx context.Context, prefixName string) error {
 // Gets the specified public IP prefix in a specified resource group.
 func GetPublicIPPrefix(ctx context.Context, ipName string) error {
 	ipClient := getIPPrefixClient()
-	resp, err := ipClient.Get(ctx, config.GroupName(), ipName, nil)
+	_, err := ipClient.Get(ctx, config.GroupName(), ipName, nil)
 	if err != nil {
 		return err
 	}
-	log.Printf("get public ip prefix, name: %v", *resp.PublicIPPrefix.Name)
 	return nil
 }
 
@@ -84,15 +79,6 @@ func ListPublicIPPrefix(ctx context.Context) error {
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
 			return pager.Err()
-		}
-		var resp = pager.PageResponse().PublicIPPrefixListResult
-		var b strings.Builder
-		if resp != nil && resp.Value != nil {
-			for _, v := range *resp.Value {
-				b.WriteString(*v.Properties.IPPrefix)
-				b.WriteString(",")
-			}
-			log.Printf("list public ip prefixs in a resource group, IPPrefix: %v\n", strings.TrimRight(b.String(), ","))
 		}
 	}
 
@@ -111,15 +97,6 @@ func ListAllPublicIPPrefix(ctx context.Context) error {
 		if pager.Err() != nil {
 			return pager.Err()
 		}
-		var resp = pager.PageResponse().PublicIPPrefixListResult
-		var b strings.Builder
-		if resp != nil && resp.Value != nil {
-			for _, v := range *resp.Value {
-				b.WriteString(*v.Name)
-				b.WriteString(",")
-			}
-			log.Printf("list all public ip prefixs in a subscription, name: %v\n", strings.TrimRight(b.String(), ","))
-		}
 	}
 
 	if pager.Err() != nil {
@@ -131,7 +108,7 @@ func ListAllPublicIPPrefix(ctx context.Context) error {
 // Updates public IP prefix tags.
 func UpdatePrefixTags(ctx context.Context, prefixName string) error {
 	ipClient := getIPPrefixClient()
-	resp, err := ipClient.UpdateTags(
+	_, err := ipClient.UpdateTags(
 		ctx,
 		config.GroupName(),
 		prefixName,
@@ -142,10 +119,6 @@ func UpdatePrefixTags(ctx context.Context, prefixName string) error {
 	)
 	if err != nil {
 		return err
-	}
-
-	if resp.RawResponse != nil {
-		log.Printf("update prefix tags, name: %v\n", *resp.PublicIPPrefix.Name)
 	}
 	return nil
 }
@@ -161,6 +134,5 @@ func DeletePublicIPPrefix(ctx context.Context, prefixName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("delete public prefix, name: %v\n", prefixName)
 	return nil
 }
