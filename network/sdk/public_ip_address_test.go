@@ -14,56 +14,54 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestNetwork(t *testing.T) {
+func TestPublicIPAddress(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
-	publicIpPrefixName := config.GenerateGroupName("publicipprefix")
 	publicIpAddressName := config.GenerateGroupName("publicipaddress")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
-	defer resources.DeleteGroup(ctx, config.GroupName())
+	defer resources.Cleanup(ctx)
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {
 		t.Fatalf("failed to create group: %+v", err)
 	}
-	t.Logf("created group: %s\n", groupName)
 
-	CreatePublicIPPrefix(ctx, publicIpPrefixName)
-	t.Logf("created public ip prefix")
-
-	CreatePublicIPAddress(ctx, publicIpAddressName)
+	err = CreatePublicIPAddress(ctx, publicIpAddressName)
+	if err != nil {
+		t.Fatalf("failed to create public ip address: %+v", err)
+	}
 	t.Logf("created public ip address")
 
-	GetPublicIPPrefix(ctx, publicIpPrefixName)
-	t.Logf("got public ip prefix")
-
-	GetPublicIPAddress(ctx, publicIpAddressName)
+	err = GetPublicIPAddress(ctx, publicIpAddressName)
+	if err != nil {
+		t.Fatalf("failed to get public ip address: %+v", err)
+	}
 	t.Logf("got public ip address")
 
-	ListPublicIPPrefix(ctx)
-	t.Logf("listed public ip prefix")
-
-	ListPublicIPAddress(ctx)
+	err = ListPublicIPAddress(ctx)
+	if err != nil {
+		t.Fatalf("failed to list public ip address: %+v", err)
+	}
 	t.Logf("listed public ip address")
 
-	ListAllPublicIPPrefix(ctx)
-	t.Logf("listed all public ip prefix")
+	err = ListAllPublicIPAddress(ctx)
+	if err != nil {
+		t.Fatalf("failed to list all public ip address: %+v", err)
+	}
+	t.Logf("listed all public ip address")
 
-	ListAllPublicIPAddress(ctx)
-	t.Logf("listed all public ip address\n")
-
-	UpdatePrefixTags(ctx, publicIpPrefixName)
-	t.Logf("updated prefix tags")
-
-	UpdateAddressTags(ctx, publicIpAddressName)
+	err = UpdateAddressTags(ctx, publicIpAddressName)
+	if err != nil {
+		t.Fatalf("failed to update public ip address: %+v", err)
+	}
 	t.Logf("updated address tags")
 
-	DeletePublicIPPrefix(ctx, publicIpPrefixName)
-	t.Logf("deleted public ip prefix")
-
-	DeletePublicIPAddress(ctx, publicIpAddressName)
+	err = DeletePublicIPAddress(ctx, publicIpAddressName)
+	if err != nil {
+		t.Fatalf("failed to delete public ip address: %+v", err)
+	}
 	t.Logf("deleted public ip address")
 }
