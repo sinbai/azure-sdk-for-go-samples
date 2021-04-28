@@ -53,11 +53,11 @@ func TestPublicIPPrefix(t *testing.T) {
 	}
 	t.Logf("listed all public ip prefix")
 
-	err = UpdatePrefixTags(ctx, publicIpPrefixName)
+	err = UpdatePublicIPPrefixTags(ctx, publicIpPrefixName)
 	if err != nil {
 		t.Fatalf("failed to update tags for public ip prefix: %+v", err)
 	}
-	t.Logf("updated prefix tags")
+	t.Logf("updated public ip prefix tags")
 
 	err = DeletePublicIPPrefix(ctx, publicIpPrefixName)
 	if err != nil {

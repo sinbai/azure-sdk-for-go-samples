@@ -53,9 +53,9 @@ func TestPublicIPAddress(t *testing.T) {
 	}
 	t.Logf("listed all public ip address")
 
-	err = UpdateAddressTags(ctx, publicIpAddressName)
+	err = UpdatePublicIPAddressTags(ctx, publicIpAddressName)
 	if err != nil {
-		t.Fatalf("failed to update public ip address: %+v", err)
+		t.Fatalf("failed to update tags for public ip address: %+v", err)
 	}
 	t.Logf("updated address tags")
 
