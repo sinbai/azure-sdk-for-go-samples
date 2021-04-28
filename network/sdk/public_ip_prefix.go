@@ -28,9 +28,8 @@ func getIPPrefixClient() armnetwork.PublicIPPrefixesClient {
 
 // Create public IP prefix
 func CreatePublicIPPrefix(ctx context.Context, prefixName string) error {
-	ipClient := getIPPrefixClient()
-
-	poller, err := ipClient.BeginCreateOrUpdate(
+	client := getIPPrefixClient()
+	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		prefixName,
@@ -63,8 +62,8 @@ func CreatePublicIPPrefix(ctx context.Context, prefixName string) error {
 
 // Gets the specified public IP prefix in a specified resource group.
 func GetPublicIPPrefix(ctx context.Context, ipName string) error {
-	ipClient := getIPPrefixClient()
-	_, err := ipClient.Get(ctx, config.GroupName(), ipName, nil)
+	client := getIPPrefixClient()
+	_, err := client.Get(ctx, config.GroupName(), ipName, nil)
 	if err != nil {
 		return err
 	}
@@ -73,8 +72,8 @@ func GetPublicIPPrefix(ctx context.Context, ipName string) error {
 
 // Gets all public IP addresses in a resource group.
 func ListPublicIPPrefix(ctx context.Context) error {
-	ipClient := getIPPrefixClient()
-	pager := ipClient.List(config.GroupName(), nil)
+	client := getIPPrefixClient()
+	pager := client.List(config.GroupName(), nil)
 
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
@@ -90,8 +89,8 @@ func ListPublicIPPrefix(ctx context.Context) error {
 
 // Gets all the public IP prefix in a subscription.
 func ListAllPublicIPPrefix(ctx context.Context) error {
-	ipClient := getIPPrefixClient()
-	pager := ipClient.ListAll(nil)
+	client := getIPPrefixClient()
+	pager := client.ListAll(nil)
 
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
@@ -107,8 +106,8 @@ func ListAllPublicIPPrefix(ctx context.Context) error {
 
 // Updates public IP prefix tags.
 func UpdatePrefixTags(ctx context.Context, prefixName string) error {
-	ipClient := getIPPrefixClient()
-	_, err := ipClient.UpdateTags(
+	client := getIPPrefixClient()
+	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		prefixName,
@@ -125,8 +124,8 @@ func UpdatePrefixTags(ctx context.Context, prefixName string) error {
 
 // Deletes the specified public IP prefix.
 func DeletePublicIPPrefix(ctx context.Context, prefixName string) error {
-	ipClient := getIPPrefixClient()
-	resp, err := ipClient.BeginDelete(ctx, config.GroupName(), prefixName, nil)
+	client := getIPPrefixClient()
+	resp, err := client.BeginDelete(ctx, config.GroupName(), prefixName, nil)
 	if err != nil {
 		return err
 	}

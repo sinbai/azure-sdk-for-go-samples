@@ -28,8 +28,8 @@ func getIPAddressClient() armnetwork.PublicIPAddressesClient {
 
 // Create public IP address
 func CreatePublicIPAddress(ctx context.Context, addressName string) error {
-	ipClient := getIPAddressClient()
-	poller, err := ipClient.BeginCreateOrUpdate(
+	client := getIPAddressClient()
+	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		addressName,
@@ -42,6 +42,9 @@ func CreatePublicIPAddress(ctx context.Context, addressName string) error {
 			Properties: &armnetwork.PublicIPAddressPropertiesFormat{
 				PublicIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
 				PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
+			},
+			SKU: &armnetwork.PublicIPAddressSKU{
+				Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
 			},
 		},
 		nil,
@@ -60,8 +63,8 @@ func CreatePublicIPAddress(ctx context.Context, addressName string) error {
 
 // Gets the specified public IP address in a specified resource group.
 func GetPublicIPAddress(ctx context.Context, ipName string) error {
-	ipClient := getIPAddressClient()
-	_, err := ipClient.Get(ctx, config.GroupName(), ipName, nil)
+	client := getIPAddressClient()
+	_, err := client.Get(ctx, config.GroupName(), ipName, nil)
 	if err != nil {
 		return err
 	}
@@ -70,8 +73,8 @@ func GetPublicIPAddress(ctx context.Context, ipName string) error {
 
 // Gets all the public IP prefixes in a subscription.
 func ListPublicIPAddress(ctx context.Context) error {
-	ipClient := getIPAddressClient()
-	pager := ipClient.List(config.GroupName(), nil)
+	client := getIPAddressClient()
+	pager := client.List(config.GroupName(), nil)
 
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
@@ -87,8 +90,8 @@ func ListPublicIPAddress(ctx context.Context) error {
 
 // Gets all the public IP addresses in a subscription.
 func ListAllPublicIPAddress(ctx context.Context) error {
-	ipClient := getIPAddressClient()
-	pager := ipClient.ListAll(nil)
+	client := getIPAddressClient()
+	pager := client.ListAll(nil)
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
 			return pager.Err()
@@ -103,8 +106,8 @@ func ListAllPublicIPAddress(ctx context.Context) error {
 
 // Updates public IP address tags.
 func UpdateAddressTags(ctx context.Context, prefixName string) error {
-	ipClient := getIPAddressClient()
-	_, err := ipClient.UpdateTags(
+	client := getIPAddressClient()
+	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		prefixName,
@@ -121,8 +124,8 @@ func UpdateAddressTags(ctx context.Context, prefixName string) error {
 
 // Deletes the specified public IP address.
 func DeletePublicIPAddress(ctx context.Context, addressName string) error {
-	ipClient := getIPAddressClient()
-	resp, err := ipClient.BeginDelete(ctx, config.GroupName(), addressName, nil)
+	client := getIPAddressClient()
+	resp, err := client.BeginDelete(ctx, config.GroupName(), addressName, nil)
 	if err != nil {
 		return err
 	}
