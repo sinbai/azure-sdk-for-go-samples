@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getPublicIPAddressClient() armnetwork.PublicIPAddressesClient {
@@ -27,26 +26,13 @@ func getPublicIPAddressClient() armnetwork.PublicIPAddressesClient {
 }
 
 // Create public IP address
-func CreatePublicIPAddress(ctx context.Context, addressName string) error {
+func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddress armnetwork.PublicIPAddress) error {
 	client := getPublicIPAddressClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		addressName,
-		armnetwork.PublicIPAddress{
-			Resource: armnetwork.Resource{
-				Name:     to.StringPtr(addressName),
-				Location: to.StringPtr(config.Location()),
-			},
-
-			Properties: &armnetwork.PublicIPAddressPropertiesFormat{
-				PublicIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
-				PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
-			},
-			SKU: &armnetwork.PublicIPAddressSKU{
-				Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
-			},
-		},
+		publicIPAddress,
 		nil,
 	)
 

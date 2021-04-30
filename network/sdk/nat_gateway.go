@@ -32,10 +32,10 @@ func getNatGatewayClient() armnetwork.NatGatewaysClient {
 func CreateNatGateway(ctx context.Context, natGatewayName string, pipaddress string, pipprefix string) error {
 	client := getNatGatewayClient()
 
-	urlPathAddredd := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{pipaddress}"
-	urlPathAddredd = strings.ReplaceAll(urlPathAddredd, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathAddredd = strings.ReplaceAll(urlPathAddredd, "{pipaddress}", url.PathEscape(pipaddress))
-	urlPathAddredd = strings.ReplaceAll(urlPathAddredd, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
+	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{pipaddress}"
+	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{resourceGroupName}", url.PathEscape(config.GroupName()))
+	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{pipaddress}", url.PathEscape(pipaddress))
+	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
 
 	urlPathPrefix := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/PublicIPPrefixes/{pipprefix}"
 	urlPathPrefix = strings.ReplaceAll(urlPathPrefix, "{resourceGroupName}", url.PathEscape(config.GroupName()))
@@ -53,7 +53,7 @@ func CreateNatGateway(ctx context.Context, natGatewayName string, pipaddress str
 			Properties: &armnetwork.NatGatewayPropertiesFormat{
 				PublicIPAddresses: &[]armnetwork.SubResource{
 					{
-						ID: &urlPathAddredd,
+						ID: &urlPathAddress,
 					},
 				},
 				PublicIPPrefixes: &[]armnetwork.SubResource{

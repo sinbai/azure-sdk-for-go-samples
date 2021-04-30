@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestPublicIPAddress(t *testing.T) {
@@ -29,7 +31,22 @@ func TestPublicIPAddress(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreatePublicIPAddress(ctx, publicIpAddressName)
+	publicIPAddress := armnetwork.PublicIPAddress{
+		Resource: armnetwork.Resource{
+			Name:     to.StringPtr(publicIpAddressName),
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.PublicIPAddressPropertiesFormat{
+			PublicIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
+			PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
+		},
+		SKU: &armnetwork.PublicIPAddressSKU{
+			Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
+		},
+	}
+
+	err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddress)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
@@ -57,7 +74,7 @@ func TestPublicIPAddress(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to update tags for public ip address: %+v", err)
 	}
-	t.Logf("updated address tags")
+	t.Logf("updated public ip address tags")
 
 	err = DeletePublicIPAddress(ctx, publicIpAddressName)
 	if err != nil {

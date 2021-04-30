@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-func TestBGPServiceCommunities(t *testing.T) {
+func TestBGPServiceCommunitiy(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
 	err := ListServiceTags(ctx)
 	if err != nil {
-		t.Fatalf("failed to list bgp service communities: %+v", err)
+		t.Fatalf("failed to list bgp service community: %+v", err)
 	}
-	t.Logf("listed bgp service communities")
+	t.Logf("listed bgp service community")
 }
