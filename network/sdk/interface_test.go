@@ -16,7 +16,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-func TestNetworkInterface(t *testing.T) {
+func TestInterface(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 	config.SetLocation("eastus")
