@@ -19,6 +19,7 @@ var (
 	tenantID               string
 	subscriptionID         string
 	locationDefault        string
+	location               string
 	authorizationServerURL string
 	cloudName              string = "AzurePublicCloud"
 	useDeviceFlow          bool
@@ -52,7 +53,16 @@ func SubscriptionID() string {
 // deprecated: use DefaultLocation() instead
 // Location returns the Azure location to be utilized.
 func Location() string {
+	if location != "" {
+		return location
+	}
 	return locationDefault
+}
+
+// deprecated: we have to set this because some resource types are not available in all locations
+// so another location might need to be set
+func SetLocation(name string) {
+	location = name
 }
 
 // DefaultLocation() returns the default location wherein to create new resources.
