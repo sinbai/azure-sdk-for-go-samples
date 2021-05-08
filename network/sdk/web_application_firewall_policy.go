@@ -17,7 +17,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-func getFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClient {
+func getWpFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		log.Fatalf("failed to obtain a credential: %v", err)
@@ -28,7 +28,7 @@ func getFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClient
 
 // Creates or update policy with specified rule set name within a resource group.
 func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string) error {
-	client := getFirewallPoliciesClient()
+	client := getWpFirewallPoliciesClient()
 	_, err := client.CreateOrUpdate(
 		ctx,
 		config.GroupName(),
@@ -62,7 +62,7 @@ func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName 
 
 // Gets the specified Firewall Policy.
 func GetWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string) error {
-	client := getFirewallPoliciesClient()
+	client := getWpFirewallPoliciesClient()
 	_, err := client.Get(ctx, config.GroupName(), firewallPolicyName, nil)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func GetWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName str
 
 // Lists all Firewall Policies in a resource group.
 func ListWebApplicationFirewallPolicy(ctx context.Context) error {
-	client := getFirewallPoliciesClient()
+	client := getWpFirewallPoliciesClient()
 	pager := client.List(config.GroupName(), nil)
 
 	for pager.NextPage(ctx) {
@@ -89,7 +89,7 @@ func ListWebApplicationFirewallPolicy(ctx context.Context) error {
 
 // Gets all the Firewall Policies in a subscription.
 func ListAllWebApplicationFirewallPolicy(ctx context.Context) error {
-	client := getFirewallPoliciesClient()
+	client := getWpFirewallPoliciesClient()
 	pager := client.ListAll(nil)
 
 	for pager.NextPage(ctx) {
@@ -106,7 +106,7 @@ func ListAllWebApplicationFirewallPolicy(ctx context.Context) error {
 
 // Deletes the specified Firewall Policy.
 func DeleteWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string) error {
-	client := getFirewallPoliciesClient()
+	client := getWpFirewallPoliciesClient()
 	resp, err := client.BeginDelete(ctx, config.GroupName(), firewallPolicyName, nil)
 	if err != nil {
 		return err
