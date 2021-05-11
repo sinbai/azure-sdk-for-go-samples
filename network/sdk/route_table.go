@@ -26,17 +26,8 @@ func getRouteTablesClient() armnetwork.RouteTablesClient {
 	return *client
 }
 
-func getRoutesClient() armnetwork.RoutesClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armnetwork.NewRoutesClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
 // Create RouteTables
-func CreateRouteTable(ctx context.Context, routeTableName string, routeName string) error {
+func CreateRouteTable(ctx context.Context, routeTableName string) error {
 	client := getRouteTablesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -44,18 +35,6 @@ func CreateRouteTable(ctx context.Context, routeTableName string, routeName stri
 		routeTableName,
 		armnetwork.RouteTable{
 			Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
-			// Properties: &armnetwork.RouteTablePropertiesFormat{
-			// 	DisableBgpRoutePropagation: to.BoolPtr(true),
-			// 	Routes: &[]armnetwork.Route{
-			// 		{
-			// 			Name: &routeName,
-			// 			Properties: &armnetwork.RoutePropertiesFormat{
-			// 				AddressPrefix: to.StringPtr("10.0.3.0/24"),
-			// 				NextHopType:   armnetwork.RouteNextHopTypeVirtualNetworkGateway.ToPtr(),
-			// 			},
-			// 		},
-			// 	},
-			// },
 		},
 		nil,
 	)
@@ -122,7 +101,7 @@ func UpdateRouteTableTags(ctx context.Context, routeTableName string) error {
 		config.GroupName(),
 		routeTableName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)
@@ -136,75 +115,6 @@ func UpdateRouteTableTags(ctx context.Context, routeTableName string) error {
 func DeleteRouteTable(ctx context.Context, routeTableName string) error {
 	client := getRouteTablesClient()
 	resp, err := client.BeginDelete(ctx, config.GroupName(), routeTableName, nil)
-	if err != nil {
-		return err
-	}
-	_, err = resp.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Creates or updates a route in the specified route table.
-func CreateRoute(ctx context.Context, routeTableName string, routeName string) error {
-	client := getRoutesClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		routeTableName,
-		routeName,
-		armnetwork.Route{
-			Properties: &armnetwork.RoutePropertiesFormat{
-				AddressPrefix: to.StringPtr("10.0.3.0/24"),
-				NextHopType:   armnetwork.RouteNextHopTypeVirtualNetworkGateway.ToPtr(),
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets the specified route from a route table.
-func GetRoute(ctx context.Context, routeTableName string, routeName string) error {
-	client := getRoutesClient()
-	_, err := client.Get(ctx, config.GroupName(), routeTableName, routeName, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets all routes in a route table.
-func ListRoute(ctx context.Context, routeTableName string) error {
-	client := getRoutesClient()
-	pager := client.List(config.GroupName(), routeTableName, nil)
-
-	for pager.NextPage(ctx) {
-		if pager.Err() != nil {
-			return pager.Err()
-		}
-	}
-
-	if pager.Err() != nil {
-		return pager.Err()
-	}
-	return nil
-}
-
-// Deletes the specified route from a route table.
-func DeleteRoute(ctx context.Context, routeTableName string, routeName string) error {
-	client := getRoutesClient()
-	resp, err := client.BeginDelete(ctx, config.GroupName(), routeTableName, routeName, nil)
 	if err != nil {
 		return err
 	}

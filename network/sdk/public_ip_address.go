@@ -14,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getPublicIPAddressClient() armnetwork.PublicIPAddressesClient {
@@ -98,7 +99,7 @@ func UpdatePublicIPAddressTags(ctx context.Context, addressName string) error {
 		config.GroupName(),
 		addressName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)

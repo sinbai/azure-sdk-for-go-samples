@@ -51,12 +51,12 @@ func CreateNatGateway(ctx context.Context, natGatewayName string, pipaddress str
 				Location: to.StringPtr(config.Location()),
 			},
 			Properties: &armnetwork.NatGatewayPropertiesFormat{
-				PublicIPAddresses: &[]armnetwork.SubResource{
+				PublicIPAddresses: &[]*armnetwork.SubResource{
 					{
 						ID: &urlPathAddress,
 					},
 				},
-				PublicIPPrefixes: &[]armnetwork.SubResource{
+				PublicIPPrefixes: &[]*armnetwork.SubResource{
 					{
 						ID: &urlPathPrefix,
 					},
@@ -130,7 +130,7 @@ func UpdateNatGateway(ctx context.Context, natGatewayName string) error {
 		config.GroupName(),
 		natGatewayName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)

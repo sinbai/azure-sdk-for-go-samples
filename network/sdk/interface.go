@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -22,7 +21,7 @@ import (
 
 var (
 	ipConfigurationName string
-	subnetName          string
+	//subnetName          string
 )
 
 func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
@@ -35,7 +34,7 @@ func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 }
 
 // Create NetworkInterfaces
-func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, publicIpAddressName string, virtualNetworkName string) (*string, error) {
+func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, publicIpAddressName string, virtualNetworkName string, subnetName string) (*string, error) {
 	ipConfigurationName = config.AppendRandomSuffix("ipconfiguration")
 
 	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}"
@@ -58,7 +57,7 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, pu
 			Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
 			Properties: &armnetwork.NetworkInterfacePropertiesFormat{
 				EnableAcceleratedNetworking: to.BoolPtr(true),
-				IPConfigurations: &[]armnetwork.NetworkInterfaceIPConfiguration{
+				IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
 					{
 						Name: &ipConfigurationName,
 						Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
@@ -80,12 +79,12 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, pu
 		return nil, err
 	}
 
-	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.NetworkInterface.ID, nil
+	return &poller.RawResponse.Request.URL.Path, nil
 }
 
 // Gets the specified network interface in a specified resource group.
@@ -139,7 +138,7 @@ func UpdateNetworkInterfaceTags(ctx context.Context, networkInterfaceName string
 		config.GroupName(),
 		networkInterfaceName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)
@@ -241,190 +240,6 @@ func ListNetworkInterfaceLoadBalancer(ctx context.Context, networkInterfaceName 
 
 	if pager.Err() != nil {
 		return pager.Err()
-	}
-	return nil
-}
-
-func getVirtualNetworksClient() armnetwork.VirtualNetworksClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armnetwork.NewVirtualNetworksClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Creates or updates a virtual network in the specified resource group
-func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string) error {
-	client := getVirtualNetworksClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		virtualNetworkName,
-		armnetwork.VirtualNetwork{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-
-			Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-				AddressSpace: &armnetwork.AddressSpace{
-					AddressPrefixes: &[]string{"10.0.0.0/16"},
-				},
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-
-	err = CreateSubnet(ctx, virtualNetworkName, subnetName)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getSubnetsClient() armnetwork.SubnetsClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armnetwork.NewSubnetsClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Create SubNets
-func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName string) error {
-	client := getSubnetsClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		virtualNetworkName,
-		subnetName,
-		armnetwork.Subnet{
-			Properties: &armnetwork.SubnetPropertiesFormat{
-				AddressPrefix: to.StringPtr("10.0.0.0/24"),
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getVirtualMachinesClient() armcompute.VirtualMachinesClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armcompute.NewVirtualMachinesClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Deletes the specified virtual machine.
-func DeleteVirtualMachine(ctx context.Context, virtualMachineName string) error {
-	client := getVirtualMachinesClient()
-	resp, err := client.BeginDelete(ctx, config.GroupName(), virtualMachineName, nil)
-	if err != nil {
-		return err
-	}
-	_, err = resp.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Create VirtualMachines
-func CreateVirtualMachine(ctx context.Context, virtualMachineName string, nicId *string) error {
-	client := getVirtualMachinesClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		virtualMachineName,
-		armcompute.VirtualMachine{
-			Resource: armcompute.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armcompute.VirtualMachineProperties{
-				HardwareProfile: &armcompute.HardwareProfile{
-					VMSize: armcompute.VirtualMachineSizeTypesStandardD2V2.ToPtr(),
-				},
-				NetworkProfile: &armcompute.NetworkProfile{
-					NetworkInterfaces: &[]armcompute.NetworkInterfaceReference{
-						{
-							SubResource: armcompute.SubResource{
-								ID: nicId,
-							},
-							Properties: &armcompute.NetworkInterfaceReferenceProperties{
-								Primary: to.BoolPtr(true),
-							},
-						},
-					},
-				},
-				OSProfile: &armcompute.OSProfile{
-					AdminPassword: to.StringPtr("Aa1!zyx_"),
-					AdminUsername: to.StringPtr("testuser"),
-					ComputerName:  to.StringPtr("myVM"),
-					WindowsConfiguration: &armcompute.WindowsConfiguration{
-						EnableAutomaticUpdates: to.BoolPtr(true),
-					},
-				},
-				StorageProfile: &armcompute.StorageProfile{
-					DataDisks: &[]armcompute.DataDisk{
-						{
-							CreateOption: armcompute.DiskCreateOptionTypesEmpty.ToPtr(),
-							DiskSizeGb:   to.Int32Ptr(1023),
-							Lun:          to.Int32Ptr(0),
-						},
-						{
-							CreateOption: armcompute.DiskCreateOptionTypesEmpty.ToPtr(),
-							DiskSizeGb:   to.Int32Ptr(1023),
-							Lun:          to.Int32Ptr(1),
-						},
-					},
-					ImageReference: &armcompute.ImageReference{
-						Offer:     to.StringPtr("WindowsServer"),
-						Publisher: to.StringPtr("MicrosoftWindowsServer"),
-						SKU:       to.StringPtr("2016-Datacenter"),
-						Version:   to.StringPtr("latest"),
-					},
-					OSDisk: &armcompute.OSDisk{
-						Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
-						CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
-						ManagedDisk: &armcompute.ManagedDiskParameters{
-							StorageAccountType: armcompute.StorageAccountTypesStandardLrs.ToPtr(),
-						},
-						Name: to.StringPtr("myVMosdisk"),
-					},
-				},
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
 	}
 	return nil
 }

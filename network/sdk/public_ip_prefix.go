@@ -112,7 +112,7 @@ func UpdatePublicIPPrefixTags(ctx context.Context, prefixName string) error {
 		config.GroupName(),
 		prefixName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)

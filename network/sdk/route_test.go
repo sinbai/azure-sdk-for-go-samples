@@ -14,11 +14,12 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestRouteTable(t *testing.T) {
+func TestRoute(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
 	routeTableName := config.AppendRandomSuffix("routetable")
+	routeName := config.AppendRandomSuffix("route")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -35,33 +36,27 @@ func TestRouteTable(t *testing.T) {
 	}
 	t.Logf("created route table")
 
-	err = GetRouteTable(ctx, routeTableName)
+	err = CreateRoute(ctx, routeTableName, routeName)
 	if err != nil {
-		t.Fatalf("failed to get route table: %+v", err)
+		t.Fatalf("failed to create route: % +v", err)
 	}
-	t.Logf("got route table")
+	t.Logf("created route")
 
-	err = ListRouteTable(ctx)
+	err = GetRoute(ctx, routeTableName, routeName)
 	if err != nil {
-		t.Fatalf("failed to list route table: %+v", err)
+		t.Fatalf("failed to get route: %+v", err)
 	}
-	t.Logf("listed route table")
+	t.Logf("got route")
 
-	err = ListAllRouteTable(ctx)
+	err = ListRoute(ctx, routeTableName)
 	if err != nil {
-		t.Fatalf("failed to list all route table: %+v", err)
+		t.Fatalf("failed to list route: %+v", err)
 	}
-	t.Logf("listed all route table")
+	t.Logf("listed route")
 
-	err = UpdateRouteTableTags(ctx, routeTableName)
+	err = DeleteRoute(ctx, routeTableName, routeName)
 	if err != nil {
-		t.Fatalf("failed to update tags for route table: %+v", err)
+		t.Fatalf("failed to delete route: %+v", err)
 	}
-	t.Logf("updated route table tags")
-
-	err = DeleteRouteTable(ctx, routeTableName)
-	if err != nil {
-		t.Fatalf("failed to delete route table: %+v", err)
-	}
-	t.Logf("deleted route table")
+	t.Logf("deleted route")
 }

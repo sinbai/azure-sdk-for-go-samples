@@ -36,12 +36,10 @@ func CreateIPGroup(ctx context.Context, ipGroupName string) error {
 		armnetwork.IPGroup{
 			Resource: armnetwork.Resource{
 				Location: to.StringPtr(config.Location()),
-				Tags: &map[string]string{
-					"key1": "value1",
-				},
+				Tags:     &map[string]*string{"tag1": to.StringPtr("value1")},
 			},
 			Properties: &armnetwork.IPGroupPropertiesFormat{
-				IPAddresses: &[]string{"13.64.39.16/32", "40.74.146.80/31", "40.74.147.32/28"},
+				IPAddresses: &[]*string{to.StringPtr("13.64.39.16/32"), to.StringPtr("40.74.146.80/31"), to.StringPtr("40.74.147.32/28")},
 			},
 		},
 		nil,

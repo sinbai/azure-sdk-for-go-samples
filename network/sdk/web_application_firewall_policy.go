@@ -38,10 +38,10 @@ func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName 
 				Location: to.StringPtr(config.Location()),
 			},
 			Properties: &armnetwork.WebApplicationFirewallPolicyPropertiesFormat{
-				CustomRules: &[]armnetwork.WebApplicationFirewallCustomRule{},
+				CustomRules: &[]*armnetwork.WebApplicationFirewallCustomRule{},
 				ManagedRules: &armnetwork.ManagedRulesDefinition{
-					Exclusions: &[]armnetwork.OwaspCrsExclusionEntry{},
-					ManagedRuleSets: &[]armnetwork.ManagedRuleSet{
+					Exclusions: &[]*armnetwork.OwaspCrsExclusionEntry{},
+					ManagedRuleSets: &[]*armnetwork.ManagedRuleSet{
 						{
 							RuleSetType:    to.StringPtr("OWASP"),
 							RuleSetVersion: to.StringPtr("3.0"),

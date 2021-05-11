@@ -14,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getRouteFilterRuleClient() armnetwork.RouteFilterRulesClient {
@@ -36,7 +37,7 @@ func CreateRouteFilterRule(ctx context.Context, routeFilterName string, routeNam
 		armnetwork.RouteFilterRule{
 			Properties: &armnetwork.RouteFilterRulePropertiesFormat{
 				Access:              armnetwork.AccessAllow.ToPtr(),
-				Communities:         &[]string{"12076:51004"},
+				Communities:         &[]*string{to.StringPtr("12076:51004")},
 				RouteFilterRuleType: armnetwork.RouteFilterRuleTypeCommunity.ToPtr(),
 			},
 		},

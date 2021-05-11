@@ -16,7 +16,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-func TestInterface(t *testing.T) {
+func TestVirtualMachine(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 	config.SetLocation("eastus")
@@ -69,58 +69,8 @@ func TestInterface(t *testing.T) {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}
 
-	err = ListNetworkInterfaceIpConfiguration(ctx, networkInterfaceName)
+	err = DeleteVirtualMachine(ctx, virtualMachineName)
 	if err != nil {
-		t.Fatalf("failed to list network interface ip configuration: %+v", err)
+		t.Fatalf("failed to delete virtual machine: %+v", err)
 	}
-	t.Logf("listed network interface ip configuration")
-
-	err = ListNetworkInterfaceLoadBalancer(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to list network interface load balancer: %+v", err)
-	}
-	t.Logf("listed network interface load balancer")
-
-	err = GetNetworkInterface(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to get network interface: %+v", err)
-	}
-	t.Logf("got network interface")
-
-	err = ListNetworkInterface(ctx)
-	if err != nil {
-		t.Fatalf("failed to list network interface: %+v", err)
-	}
-	t.Logf("listed network interface")
-
-	err = ListAllNetworkInterface(ctx)
-	if err != nil {
-		t.Fatalf("failed to list all network interface: %+v", err)
-	}
-	t.Logf("listed all network interface")
-
-	err = BeginListEffectiveRouteTable(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to list all network security groups applied to a network interface: %+v", err)
-	}
-	t.Logf("listed all network security groups applied to a network interface")
-
-	err = BeginGetEffectiveRouteTable(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to get all route tables applied to a network interface: %+v", err)
-	}
-	t.Logf("got all route tables applied to a network interface")
-
-	err = UpdateNetworkInterfaceTags(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to update tags for network interface: %+v", err)
-	}
-	t.Logf("updated network interface tags")
-
-	err = DeleteNetworkInterface(ctx, networkInterfaceName)
-	if err != nil {
-		t.Fatalf("failed to delete network interface: %+v", err)
-	}
-	t.Logf("deleted network interface")
-
 }

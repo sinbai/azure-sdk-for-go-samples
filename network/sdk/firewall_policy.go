@@ -36,7 +36,7 @@ func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string) error 
 		armnetwork.FirewallPolicy{
 			Resource: armnetwork.Resource{
 				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]string{"key1": "value1"},
+				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
 			},
 			Properties: &armnetwork.FirewallPolicyPropertiesFormat{
 				ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
@@ -50,90 +50,6 @@ func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string) error 
 	}
 
 	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getFirewallPolicyRuleCollectionGroupsClient() armnetwork.FirewallPolicyRuleCollectionGroupsClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armnetwork.NewFirewallPolicyRuleCollectionGroupsClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Creates or updates the specified FirewallPolicyRuleCollectionGroup.
-func CreateFirewallPolicyRuleCollectionGroup(ctx context.Context, firewallPolicyName string, firewallPolicyRuleCollectionGroupName string, body string) error {
-	client := getFirewallPolicyRuleCollectionGroupsClient()
-	parameter := armnetwork.FirewallPolicyRuleCollectionGroupProperties{}
-	parameter.UnmarshalJSON([]byte(body))
-
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		firewallPolicyName,
-		firewallPolicyRuleCollectionGroupName,
-		armnetwork.FirewallPolicyRuleCollectionGroup{
-			SubResource: armnetwork.SubResource{
-				ID: new(string),
-			},
-			Etag:       new(string),
-			Name:       new(string),
-			Properties: &parameter,
-			Type:       new(string),
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets the specified FirewallPolicyRuleCollectionGroup.
-func GetFirewallPolicyRuleCollectionGroup(ctx context.Context, firewallPolicyName string, firewallPolicyRuleCollectionGroupName string) error {
-	client := getFirewallPolicyRuleCollectionGroupsClient()
-	_, err := client.Get(ctx, config.GroupName(), firewallPolicyName, firewallPolicyRuleCollectionGroupName, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Lists all FirewallPolicyRuleCollectionGroups in a FirewallPolicy resource.
-func ListFirewallPolicyRuleCollectionGroup(ctx context.Context, firewallPolicyName string) error {
-	client := getFirewallPolicyRuleCollectionGroupsClient()
-	pager := client.List(config.GroupName(), firewallPolicyName, nil)
-
-	for pager.NextPage(ctx) {
-		if pager.Err() != nil {
-			return pager.Err()
-		}
-	}
-
-	if pager.Err() != nil {
-		return pager.Err()
-	}
-	return nil
-}
-
-// Deletes the specified FirewallPolicyRuleCollectionGroup.
-func DeleteFirewallPolicyRuleCollectionGroup(ctx context.Context, firewallPolicyName string, firewallPolicyRuleCollectionGroupName string) error {
-	client := getFirewallPolicyRuleCollectionGroupsClient()
-	resp, err := client.BeginDelete(ctx, config.GroupName(), firewallPolicyName, firewallPolicyRuleCollectionGroupName, nil)
-	if err != nil {
-		return err
-	}
-	_, err = resp.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return err
 	}

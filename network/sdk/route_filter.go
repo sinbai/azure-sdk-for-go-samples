@@ -36,10 +36,10 @@ func CreateRouteFilter(ctx context.Context, routeFilterName string) error {
 		armnetwork.RouteFilter{
 			Resource: armnetwork.Resource{
 				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]string{"key1": "value1"},
+				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
 			},
 			Properties: &armnetwork.RouteFilterPropertiesFormat{
-				Rules: &[]armnetwork.RouteFilterRule{}},
+				Rules: &[]*armnetwork.RouteFilterRule{}},
 		},
 		nil,
 	)
@@ -106,7 +106,7 @@ func UpdateRouteFilterTags(ctx context.Context, routeFilterName string) error {
 		config.GroupName(),
 		routeFilterName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)

@@ -19,15 +19,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-var (
-	loadBalancingRuleName       string
-	outBoundRuleName            string
-	probeName                   string
-	frontendIpConfigurationName string
-	backendAddressPoolName      string
-	inboundNatruleName          string
-)
-
 func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
@@ -38,14 +29,9 @@ func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 }
 
 // Create LoadBalancers
-func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAddressName string) error {
-	loadBalancingRuleName = config.AppendRandomSuffix("loadbalancingrule")
-	outBoundRuleName = config.AppendRandomSuffix("outboundrule")
-	probeName = config.AppendRandomSuffix("probe")
-	frontendIpConfigurationName = config.AppendRandomSuffix("frontendipconfiguration")
-	backendAddressPoolName = config.AppendRandomSuffix("backendaddresspool")
-	inboundNatruleName = config.AppendRandomSuffix("inboundnatrule")
-
+func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAddressName string,
+	frontendIpConfigurationName string, backendAddressPoolName string, probeName string,
+	loadBalancingRuleName string, outBoundRuleName string) error {
 	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}"
 	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{resourceGroupName}", url.PathEscape(config.GroupName()))
 	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{publicIpAddressName}", url.PathEscape(publicIpAddressName))
@@ -79,12 +65,12 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 				Location: to.StringPtr(config.Location()),
 			},
 			Properties: &armnetwork.LoadBalancerPropertiesFormat{
-				BackendAddressPools: &[]armnetwork.BackendAddressPool{
+				BackendAddressPools: &[]*armnetwork.BackendAddressPool{
 					{
 						Name: &backendAddressPoolName,
 					},
 				},
-				FrontendIPConfigurations: &[]armnetwork.FrontendIPConfiguration{
+				FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
 					{
 						Name: &frontendIpConfigurationName,
 						Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
@@ -96,7 +82,7 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 						},
 					},
 				},
-				LoadBalancingRules: &[]armnetwork.LoadBalancingRule{
+				LoadBalancingRules: &[]*armnetwork.LoadBalancingRule{
 					{
 						Name: &loadBalancingRuleName,
 						Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
@@ -111,7 +97,7 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 								ID: &urlPathFrontendIPConfiguration,
 							},
 							FrontendPort:         to.Int32Ptr(80),
-							IDleTimeoutInMinutes: to.Int32Ptr(15),
+							IdleTimeoutInMinutes: to.Int32Ptr(15),
 							LoadDistribution:     armnetwork.LoadDistributionDefault.ToPtr(),
 							Probe: &armnetwork.SubResource{
 								ID: &urlPathProb,
@@ -120,14 +106,14 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 						},
 					},
 				},
-				OutboundRules: &[]armnetwork.OutboundRule{
+				OutboundRules: &[]*armnetwork.OutboundRule{
 					{
 						Name: &outBoundRuleName,
 						Properties: &armnetwork.OutboundRulePropertiesFormat{
 							BackendAddressPool: &armnetwork.SubResource{
 								ID: &urlPathBackendAddressPool,
 							},
-							FrontendIPConfigurations: &[]armnetwork.SubResource{
+							FrontendIPConfigurations: &[]*armnetwork.SubResource{
 								{
 									ID: &urlPathFrontendIPConfiguration,
 								},
@@ -136,7 +122,7 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 						},
 					},
 				},
-				Probes: &[]armnetwork.Probe{
+				Probes: &[]*armnetwork.Probe{
 					{
 						Name: &probeName,
 						Properties: &armnetwork.ProbePropertiesFormat{
@@ -218,7 +204,7 @@ func UpdateLoadBalancerTags(ctx context.Context, loadBalancerName string) error 
 		config.GroupName(),
 		loadBalancerName,
 		armnetwork.TagsObject{
-			Tags: &map[string]string{"tag1": "value1", "tag2": "value2"},
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 		},
 		nil,
 	)
@@ -310,98 +296,6 @@ func ListLoadBalancerBackendAddressPool(ctx context.Context, loadBalancerName st
 
 	if pager.Err() != nil {
 		return pager.Err()
-	}
-	return nil
-}
-
-func getInboundNatRulesClient() armnetwork.InboundNatRulesClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armnetwork.NewInboundNatRulesClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Creates or updates a load balancer inbound nat rule.
-func CreateInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string) error {
-	urlPathFrontendIPConfiguration := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations/{frontendIpConfigurationName}"
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{loadBalancerName}", url.PathEscape(loadBalancerName))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{frontendIpConfigurationName}", url.PathEscape(frontendIpConfigurationName))
-
-	client := getInboundNatRulesClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		loadBalancerName,
-		inboundNatRuleName,
-		armnetwork.InboundNatRule{
-			Properties: &armnetwork.InboundNatRulePropertiesFormat{
-				BackendIPConfiguration: &armnetwork.NetworkInterfaceIPConfiguration{},
-				BackendPort:            to.Int32Ptr(3389),
-				EnableFloatingIP:       to.BoolPtr(false),
-				EnableTCPReset:         to.BoolPtr(false),
-				FrontendIPConfiguration: &armnetwork.SubResource{
-					ID: &urlPathFrontendIPConfiguration,
-				},
-				FrontendPort:         to.Int32Ptr(3390),
-				IDleTimeoutInMinutes: to.Int32Ptr(4),
-				Protocol:             armnetwork.TransportProtocolTCP.ToPtr(),
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets the specified load balancer inbound nat rule.
-func GetInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string) error {
-	client := getInboundNatRulesClient()
-	_, err := client.Get(ctx, config.GroupName(), loadBalancerName, inboundNatRuleName, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets all the inbound nat rules in a load balancer.
-func ListInboundNatRule(ctx context.Context, loadBalancerName string) error {
-	client := getInboundNatRulesClient()
-	pager := client.List(config.GroupName(), loadBalancerName, nil)
-
-	for pager.NextPage(ctx) {
-		if pager.Err() != nil {
-			return pager.Err()
-		}
-	}
-
-	if pager.Err() != nil {
-		return pager.Err()
-	}
-	return nil
-}
-
-// Deletes the specified load balancer inbound nat rule.
-func DeleteInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string) error {
-	client := getInboundNatRulesClient()
-	resp, err := client.BeginDelete(ctx, config.GroupName(), loadBalancerName, inboundNatRuleName, nil)
-	if err != nil {
-		return err
-	}
-	_, err = resp.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
 	}
 	return nil
 }

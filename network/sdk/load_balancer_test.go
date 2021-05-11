@@ -22,6 +22,12 @@ func TestLoadBalancer(t *testing.T) {
 
 	loadBalancerName := config.AppendRandomSuffix("loadbalancer")
 	publicIpAddressName := config.AppendRandomSuffix("pipaddress")
+	inboundNatRuleName := config.AppendRandomSuffix("inboundnatrule")
+	loadBalancingRuleName := config.AppendRandomSuffix("loadbalancingrule")
+	outBoundRuleName := config.AppendRandomSuffix("outboundrule")
+	probeName := config.AppendRandomSuffix("probe")
+	frontendIpConfigurationName := config.AppendRandomSuffix("frontendipconfiguration")
+	backendAddressPoolName := config.AppendRandomSuffix("backendaddresspool")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -38,7 +44,7 @@ func TestLoadBalancer(t *testing.T) {
 		},
 
 		Properties: &armnetwork.PublicIPAddressPropertiesFormat{
-			IDleTimeoutInMinutes:     to.Int32Ptr(10),
+			IdleTimeoutInMinutes:     to.Int32Ptr(10),
 			PublicIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
 			PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
 		},
@@ -51,13 +57,14 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreateLoadBalancer(ctx, loadBalancerName, publicIpAddressName)
+	err = CreateLoadBalancer(ctx, loadBalancerName, publicIpAddressName, frontendIpConfigurationName, backendAddressPoolName,
+		probeName, loadBalancingRuleName, outBoundRuleName)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}
 	t.Logf("created load balancer")
 
-	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatruleName)
+	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatRuleName, frontendIpConfigurationName)
 	if err != nil {
 		t.Fatalf("failed to get load balancer inbound nat rule: %+v", err)
 	}
@@ -77,12 +84,6 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to get the specified load balancer load balancing rule: %+v", err)
 	}
 	t.Logf("got the specified load balancer load balancing rule")
-
-	err = GetInboundNatRule(ctx, loadBalancerName, inboundNatruleName)
-	if err != nil {
-		t.Fatalf("failed to list the specified load balancer inbound nat rule: %+v", err)
-	}
-	t.Logf("listed the specified load balancer inbound nat rule")
 
 	err = GetLoadBalancerOutboundRule(ctx, loadBalancerName, outBoundRuleName)
 	if err != nil {
@@ -126,12 +127,6 @@ func TestLoadBalancer(t *testing.T) {
 	}
 	t.Logf("listed associated load balancer network interfaces")
 
-	err = ListInboundNatRule(ctx, loadBalancerName)
-	if err != nil {
-		t.Fatalf("failed to list all the inbound nat rules in a load balancer: %+v", err)
-	}
-	t.Logf("listed all the inbound nat rules in a load balancer")
-
 	err = ListLoadBalancerOutboundRule(ctx, loadBalancerName)
 	if err != nil {
 		t.Fatalf("failed to list all the outbound rules in a load balancer: %+v", err)
@@ -167,12 +162,6 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to update tags for load balancer: %+v", err)
 	}
 	t.Logf("updated load balancer tags")
-
-	err = DeleteInboundNatRule(ctx, loadBalancerName, inboundNatruleName)
-	if err != nil {
-		t.Fatalf("failed to delete the specified load balancer inbound nat rule: %+v", err)
-	}
-	t.Logf("deleted the specified load balancer inbound nat rule")
 
 	err = DeleteLoadBalancer(ctx, loadBalancerName)
 	if err != nil {
