@@ -27,7 +27,7 @@ func getAvailablePrivateEndpointTypesClient() armnetwork.AvailablePrivateEndpoin
 // Gets all the available private endpoint type in a subscription.
 func ListAvailablePrivateEndpointType(ctx context.Context) error {
 	client := getAvailablePrivateEndpointTypesClient()
-	pager := client.List(config.GroupName(), nil)
+	pager := client.List(config.Location(), nil)
 
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {

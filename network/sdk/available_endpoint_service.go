@@ -27,7 +27,7 @@ func getAvailableEndpointServicesClient() armnetwork.AvailableEndpointServicesCl
 // Gets all the available endpoint service in a subscription.
 func ListAvailableEndpointService(ctx context.Context) error {
 	client := getAvailableEndpointServicesClient()
-	pager := client.List(config.GroupName(), nil)
+	pager := client.List(config.Location(), nil)
 
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
