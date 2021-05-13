@@ -7,6 +7,7 @@ package network
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getSubnetsClient() armnetwork.SubnetsClient {
@@ -27,28 +27,38 @@ func getSubnetsClient() armnetwork.SubnetsClient {
 }
 
 // Create SubNets
-func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName string) error {
+func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName string, body string) (string, error) {
 	client := getSubnetsClient()
+
+	var subNetProps armnetwork.SubnetPropertiesFormat
+	if err := json.Unmarshal([]byte(body), &subNetProps); err != nil {
+		return "", err
+	}
+
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
 		subnetName,
-		armnetwork.Subnet{
-			Properties: &armnetwork.SubnetPropertiesFormat{
-				AddressPrefix: to.StringPtr("10.0.0.0/24"),
-			},
-		},
+		armnetwork.Subnet{Properties: &subNetProps},
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	return poller.RawResponse.Request.URL.Path, nil
+
+	// resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// return *resp.Subnet.ID, nil
 }

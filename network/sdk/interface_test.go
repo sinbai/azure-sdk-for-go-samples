@@ -43,7 +43,11 @@ func TestInterface(t *testing.T) {
 	}
 	t.Logf("created virtual network")
 
-	err = CreateSubnet(ctx, virtualNetworkName, subnetName)
+	body := `{
+		"addressPrefix": "10.0.0.0/16"
+	  }
+	`
+	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
@@ -116,6 +120,11 @@ func TestInterface(t *testing.T) {
 		t.Fatalf("failed to update tags for network interface: %+v", err)
 	}
 	t.Logf("updated network interface tags")
+
+	err = DeleteVirtualMachine(ctx, virtualMachineName)
+	if err != nil {
+		t.Fatalf("failed to delete virtual machine: %+v", err)
+	}
 
 	err = DeleteNetworkInterface(ctx, networkInterfaceName)
 	if err != nil {
