@@ -116,7 +116,7 @@ func createDeployment() (deployment resources.DeploymentExtended, err error) {
 	if err != nil {
 		return
 	}
-	err = deploymentFuture.Future.WaitForCompletionRef(ctx, deploymentsClient.BaseClient.Client)
+	err = deploymentFuture.FutureAPI.WaitForCompletionRef(ctx, deploymentsClient.BaseClient.Client)
 	if err != nil {
 		return
 	}
