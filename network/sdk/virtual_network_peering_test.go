@@ -14,11 +14,13 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestVirtualNetwork(t *testing.T) {
+func TestVirtualNetworkPeering(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
+	virtualNetworkPeeringName := config.AppendRandomSuffix("virtualnetworkpeering")
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
+	remoteVirtualNetworkName := config.AppendRandomSuffix("remotevirtualnetwork")
 	subNetName := config.AppendRandomSuffix("subnet")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
@@ -30,11 +32,15 @@ func TestVirtualNetwork(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
+	err = CreateVirtualNetwork(ctx, remoteVirtualNetworkName, "10.2.0.0/16")
+	if err != nil {
+		t.Fatalf("failed to create virtual network: % +v", err)
+	}
+
 	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
-	t.Logf("created virtual network")
 
 	body := `{
 		"addressPrefix": "10.0.1.0/24",
@@ -45,47 +51,28 @@ func TestVirtualNetwork(t *testing.T) {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	ipAddress := "10.0.1.4"
-	err = CheckIPAddressAvailability(ctx, virtualNetworkName, ipAddress)
+	err = CreateVirtualNetworkPeering(ctx, virtualNetworkName, remoteVirtualNetworkName, virtualNetworkPeeringName)
 	if err != nil {
-		t.Fatalf("failed to check ip address availability: %+v", err)
+		t.Fatalf("failed to create virtual network peering: % +v", err)
 	}
-	t.Logf("checked ip address availability")
+	t.Logf("created virtual network peering")
 
-	err = ListUsageVirtualNetwork(ctx, virtualNetworkName)
+	err = GetVirtualNetworkPeering(ctx, virtualNetworkName, virtualNetworkPeeringName)
 	if err != nil {
-		t.Fatalf("failed to list usage virtual network: %+v", err)
+		t.Fatalf("failed to get virtual network peering: %+v", err)
 	}
-	t.Logf("listed usage virtual network")
+	t.Logf("got virtual network peering")
 
-	err = GetVirtualNetwork(ctx, virtualNetworkName)
+	err = ListVirtualNetworkPeering(ctx, virtualNetworkName)
 	if err != nil {
-		t.Fatalf("failed to get virtual network: %+v", err)
+		t.Fatalf("failed to list virtual network peering: %+v", err)
 	}
-	t.Logf("got virtual network")
+	t.Logf("listed virtual network peering")
 
-	err = ListVirtualNetwork(ctx)
+	err = DeleteVirtualNetworkPeering(ctx, virtualNetworkName, virtualNetworkPeeringName)
 	if err != nil {
-		t.Fatalf("failed to list virtual network: %+v", err)
+		t.Fatalf("failed to delete virtual network peering: %+v", err)
 	}
-	t.Logf("listed virtual network")
-
-	err = ListAllVirtualNetwork(ctx)
-	if err != nil {
-		t.Fatalf("failed to list all virtual network: %+v", err)
-	}
-	t.Logf("listed all virtual network")
-
-	err = UpdateVirtualNetworkTags(ctx, virtualNetworkName)
-	if err != nil {
-		t.Fatalf("failed to update tags for virtual network: %+v", err)
-	}
-	t.Logf("updated virtual network tags")
-
-	err = DeleteVirtualNetwork(ctx, virtualNetworkName)
-	if err != nil {
-		t.Fatalf("failed to delete virtual network: %+v", err)
-	}
-	t.Logf("deleted virtual network")
+	t.Logf("deleted virtual network peering")
 
 }

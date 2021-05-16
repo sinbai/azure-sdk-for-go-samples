@@ -14,36 +14,22 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestSubnet(t *testing.T) {
+func TestAvailableResourceGroupDelegation(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
-
-	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
-	subnetName := config.AppendRandomSuffix("subnet")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.DefaultLocation())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
+	err = ListAvailableResourceGroupDelegation(ctx)
 	if err != nil {
-		t.Fatalf("failed to create virtual network: % +v", err)
+		t.Fatalf("failed to list available resource group delegation: %+v", err)
 	}
-	t.Logf("created virtual network")
-
-	body := `{
-		"addressPrefix": "10.0.0.0/16"
-	  }
-	`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
-	if err != nil {
-		t.Fatalf("failed to create sub net: % +v", err)
-	}
+	t.Logf("listed available resource group delegation")
 }

@@ -14,18 +14,16 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestSubnet(t *testing.T) {
+func TestResourceNavigationLink(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
 
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
-	subnetName := config.AppendRandomSuffix("subnet")
+	subNetName := "Subnet"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.DefaultLocation())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {
@@ -36,14 +34,18 @@ func TestSubnet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
-	t.Logf("created virtual network")
 
 	body := `{
-		"addressPrefix": "10.0.0.0/16"
-	  }
-	`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+		"addressPrefix": "10.0.1.0/24"
+		}`
+	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
+
+	err = ListResourceNavigationLink(ctx, virtualNetworkName, subNetName)
+	if err != nil {
+		t.Fatalf("failed to list resource navigation link: %+v", err)
+	}
+	t.Logf("listed resource navigation link")
 }
