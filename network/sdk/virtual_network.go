@@ -27,7 +27,7 @@ func getVirtualNetworksClient() armnetwork.VirtualNetworksClient {
 }
 
 // Creates or updates a virtual network in the specified resource group
-func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string) error {
+func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, addressPrefixes string) error {
 	client := getVirtualNetworksClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -40,7 +40,7 @@ func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string) error 
 
 			Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 				AddressSpace: &armnetwork.AddressSpace{
-					AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+					AddressPrefixes: &[]*string{&addressPrefixes},
 				},
 			},
 		},
@@ -56,5 +56,107 @@ func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string) error 
 		return err
 	}
 
+	return nil
+}
+
+// Checks whether a private IP address is available for use.
+func CheckIPAddressAvailability(ctx context.Context, virtualNetworkName string, ipAddress string) error {
+	client := getVirtualNetworksClient()
+	_, err := client.CheckIPAddressAvailability(ctx, config.GroupName(), virtualNetworkName, ipAddress, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Lists usage stats.
+func ListUsageVirtualNetwork(ctx context.Context, virtualNetworkName string) error {
+	client := getVirtualNetworksClient()
+	pager := client.ListUsage(config.GroupName(), virtualNetworkName, nil)
+
+	for pager.NextPage(ctx) {
+		if pager.Err() != nil {
+			return pager.Err()
+		}
+	}
+
+	if pager.Err() != nil {
+		return pager.Err()
+	}
+	return nil
+}
+
+// Gets the specified virtual network in a specified resource group.
+func GetVirtualNetwork(ctx context.Context, virtualNetworkName string) error {
+	client := getVirtualNetworksClient()
+	_, err := client.Get(ctx, config.GroupName(), virtualNetworkName, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Gets all the virtual network in a subscription.
+func ListVirtualNetwork(ctx context.Context) error {
+	client := getVirtualNetworksClient()
+	pager := client.List(config.GroupName(), nil)
+
+	for pager.NextPage(ctx) {
+		if pager.Err() != nil {
+			return pager.Err()
+		}
+	}
+
+	if pager.Err() != nil {
+		return pager.Err()
+	}
+	return nil
+}
+
+// Gets all the virtual network in a subscription.
+func ListAllVirtualNetwork(ctx context.Context) error {
+	client := getVirtualNetworksClient()
+	pager := client.ListAll(nil)
+	for pager.NextPage(ctx) {
+		if pager.Err() != nil {
+			return pager.Err()
+		}
+	}
+
+	if pager.Err() != nil {
+		return pager.Err()
+	}
+	return nil
+}
+
+// Updates virtual network tags.
+func UpdateVirtualNetworkTags(ctx context.Context, virtualNetworkName string) error {
+	client := getVirtualNetworksClient()
+	_, err := client.UpdateTags(
+		ctx,
+		config.GroupName(),
+		virtualNetworkName,
+		armnetwork.TagsObject{
+			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Deletes the specified virtual network.
+func DeleteVirtualNetwork(ctx context.Context, virtualNetworkName string) error {
+	client := getVirtualNetworksClient()
+	resp, err := client.BeginDelete(ctx, config.GroupName(), virtualNetworkName, nil)
+	if err != nil {
+		return err
+	}
+	_, err = resp.PollUntilDone(ctx, 30*time.Second)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -38,7 +38,7 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPAddress := armnetwork.PublicIPAddress{
+	publicIPAddressPro := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -52,12 +52,12 @@ func TestLoadBalancer(t *testing.T) {
 			Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
 		},
 	}
-	err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddress)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreateLoadBalancer(ctx, loadBalancerName, publicIpAddressName, frontendIpConfigurationName, backendAddressPoolName,
+	err = CreateLoadBalancer(ctx, loadBalancerName, publicIpAddressId, frontendIpConfigurationName, backendAddressPoolName,
 		probeName, loadBalancingRuleName, outBoundRuleName)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)

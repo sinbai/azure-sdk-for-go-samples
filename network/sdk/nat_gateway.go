@@ -29,13 +29,8 @@ func getNatGatewayClient() armnetwork.NatGatewaysClient {
 }
 
 // Creates or updates a nat gateway.
-func CreateNatGateway(ctx context.Context, natGatewayName string, pipaddress string, pipprefix string) error {
+func CreateNatGateway(ctx context.Context, natGatewayName string, publicIdAddressId string, pipprefix string) error {
 	client := getNatGatewayClient()
-
-	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{pipaddress}"
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{pipaddress}", url.PathEscape(pipaddress))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
 
 	urlPathPrefix := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/PublicIPPrefixes/{pipprefix}"
 	urlPathPrefix = strings.ReplaceAll(urlPathPrefix, "{resourceGroupName}", url.PathEscape(config.GroupName()))
@@ -53,7 +48,7 @@ func CreateNatGateway(ctx context.Context, natGatewayName string, pipaddress str
 			Properties: &armnetwork.NatGatewayPropertiesFormat{
 				PublicIPAddresses: &[]*armnetwork.SubResource{
 					{
-						ID: &urlPathAddress,
+						ID: &publicIdAddressId,
 					},
 				},
 				PublicIPPrefixes: &[]*armnetwork.SubResource{

@@ -14,11 +14,12 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 )
 
-func TestVirtualNetWork(t *testing.T) {
+func TestVirtualNetwork(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
+	subNetName := config.AppendRandomSuffix("subnet")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -29,10 +30,62 @@ func TestVirtualNetWork(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName)
+	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 	t.Logf("created virtual network")
+
+	body := `{
+		"addressPrefix": "10.0.1.0/24",
+		"privateLinkServiceNetworkPolicies": "Disabled"
+		}`
+	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, body)
+	if err != nil {
+		t.Fatalf("failed to create sub net: % +v", err)
+	}
+
+	ipAddress := "10.0.1.4"
+	err = CheckIPAddressAvailability(ctx, virtualNetworkName, ipAddress)
+	if err != nil {
+		t.Fatalf("failed to check ip address availability: %+v", err)
+	}
+	t.Logf("checked ip address availability")
+
+	err = ListUsageVirtualNetwork(ctx, virtualNetworkName)
+	if err != nil {
+		t.Fatalf("failed to list usage virtual network: %+v", err)
+	}
+	t.Logf("listed usage virtual network")
+
+	err = GetVirtualNetwork(ctx, virtualNetworkName)
+	if err != nil {
+		t.Fatalf("failed to get virtual network: %+v", err)
+	}
+	t.Logf("got virtual network")
+
+	err = ListVirtualNetwork(ctx)
+	if err != nil {
+		t.Fatalf("failed to list virtual network: %+v", err)
+	}
+	t.Logf("listed virtual network")
+
+	err = ListAllVirtualNetwork(ctx)
+	if err != nil {
+		t.Fatalf("failed to list all virtual network: %+v", err)
+	}
+	t.Logf("listed all virtual network")
+
+	err = UpdateVirtualNetworkTags(ctx, virtualNetworkName)
+	if err != nil {
+		t.Fatalf("failed to update tags for virtual network: %+v", err)
+	}
+	t.Logf("updated virtual network tags")
+
+	err = DeleteVirtualNetwork(ctx, virtualNetworkName)
+	if err != nil {
+		t.Fatalf("failed to delete virtual network: %+v", err)
+	}
+	t.Logf("deleted virtual network")
 
 }

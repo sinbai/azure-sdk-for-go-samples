@@ -37,7 +37,7 @@ func TestInterface(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName)
+	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -47,22 +47,22 @@ func TestInterface(t *testing.T) {
 		"addressPrefix": "10.0.0.0/16"
 	  }
 	`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	publicIPAddress := armnetwork.PublicIPAddress{
+	publicIPAddressPro := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
 	}
-	err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddress)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	nicId, err := CreateNetworkInterface(ctx, networkInterfaceName, publicIpAddressName, virtualNetworkName, subnetName)
+	nicId, err := CreateNetworkInterface(ctx, networkInterfaceName, publicIpAddressId, virtualNetworkName, subNetID)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}

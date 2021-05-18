@@ -35,7 +35,7 @@ func TestPrivateLinkService(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName)
+	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}

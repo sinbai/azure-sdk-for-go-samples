@@ -27,7 +27,7 @@ func getPublicIPAddressClient() armnetwork.PublicIPAddressesClient {
 }
 
 // Create public IP address
-func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddress armnetwork.PublicIPAddress) error {
+func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddress armnetwork.PublicIPAddress) (string, error) {
 	client := getPublicIPAddressClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -38,14 +38,14 @@ func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddr
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return poller.RawResponse.Request.URL.Path, nil
 }
 
 // Gets the specified public IP address in a specified resource group.

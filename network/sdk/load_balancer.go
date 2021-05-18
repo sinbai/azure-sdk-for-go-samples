@@ -29,13 +29,9 @@ func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 }
 
 // Create LoadBalancers
-func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAddressName string,
+func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAddressId string,
 	frontendIpConfigurationName string, backendAddressPoolName string, probeName string,
 	loadBalancingRuleName string, outBoundRuleName string) error {
-	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}"
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{publicIpAddressName}", url.PathEscape(publicIpAddressName))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
 
 	urlPathFrontendIPConfiguration := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations/{frontendIpConfigurationName}"
 	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{resourceGroupName}", url.PathEscape(config.GroupName()))
@@ -76,7 +72,7 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAd
 						Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
 							PublicIPAddress: &armnetwork.PublicIPAddress{
 								Resource: armnetwork.Resource{
-									ID: &urlPathAddress,
+									ID: &publicIpAddressId,
 								},
 							},
 						},

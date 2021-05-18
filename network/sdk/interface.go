@@ -8,8 +8,6 @@ package network
 import (
 	"context"
 	"log"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
@@ -34,19 +32,8 @@ func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 }
 
 // Create NetworkInterfaces
-func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, publicIpAddressName string, virtualNetworkName string, subnetName string) (*string, error) {
+func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, publicIpAddressID string, virtualNetworkName string, subnetID string) (*string, error) {
 	ipConfigurationName = config.AppendRandomSuffix("ipconfiguration")
-
-	urlPathAddress := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}"
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{publicIpAddressName}", url.PathEscape(publicIpAddressName))
-	urlPathAddress = strings.ReplaceAll(urlPathAddress, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-
-	urlPathSubNet := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}"
-	urlPathSubNet = strings.ReplaceAll(urlPathSubNet, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathSubNet = strings.ReplaceAll(urlPathSubNet, "{virtualNetworkName}", url.PathEscape(virtualNetworkName))
-	urlPathSubNet = strings.ReplaceAll(urlPathSubNet, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathSubNet = strings.ReplaceAll(urlPathSubNet, "{subnetName}", url.PathEscape(subnetName))
 
 	client := getNetworkInterfacesClient()
 	poller, err := client.BeginCreateOrUpdate(
@@ -63,10 +50,10 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, pu
 						Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
 							PublicIPAddress: &armnetwork.PublicIPAddress{
 								Resource: armnetwork.Resource{
-									ID: &urlPathAddress,
+									ID: &publicIpAddressID,
 								},
 							},
-							Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &urlPathSubNet}},
+							Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subnetID}},
 						},
 					},
 				},

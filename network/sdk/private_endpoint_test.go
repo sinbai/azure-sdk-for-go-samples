@@ -25,7 +25,6 @@ func TestPrivateEndpoint(t *testing.T) {
 	subNetName2 := config.AppendRandomSuffix("subnet2")
 	ipConfigName := config.AppendRandomSuffix("ipconfig")
 	privateEndpointName := config.AppendRandomSuffix("privateendpoint")
-	privateZoneName := config.AppendRandomSuffix("www.zone1.com")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -36,7 +35,7 @@ func TestPrivateEndpoint(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName)
+	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -74,12 +73,6 @@ func TestPrivateEndpoint(t *testing.T) {
 		t.Fatalf("failed to create private endpoint: % +v", err)
 	}
 	t.Logf("created private endpoint")
-
-	_, err = CreatePrivateZone(ctx, privateZoneName)
-	if err != nil {
-		t.Fatalf("failed to create private zone: % +v", err)
-	}
-	t.Logf("created private zone")
 
 	err = GetPrivateEndpoint(ctx, privateEndpointName)
 	if err != nil {

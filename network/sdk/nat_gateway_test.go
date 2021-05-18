@@ -18,7 +18,7 @@ import (
 
 func TestNatGateWay(t *testing.T) {
 	natGatewayName := config.AppendRandomSuffix("natgateway")
-	pipaddress := config.AppendRandomSuffix("pipaddress")
+	publicIpAddressName := config.AppendRandomSuffix("pipaddress")
 	pipprefix := config.AppendRandomSuffix("pipprefix")
 
 	groupName := config.GenerateGroupName("network")
@@ -33,9 +33,9 @@ func TestNatGateWay(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPAddress := armnetwork.PublicIPAddress{
+	publicIPAddressPro := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
-			Name:     to.StringPtr(pipaddress),
+			Name:     to.StringPtr(publicIpAddressName),
 			Location: to.StringPtr(config.Location()),
 		},
 
@@ -48,7 +48,7 @@ func TestNatGateWay(t *testing.T) {
 		},
 	}
 
-	err = CreatePublicIPAddress(ctx, pipaddress, publicIPAddress)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
@@ -58,7 +58,7 @@ func TestNatGateWay(t *testing.T) {
 		t.Fatalf("failed to create public ip prefix: %+v", err)
 	}
 
-	err = CreateNatGateway(ctx, natGatewayName, pipaddress, pipprefix)
+	err = CreateNatGateway(ctx, natGatewayName, publicIpAddressId, pipprefix)
 	if err != nil {
 		t.Fatalf("failed to create nat gateway: %+v", err)
 	}
