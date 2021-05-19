@@ -46,6 +46,13 @@ func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddr
 		return "", err
 	}
 	return poller.RawResponse.Request.URL.Path, nil
+
+	// resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// return *resp.PublicIPAddress.ID, nil
+
 }
 
 // Gets the specified public IP address in a specified resource group.

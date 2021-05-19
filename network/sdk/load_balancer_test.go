@@ -57,8 +57,87 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreateLoadBalancer(ctx, loadBalancerName, publicIpAddressId, frontendIpConfigurationName, backendAddressPoolName,
-		probeName, loadBalancingRuleName, outBoundRuleName)
+	loadBalancerPro := armnetwork.LoadBalancer{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.LoadBalancerPropertiesFormat{
+			BackendAddressPools: &[]*armnetwork.BackendAddressPool{
+				{
+					Name: &backendAddressPoolName,
+				},
+			},
+			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+				{
+					Name: &frontendIpConfigurationName,
+					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
+						PublicIPAddress: &armnetwork.PublicIPAddress{
+							Resource: armnetwork.Resource{
+								ID: &publicIpAddressId,
+							},
+						},
+					},
+				},
+			},
+			LoadBalancingRules: &[]*armnetwork.LoadBalancingRule{
+				{
+					Name: &loadBalancingRuleName,
+					Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
+						BackendAddressPool: &armnetwork.SubResource{
+							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/backendAddressPools/" + backendAddressPoolName),
+						},
+						BackendPort:         to.Int32Ptr(80),
+						DisableOutboundSnat: to.BoolPtr(true),
+						EnableFloatingIP:    to.BoolPtr(true),
+						EnableTCPReset:      new(bool),
+						FrontendIPConfiguration: &armnetwork.SubResource{
+							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/frontendIPConfigurations/" + frontendIpConfigurationName),
+						},
+						FrontendPort:         to.Int32Ptr(80),
+						IdleTimeoutInMinutes: to.Int32Ptr(15),
+						LoadDistribution:     armnetwork.LoadDistributionDefault.ToPtr(),
+						Probe: &armnetwork.SubResource{
+							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/probes/" + probeName),
+						},
+						Protocol: armnetwork.TransportProtocolTCP.ToPtr(),
+					},
+				},
+			},
+			OutboundRules: &[]*armnetwork.OutboundRule{
+				{
+					Name: &outBoundRuleName,
+					Properties: &armnetwork.OutboundRulePropertiesFormat{
+						BackendAddressPool: &armnetwork.SubResource{
+							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/backendAddressPools/" + backendAddressPoolName),
+						},
+						FrontendIPConfigurations: &[]*armnetwork.SubResource{
+							{
+								ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/frontendIPConfigurations/" + frontendIpConfigurationName),
+							},
+						},
+						Protocol: armnetwork.LoadBalancerOutboundRuleProtocolAll.ToPtr(),
+					},
+				},
+			},
+			Probes: &[]*armnetwork.Probe{
+				{
+					Name: &probeName,
+					Properties: &armnetwork.ProbePropertiesFormat{
+						IntervalInSeconds: to.Int32Ptr(15),
+						NumberOfProbes:    to.Int32Ptr(2),
+						Port:              to.Int32Ptr(80),
+						Protocol:          armnetwork.ProbeProtocolHTTP.ToPtr(),
+						RequestPath:       to.StringPtr("healthcheck.aspx"),
+					},
+				},
+			},
+		},
+		SKU: &armnetwork.LoadBalancerSKU{
+			Name: armnetwork.LoadBalancerSKUNameStandard.ToPtr(),
+		},
+	}
+
+	err = CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}

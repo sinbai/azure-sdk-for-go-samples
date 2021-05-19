@@ -17,49 +17,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-// Create LoadBalancers
-func createLoadBalancer(ctx context.Context, loadBalancerName string, ipConfigName string, subnetID string) error {
-	client := getLoadBalancersClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		loadBalancerName,
-		armnetwork.LoadBalancer{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.LoadBalancerPropertiesFormat{
-				FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
-					{
-						Name: &ipConfigName,
-						Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-							Subnet: &armnetwork.Subnet{
-								SubResource: armnetwork.SubResource{
-									ID: &subnetID,
-								},
-							},
-						},
-					},
-				},
-			},
-			SKU: &armnetwork.LoadBalancerSKU{
-				Name: armnetwork.LoadBalancerSKUNameStandard.ToPtr(),
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func getPrivateEndpointsClient() armnetwork.PrivateEndpointsClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {

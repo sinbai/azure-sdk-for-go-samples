@@ -55,4 +55,10 @@ func CreateVirtualWan(ctx context.Context, virtualWanName string) (string, error
 		return "", err
 	}
 	return poller.RawResponse.Request.URL.Path, nil
+
+	// resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// return *resp.VirtualWAN.ID, nil
 }

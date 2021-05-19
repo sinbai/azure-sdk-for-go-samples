@@ -17,43 +17,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-// Create NetworkInterfaces
-func createNetworkInterface(ctx context.Context, networkInterfaceName string, virtualNetworkName string, subnetID string) (*string, error) {
-	ipConfigurationName = config.AppendRandomSuffix("ipconfiguration")
-
-	client := getNetworkInterfacesClient()
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		networkInterfaceName,
-		armnetwork.NetworkInterface{
-			Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
-			Properties: &armnetwork.NetworkInterfacePropertiesFormat{
-				IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
-					{
-						Name: to.StringPtr("MyIpConfig"),
-						Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
-							Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subnetID}},
-						},
-					},
-				},
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return nil, err
-	}
-
-	return &poller.RawResponse.Request.URL.Path, nil
-}
-
 func getBastionHostsClient() armnetwork.BastionHostsClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
@@ -61,40 +24,6 @@ func getBastionHostsClient() armnetwork.BastionHostsClient {
 	}
 	client := armnetwork.NewBastionHostsClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
 	return *client
-}
-
-// Create public IP address
-func createPublicIPAddress(ctx context.Context, addressName string) (string, error) {
-	client := getPublicIPAddressClient()
-
-	poller, err := client.BeginCreateOrUpdate(
-		ctx,
-		config.GroupName(),
-		addressName,
-		armnetwork.PublicIPAddress{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.PublicIPAddressPropertiesFormat{
-				IdleTimeoutInMinutes:     to.Int32Ptr(4),
-				PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
-			},
-			SKU: &armnetwork.PublicIPAddressSKU{
-				Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return "", err
-	}
-	return poller.RawResponse.Request.URL.Path, nil
 }
 
 // Create BastionHosts

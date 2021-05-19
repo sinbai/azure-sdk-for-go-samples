@@ -62,13 +62,33 @@ func TestInterface(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	nicId, err := CreateNetworkInterface(ctx, networkInterfaceName, publicIpAddressId, virtualNetworkName, subNetID)
+	networkInterfacePro := armnetwork.NetworkInterface{
+		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
+		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
+			EnableAcceleratedNetworking: to.BoolPtr(true),
+			IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
+				{
+					Name: &ipConfigurationName,
+					Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
+						PublicIPAddress: &armnetwork.PublicIPAddress{
+							Resource: armnetwork.Resource{
+								ID: &publicIpAddressId,
+							},
+						},
+						Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subNetID}},
+					},
+				},
+			},
+		},
+	}
+
+	interfaceId, _, err := CreateNetworkInterface(ctx, networkInterfaceName, networkInterfacePro)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
 	t.Logf("created network interface")
 
-	err = CreateVirtualMachine(ctx, virtualMachineName, nicId)
+	err = CreateVirtualMachine(ctx, virtualMachineName, interfaceId)
 	if err != nil {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}

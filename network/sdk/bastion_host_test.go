@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestBastionHost(t *testing.T) {
@@ -52,7 +54,21 @@ func TestBastionHost(t *testing.T) {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	nicId, err := createNetworkInterface(ctx, interfaceName, virtualNetworkName, subNetId)
+	networkInterfacePro := armnetwork.NetworkInterface{
+		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
+		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
+			IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
+				{
+					Name: to.StringPtr("MyIpConfig"),
+					Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
+						Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subNetId}},
+					},
+				},
+			},
+		},
+	}
+
+	nicId, _, err := CreateNetworkInterface(ctx, interfaceName, networkInterfacePro)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
@@ -62,7 +78,20 @@ func TestBastionHost(t *testing.T) {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}
 
-	publicIpAddressId, err := createPublicIPAddress(ctx, publicIpAddressName)
+	publicIPAddressPro := armnetwork.PublicIPAddress{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.PublicIPAddressPropertiesFormat{
+			IdleTimeoutInMinutes:     to.Int32Ptr(4),
+			PublicIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
+		},
+		SKU: &armnetwork.PublicIPAddressSKU{
+			Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
+		},
+	}
+
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}

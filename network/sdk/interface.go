@@ -32,7 +32,7 @@ func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 }
 
 // Create NetworkInterfaces
-func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, publicIpAddressID string, virtualNetworkName string, subnetID string) (*string, error) {
+func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, networkInterface armnetwork.NetworkInterface) (*string, *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat, error) {
 	ipConfigurationName = config.AppendRandomSuffix("ipconfiguration")
 
 	client := getNetworkInterfacesClient()
@@ -40,38 +40,23 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, pu
 		ctx,
 		config.GroupName(),
 		networkInterfaceName,
-		armnetwork.NetworkInterface{
-			Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
-			Properties: &armnetwork.NetworkInterfacePropertiesFormat{
-				EnableAcceleratedNetworking: to.BoolPtr(true),
-				IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
-					{
-						Name: &ipConfigurationName,
-						Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
-							PublicIPAddress: &armnetwork.PublicIPAddress{
-								Resource: armnetwork.Resource{
-									ID: &publicIpAddressID,
-								},
-							},
-							Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subnetID}},
-						},
-					},
-				},
-			},
-		},
+		networkInterface,
 		nil,
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &poller.RawResponse.Request.URL.Path, nil
+	if len((*(resp.NetworkInterface.Properties.IPConfigurations))) > 0 {
+		return resp.NetworkInterface.ID, (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties, nil
+	}
+	return resp.NetworkInterface.ID, nil, nil
 }
 
 // Gets the specified network interface in a specified resource group.

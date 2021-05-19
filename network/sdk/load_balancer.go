@@ -8,8 +8,6 @@ package network
 import (
 	"context"
 	"log"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
@@ -29,112 +27,13 @@ func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 }
 
 // Create LoadBalancers
-func CreateLoadBalancer(ctx context.Context, loadBalancerName string, publicIpAddressId string,
-	frontendIpConfigurationName string, backendAddressPoolName string, probeName string,
-	loadBalancingRuleName string, outBoundRuleName string) error {
-
-	urlPathFrontendIPConfiguration := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations/{frontendIpConfigurationName}"
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{loadBalancerName}", url.PathEscape(loadBalancerName))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{frontendIpConfigurationName}", url.PathEscape(frontendIpConfigurationName))
-
-	urlPathBackendAddressPool := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}"
-	urlPathBackendAddressPool = strings.ReplaceAll(urlPathBackendAddressPool, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathBackendAddressPool = strings.ReplaceAll(urlPathBackendAddressPool, "{loadBalancerName}", url.PathEscape(loadBalancerName))
-	urlPathBackendAddressPool = strings.ReplaceAll(urlPathBackendAddressPool, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathBackendAddressPool = strings.ReplaceAll(urlPathBackendAddressPool, "{backendAddressPoolName}", url.PathEscape(backendAddressPoolName))
-
-	urlPathProb := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/probes/{probeName}"
-	urlPathProb = strings.ReplaceAll(urlPathProb, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathProb = strings.ReplaceAll(urlPathProb, "{loadBalancerName}", url.PathEscape(loadBalancerName))
-	urlPathProb = strings.ReplaceAll(urlPathProb, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathProb = strings.ReplaceAll(urlPathProb, "{probeName}", url.PathEscape(probeName))
-
+func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalancer armnetwork.LoadBalancer) error {
 	client := getLoadBalancersClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
-		armnetwork.LoadBalancer{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.LoadBalancerPropertiesFormat{
-				BackendAddressPools: &[]*armnetwork.BackendAddressPool{
-					{
-						Name: &backendAddressPoolName,
-					},
-				},
-				FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
-					{
-						Name: &frontendIpConfigurationName,
-						Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-							PublicIPAddress: &armnetwork.PublicIPAddress{
-								Resource: armnetwork.Resource{
-									ID: &publicIpAddressId,
-								},
-							},
-						},
-					},
-				},
-				LoadBalancingRules: &[]*armnetwork.LoadBalancingRule{
-					{
-						Name: &loadBalancingRuleName,
-						Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
-							BackendAddressPool: &armnetwork.SubResource{
-								ID: &urlPathBackendAddressPool,
-							},
-							BackendPort:         to.Int32Ptr(80),
-							DisableOutboundSnat: to.BoolPtr(true),
-							EnableFloatingIP:    to.BoolPtr(true),
-							EnableTCPReset:      new(bool),
-							FrontendIPConfiguration: &armnetwork.SubResource{
-								ID: &urlPathFrontendIPConfiguration,
-							},
-							FrontendPort:         to.Int32Ptr(80),
-							IdleTimeoutInMinutes: to.Int32Ptr(15),
-							LoadDistribution:     armnetwork.LoadDistributionDefault.ToPtr(),
-							Probe: &armnetwork.SubResource{
-								ID: &urlPathProb,
-							},
-							Protocol: armnetwork.TransportProtocolTCP.ToPtr(),
-						},
-					},
-				},
-				OutboundRules: &[]*armnetwork.OutboundRule{
-					{
-						Name: &outBoundRuleName,
-						Properties: &armnetwork.OutboundRulePropertiesFormat{
-							BackendAddressPool: &armnetwork.SubResource{
-								ID: &urlPathBackendAddressPool,
-							},
-							FrontendIPConfigurations: &[]*armnetwork.SubResource{
-								{
-									ID: &urlPathFrontendIPConfiguration,
-								},
-							},
-							Protocol: armnetwork.LoadBalancerOutboundRuleProtocolAll.ToPtr(),
-						},
-					},
-				},
-				Probes: &[]*armnetwork.Probe{
-					{
-						Name: &probeName,
-						Properties: &armnetwork.ProbePropertiesFormat{
-							IntervalInSeconds: to.Int32Ptr(15),
-							NumberOfProbes:    to.Int32Ptr(2),
-							Port:              to.Int32Ptr(80),
-							Protocol:          armnetwork.ProbeProtocolHTTP.ToPtr(),
-							RequestPath:       to.StringPtr("healthcheck.aspx"),
-						},
-					},
-				},
-			},
-			SKU: &armnetwork.LoadBalancerSKU{
-				Name: armnetwork.LoadBalancerSKUNameStandard.ToPtr(),
-			},
-		},
+		loadBalancer,
 		nil,
 	)
 

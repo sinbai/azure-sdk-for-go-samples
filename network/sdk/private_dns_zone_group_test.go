@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestPrivateDnsZoneGroup(t *testing.T) {
@@ -61,7 +63,30 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	err = createLoadBalancer(ctx, loadBalancerName, ipConfigName, subnet1ID)
+	loadBalancerPro := armnetwork.LoadBalancer{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.LoadBalancerPropertiesFormat{
+			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+				{
+					Name: &ipConfigName,
+					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
+						Subnet: &armnetwork.Subnet{
+							SubResource: armnetwork.SubResource{
+								ID: &subnet1ID,
+							},
+						},
+					},
+				},
+			},
+		},
+		SKU: &armnetwork.LoadBalancerSKU{
+			Name: armnetwork.LoadBalancerSKUNameStandard.ToPtr(),
+		},
+	}
+
+	err = CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}

@@ -47,7 +47,7 @@ func TestVirtualMachine(t *testing.T) {
 		"addressPrefix": "10.0.0.0/16"
 	  }
 	`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
@@ -62,19 +62,40 @@ func TestVirtualMachine(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	nicId, err := CreateNetworkInterface(ctx, networkInterfaceName, publicIpAddressId, virtualNetworkName, subnetName)
+	networkInterfacePro := armnetwork.NetworkInterface{
+		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
+		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
+			EnableAcceleratedNetworking: to.BoolPtr(true),
+			IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
+				{
+					Name: &ipConfigurationName,
+					Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
+						PublicIPAddress: &armnetwork.PublicIPAddress{
+							Resource: armnetwork.Resource{
+								ID: &publicIpAddressId,
+							},
+						},
+						Subnet: &armnetwork.Subnet{SubResource: armnetwork.SubResource{ID: &subNetID}},
+					},
+				},
+			},
+		},
+	}
+
+	nicId, _, err := CreateNetworkInterface(ctx, networkInterfaceName, networkInterfacePro)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
-	t.Logf("created network interface")
 
 	err = CreateVirtualMachine(ctx, virtualMachineName, nicId)
 	if err != nil {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}
+	t.Logf("created virtual machine")
 
 	err = DeleteVirtualMachine(ctx, virtualMachineName)
 	if err != nil {
 		t.Fatalf("failed to delete virtual machine: %+v", err)
 	}
+	t.Logf("deleted virtual machine")
 }
