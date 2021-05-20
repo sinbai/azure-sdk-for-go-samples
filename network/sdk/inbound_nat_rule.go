@@ -8,15 +8,12 @@ package network
 import (
 	"context"
 	"log"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getInboundNatRulesClient() armnetwork.InboundNatRulesClient {
@@ -29,33 +26,14 @@ func getInboundNatRulesClient() armnetwork.InboundNatRulesClient {
 }
 
 // Creates or updates a load balancer inbound nat rule.
-func CreateInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string, frontendIpConfigurationName string) error {
-	urlPathFrontendIPConfiguration := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations/{frontendIpConfigurationName}"
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{loadBalancerName}", url.PathEscape(loadBalancerName))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-	urlPathFrontendIPConfiguration = strings.ReplaceAll(urlPathFrontendIPConfiguration, "{frontendIpConfigurationName}", url.PathEscape(frontendIpConfigurationName))
-
+func CreateInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string, inboundNatRulePro armnetwork.InboundNatRule) error {
 	client := getInboundNatRulesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
 		inboundNatRuleName,
-		armnetwork.InboundNatRule{
-			Properties: &armnetwork.InboundNatRulePropertiesFormat{
-				BackendIPConfiguration: &armnetwork.NetworkInterfaceIPConfiguration{},
-				BackendPort:            to.Int32Ptr(3389),
-				EnableFloatingIP:       to.BoolPtr(false),
-				EnableTCPReset:         to.BoolPtr(false),
-				FrontendIPConfiguration: &armnetwork.SubResource{
-					ID: &urlPathFrontendIPConfiguration,
-				},
-				FrontendPort:         to.Int32Ptr(3390),
-				IdleTimeoutInMinutes: to.Int32Ptr(4),
-				Protocol:             armnetwork.TransportProtocolTCP.ToPtr(),
-			},
-		},
+		inboundNatRulePro,
 		nil,
 	)
 

@@ -17,11 +17,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-var (
-	ipConfigurationName string
-	//subnetName          string
-)
-
 func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
@@ -32,9 +27,7 @@ func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 }
 
 // Create NetworkInterfaces
-func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, networkInterface armnetwork.NetworkInterface) (*string, *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat, error) {
-	ipConfigurationName = config.AppendRandomSuffix("ipconfiguration")
-
+func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, networkInterface armnetwork.NetworkInterface) (string, *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat, error) {
 	client := getNetworkInterfacesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -45,18 +38,26 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, ne
 	)
 
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 
 	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 
-	if len((*(resp.NetworkInterface.Properties.IPConfigurations))) > 0 {
-		return resp.NetworkInterface.ID, (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties, nil
+	id := ""
+	if resp.NetworkInterface.ID == nil {
+		id = poller.RawResponse.Request.URL.Path
+	} else {
+		id = *resp.NetworkInterface.ID
 	}
-	return resp.NetworkInterface.ID, nil, nil
+
+	var ipConfigPro *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat
+	if len((*(resp.NetworkInterface.Properties.IPConfigurations))) > 0 {
+		ipConfigPro = (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties
+	}
+	return id, ipConfigPro, nil
 }
 
 // Gets the specified network interface in a specified resource group.

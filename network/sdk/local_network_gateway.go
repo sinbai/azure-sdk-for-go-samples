@@ -27,35 +27,29 @@ func getLocalNetworkGatewaysClient() armnetwork.LocalNetworkGatewaysClient {
 }
 
 // Create LocalNetworkGateways
-func CreateLocalNetworkGateway(ctx context.Context, localNetworkGatewayName string) error {
+func CreateLocalNetworkGateway(ctx context.Context, localNetworkGatewayName string, localNetworkGatewayPro armnetwork.LocalNetworkGateway) (string, error) {
 	client := getLocalNetworkGatewaysClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		localNetworkGatewayName,
-		armnetwork.LocalNetworkGateway{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
-				GatewayIPAddress: to.StringPtr("11.12.13.14"),
-				LocalNetworkAddressSpace: &armnetwork.AddressSpace{
-					AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
-				},
-			},
-		},
+		localNetworkGatewayPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.LocalNetworkGateway.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.LocalNetworkGateway.ID, nil
 }
 
 // Gets the specified local network gateway in a specified resource group.

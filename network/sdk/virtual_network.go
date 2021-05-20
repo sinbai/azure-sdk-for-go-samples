@@ -27,36 +27,29 @@ func getVirtualNetworksClient() armnetwork.VirtualNetworksClient {
 }
 
 // Creates or updates a virtual network in the specified resource group
-func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, addressPrefixes string) error {
+func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, virtualNetworkPro armnetwork.VirtualNetwork) (string, error) {
 	client := getVirtualNetworksClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
-		armnetwork.VirtualNetwork{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-
-			Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-				AddressSpace: &armnetwork.AddressSpace{
-					AddressPrefixes: &[]*string{&addressPrefixes},
-				},
-			},
-		},
+		virtualNetworkPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	if resp.VirtualNetwork.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.VirtualNetwork.ID, nil
 }
 
 // Checks whether a private IP address is available for use.

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func getExpressRouteCircuitPeeringsClient() armnetwork.ExpressRouteCircuitPeeringsClient {
@@ -27,33 +26,30 @@ func getExpressRouteCircuitPeeringsClient() armnetwork.ExpressRouteCircuitPeerin
 }
 
 // Create ExpressRouteCircuitPeerings
-func CreateExpressRouteCircuitPeering(ctx context.Context, circuitName string, expressRouteCircuitPeeringName string) error {
+func CreateExpressRouteCircuitPeering(ctx context.Context, circuitName string, expressRouteCircuitPeeringName string, expressRouteCircuitPeeringPro armnetwork.ExpressRouteCircuitPeering) (string, error) {
 	client := getExpressRouteCircuitPeeringsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		circuitName,
 		expressRouteCircuitPeeringName,
-		armnetwork.ExpressRouteCircuitPeering{
-			Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
-				PeerASN:                    to.Int64Ptr(10001),
-				PrimaryPeerAddressPrefix:   to.StringPtr("102.0.0.0/30"),
-				SecondaryPeerAddressPrefix: to.StringPtr("103.0.0.0/30"),
-				VlanID:                     to.Int32Ptr(101),
-			},
-		},
+		expressRouteCircuitPeeringPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.ExpressRouteCircuitPeering.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.ExpressRouteCircuitPeering.ID, nil
 }
 
 // Gets the specified peering for the express route circuit.

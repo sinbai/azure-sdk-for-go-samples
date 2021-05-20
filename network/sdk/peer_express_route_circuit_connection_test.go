@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestPeerExpressRouteCircuitConnection(t *testing.T) {
@@ -32,23 +34,90 @@ func TestPeerExpressRouteCircuitConnection(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName)
+	expressRouteCircuitPro := armnetwork.ExpressRouteCircuit{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.ExpressRouteCircuitPropertiesFormat{
+			ServiceProviderProperties: &armnetwork.ExpressRouteCircuitServiceProviderProperties{
+				BandwidthInMbps:     to.Int32Ptr(200),
+				PeeringLocation:     to.StringPtr("Silicon Valley Test"),
+				ServiceProviderName: to.StringPtr("Equinix Test"),
+			},
+		},
+		SKU: &armnetwork.ExpressRouteCircuitSKU{
+			Family: armnetwork.ExpressRouteCircuitSKUFamilyMeteredData.ToPtr(),
+			Name:   to.StringPtr("Standard_MeteredData"),
+			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
+		},
+	}
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitPro)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit: % +v", err)
 	}
 
-	err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName2)
+	expressRouteCircuitPro = armnetwork.ExpressRouteCircuit{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.ExpressRouteCircuitPropertiesFormat{
+			ServiceProviderProperties: &armnetwork.ExpressRouteCircuitServiceProviderProperties{
+				BandwidthInMbps:     to.Int32Ptr(200),
+				PeeringLocation:     to.StringPtr("Silicon Valley Test"),
+				ServiceProviderName: to.StringPtr("Equinix Test"),
+			},
+		},
+		SKU: &armnetwork.ExpressRouteCircuitSKU{
+			Family: armnetwork.ExpressRouteCircuitSKUFamilyMeteredData.ToPtr(),
+			Name:   to.StringPtr("Standard_MeteredData"),
+			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
+		},
+	}
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName2, expressRouteCircuitPro)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit2: % +v", err)
 	}
 
-	err = CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName)
+	expressRouteCircuitPeeringPro := armnetwork.ExpressRouteCircuitPeering{
+		Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
+			PeerASN:                    to.Int64Ptr(10001),
+			PrimaryPeerAddressPrefix:   to.StringPtr("102.0.0.0/30"),
+			SecondaryPeerAddressPrefix: to.StringPtr("103.0.0.0/30"),
+			VlanID:                     to.Int32Ptr(101),
+		},
+	}
+	expressRouteCircuitPeeringId, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitPeeringPro)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit peering: % +v", err)
 	}
 
-	err = CreateExpressRouteCircuitConnection(ctx, expressRouteCircuitName, expressRouteCircuitName2,
-		expressRouteCircuitPeeringName, expressRouteCircuitConnectionName)
+	expressRouteCircuitPeeringPro2 := armnetwork.ExpressRouteCircuitPeering{
+		Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
+			PeerASN:                    to.Int64Ptr(10002),
+			PrimaryPeerAddressPrefix:   to.StringPtr("104.0.0.0/30"),
+			SecondaryPeerAddressPrefix: to.StringPtr("105.0.0.0/30"),
+			VlanID:                     to.Int32Ptr(102),
+		},
+	}
+	expressRouteCircuitPeeringId2, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName2, expressRouteCircuitPeeringName, expressRouteCircuitPeeringPro2)
+	if err != nil {
+		t.Fatalf("failed to create express route circuit peering: % +v", err)
+	}
+
+	expressRouteCircuitConnectionPro := armnetwork.ExpressRouteCircuitConnection{
+		Properties: &armnetwork.ExpressRouteCircuitConnectionPropertiesFormat{
+			AddressPrefix: to.StringPtr("104.0.0.0/29"),
+			ExpressRouteCircuitPeering: &armnetwork.SubResource{
+				ID: &expressRouteCircuitPeeringId,
+			},
+			PeerExpressRouteCircuitPeering: &armnetwork.SubResource{
+				ID: &expressRouteCircuitPeeringId2,
+			},
+		},
+	}
+	err = CreateExpressRouteCircuitConnection(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitConnectionName, expressRouteCircuitConnectionPro)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit connection: % +v", err)
 	}

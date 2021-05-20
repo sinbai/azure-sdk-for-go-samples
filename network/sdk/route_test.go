@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestRoute(t *testing.T) {
@@ -36,7 +38,13 @@ func TestRoute(t *testing.T) {
 	}
 	t.Logf("created route table")
 
-	err = CreateRoute(ctx, routeTableName, routeName)
+	routePro := armnetwork.Route{
+		Properties: &armnetwork.RoutePropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.3.0/24"),
+			NextHopType:   armnetwork.RouteNextHopTypeVirtualNetworkGateway.ToPtr(),
+		},
+	}
+	err = CreateRoute(ctx, routeTableName, routeName, routePro)
 	if err != nil {
 		t.Fatalf("failed to create route: % +v", err)
 	}

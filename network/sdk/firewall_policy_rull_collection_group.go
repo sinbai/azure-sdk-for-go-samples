@@ -37,13 +37,7 @@ func CreateFirewallPolicyRuleCollectionGroup(ctx context.Context, firewallPolicy
 		firewallPolicyName,
 		firewallPolicyRuleCollectionGroupName,
 		armnetwork.FirewallPolicyRuleCollectionGroup{
-			SubResource: armnetwork.SubResource{
-				ID: new(string),
-			},
-			Etag:       new(string),
-			Name:       new(string),
 			Properties: &parameter,
-			Type:       new(string),
 		},
 		nil,
 	)

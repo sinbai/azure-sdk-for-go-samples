@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getVirtualMachinesClient() armcompute.VirtualMachinesClient {
@@ -27,82 +26,29 @@ func getVirtualMachinesClient() armcompute.VirtualMachinesClient {
 }
 
 // Create VirtualMachines
-func CreateVirtualMachine(ctx context.Context, virtualMachineName string, nicId *string) error {
+func CreateVirtualMachine(ctx context.Context, virtualMachineName string, virtualMachinePro armcompute.VirtualMachine) (string, error) {
 	client := getVirtualMachinesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualMachineName,
-		armcompute.VirtualMachine{
-			Resource: armcompute.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armcompute.VirtualMachineProperties{
-				HardwareProfile: &armcompute.HardwareProfile{
-					VMSize: armcompute.VirtualMachineSizeTypesStandardD2V2.ToPtr(),
-				},
-				NetworkProfile: &armcompute.NetworkProfile{
-					NetworkInterfaces: &[]armcompute.NetworkInterfaceReference{
-						{
-							SubResource: armcompute.SubResource{
-								ID: nicId,
-							},
-							Properties: &armcompute.NetworkInterfaceReferenceProperties{
-								Primary: to.BoolPtr(true),
-							},
-						},
-					},
-				},
-				OSProfile: &armcompute.OSProfile{
-					AdminPassword: to.StringPtr("Aa1!zyx_"),
-					AdminUsername: to.StringPtr("testuser"),
-					ComputerName:  to.StringPtr("myVM"),
-					WindowsConfiguration: &armcompute.WindowsConfiguration{
-						EnableAutomaticUpdates: to.BoolPtr(true),
-					},
-				},
-				StorageProfile: &armcompute.StorageProfile{
-					DataDisks: &[]armcompute.DataDisk{
-						{
-							CreateOption: armcompute.DiskCreateOptionTypesEmpty.ToPtr(),
-							DiskSizeGb:   to.Int32Ptr(1023),
-							Lun:          to.Int32Ptr(0),
-						},
-						{
-							CreateOption: armcompute.DiskCreateOptionTypesEmpty.ToPtr(),
-							DiskSizeGb:   to.Int32Ptr(1023),
-							Lun:          to.Int32Ptr(1),
-						},
-					},
-					ImageReference: &armcompute.ImageReference{
-						Offer:     to.StringPtr("WindowsServer"),
-						Publisher: to.StringPtr("MicrosoftWindowsServer"),
-						SKU:       to.StringPtr("2016-Datacenter"),
-						Version:   to.StringPtr("latest"),
-					},
-					OSDisk: &armcompute.OSDisk{
-						Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
-						CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
-						ManagedDisk: &armcompute.ManagedDiskParameters{
-							StorageAccountType: armcompute.StorageAccountTypesStandardLrs.ToPtr(),
-						},
-						Name: to.StringPtr("myVMosdisk"),
-					},
-				},
-			},
-		},
+		virtualMachinePro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.VirtualMachine.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.VirtualMachine.ID, nil
 }
 
 // Deletes the specified virtual machine.

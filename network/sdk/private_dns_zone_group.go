@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getPrivateDnsZoneGroupsClient() armnetwork.PrivateDNSZoneGroupsClient {
@@ -27,24 +26,14 @@ func getPrivateDnsZoneGroupsClient() armnetwork.PrivateDNSZoneGroupsClient {
 }
 
 // Creates or updates a private dns zone group in the specified private endpoint.
-func CreatePrivateDnsZoneGroup(ctx context.Context, privateEndpointName string, privateDnsZoneGroupName string, zoneName string) error {
+func CreatePrivateDnsZoneGroup(ctx context.Context, privateEndpointName string, privateDnsZoneGroupName string, privateDNSZoneGroupPro armnetwork.PrivateDNSZoneGroup) error {
 	client := getPrivateDnsZoneGroupsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateEndpointName,
 		privateDnsZoneGroupName,
-		armnetwork.PrivateDNSZoneGroup{
-			Name: &privateDnsZoneGroupName,
-			Properties: &armnetwork.PrivateDNSZoneGroupPropertiesFormat{
-				PrivateDNSZoneConfigs: &[]*armnetwork.PrivateDNSZoneConfig{{
-					Name: &zoneName,
-					Properties: &armnetwork.PrivateDNSZonePropertiesFormat{
-						PrivateDNSZoneID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/privateDnsZones/" + zoneName),
-					},
-				}},
-			},
-		},
+		privateDNSZoneGroupPro,
 		nil,
 	)
 

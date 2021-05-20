@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestRouteFilterRule(t *testing.T) {
@@ -30,12 +32,27 @@ func TestRouteFilterRule(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateRouteFilter(ctx, routeFilterName)
+	routeFilterPro := armnetwork.RouteFilter{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.RouteFilterPropertiesFormat{
+			Rules: &[]*armnetwork.RouteFilterRule{}},
+	}
+	err = CreateRouteFilter(ctx, routeFilterName, routeFilterPro)
 	if err != nil {
 		t.Fatalf("failed to create route filter: %+v", err)
 	}
 
-	err = CreateRouteFilterRule(ctx, routeFilterName, ruleName)
+	routeFilterRulePro := armnetwork.RouteFilterRule{
+		Properties: &armnetwork.RouteFilterRulePropertiesFormat{
+			Access:              armnetwork.AccessAllow.ToPtr(),
+			Communities:         &[]*string{to.StringPtr("12076:51004")},
+			RouteFilterRuleType: armnetwork.RouteFilterRuleTypeCommunity.ToPtr(),
+		},
+	}
+	err = CreateRouteFilterRule(ctx, routeFilterName, ruleName, routeFilterRulePro)
 	if err != nil {
 		t.Fatalf("failed to create route filter rule: %+v", err)
 	}

@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestVirtualNetworkPeering(t *testing.T) {
@@ -32,12 +34,34 @@ func TestVirtualNetworkPeering(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, remoteVirtualNetworkName, "10.2.0.0/16")
+	virtualNetworkPro := armnetwork.VirtualNetwork{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.2.0.0/16")},
+			},
+		},
+	}
+	remoteVirtualNetworkId, err := CreateVirtualNetwork(ctx, remoteVirtualNetworkName, virtualNetworkPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
+	virtualNetworkPro = armnetwork.VirtualNetwork{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+			},
+		},
+	}
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -51,7 +75,18 @@ func TestVirtualNetworkPeering(t *testing.T) {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	err = CreateVirtualNetworkPeering(ctx, virtualNetworkName, remoteVirtualNetworkName, virtualNetworkPeeringName)
+	virtualNetworkPeeringPro := armnetwork.VirtualNetworkPeering{
+		Properties: &armnetwork.VirtualNetworkPeeringPropertiesFormat{
+			AllowForwardedTraffic:     to.BoolPtr(true),
+			AllowGatewayTransit:       to.BoolPtr(false),
+			AllowVirtualNetworkAccess: to.BoolPtr(true),
+			RemoteVirtualNetwork: &armnetwork.SubResource{
+				ID: &remoteVirtualNetworkId,
+			},
+			UseRemoteGateways: to.BoolPtr(false),
+		},
+	}
+	err = CreateVirtualNetworkPeering(ctx, virtualNetworkName, virtualNetworkPeeringName, virtualNetworkPeeringPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network peering: % +v", err)
 	}

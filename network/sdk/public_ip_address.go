@@ -41,18 +41,15 @@ func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddr
 		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return "", err
 	}
-	return poller.RawResponse.Request.URL.Path, nil
 
-	// resp, err := poller.PollUntilDone(ctx, 30*time.Second)
-	// if err != nil {
-	// 	return "", err
-	// }
-	// return *resp.PublicIPAddress.ID, nil
-
+	if resp.PublicIPAddress.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.PublicIPAddress.ID, nil
 }
 
 // Gets the specified public IP address in a specified resource group.

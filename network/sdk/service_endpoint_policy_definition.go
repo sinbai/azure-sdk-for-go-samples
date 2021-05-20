@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getServiceEndpointPolicyDefinitionsClient() armnetwork.ServiceEndpointPolicyDefinitionsClient {
@@ -27,22 +26,15 @@ func getServiceEndpointPolicyDefinitionsClient() armnetwork.ServiceEndpointPolic
 }
 
 // Create ServiceEndpointPolicyDefinitions
-func CreateServiceEndpointPolicyDefinition(ctx context.Context, serviceEndpointPolicyName string, serviceEndpointPolicyDefinitionName string) error {
+func CreateServiceEndpointPolicyDefinition(ctx context.Context, serviceEndpointPolicyName string, serviceEndpointPolicyDefinitionName string, serviceEndpointPolicyDefinitionPro armnetwork.ServiceEndpointPolicyDefinition) error {
 	client := getServiceEndpointPolicyDefinitionsClient()
-	serviceResources := "/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName()
 
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		serviceEndpointPolicyName,
 		serviceEndpointPolicyDefinitionName,
-		armnetwork.ServiceEndpointPolicyDefinition{
-			Properties: &armnetwork.ServiceEndpointPolicyDefinitionPropertiesFormat{
-				Description:      to.StringPtr("Storage Service EndpointPolicy Definition"),
-				Service:          to.StringPtr("Microsoft.Storage"),
-				ServiceResources: &[]*string{&serviceResources},
-			},
-		},
+		serviceEndpointPolicyDefinitionPro,
 		nil,
 	)
 

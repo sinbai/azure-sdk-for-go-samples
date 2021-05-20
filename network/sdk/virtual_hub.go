@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getVirtualHubsClient() armnetwork.VirtualHubsClient {
@@ -27,36 +26,28 @@ func getVirtualHubsClient() armnetwork.VirtualHubsClient {
 }
 
 // Create VirtualHubs
-func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualWanID string) error {
+func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualWanID string, virtualHubPro armnetwork.VirtualHub) (string, error) {
 	client := getVirtualHubsClient()
 
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualHubName,
-		armnetwork.VirtualHub{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
-			},
-			Properties: &armnetwork.VirtualHubProperties{
-				AddressPrefix: to.StringPtr("10.168.0.0/24"),
-				SKU:           to.StringPtr("Basic"),
-				VirtualWan: &armnetwork.SubResource{
-					ID: &virtualWanID,
-				},
-			},
-		},
+		virtualHubPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.VirtualHub.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.VirtualHub.ID, nil
 }

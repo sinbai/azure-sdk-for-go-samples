@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestPublicIPPrefix(t *testing.T) {
@@ -29,7 +31,20 @@ func TestPublicIPPrefix(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreatePublicIPPrefix(ctx, publicIpPrefixName)
+	publicIPPrefixPro := armnetwork.PublicIPPrefix{
+		Resource: armnetwork.Resource{
+			Name:     to.StringPtr(publicIpPrefixName),
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.PublicIPPrefixPropertiesFormat{
+			PrefixLength:           to.Int32Ptr(30),
+			PublicIPAddressVersion: armnetwork.IPVersionIPv4.ToPtr(),
+		},
+		SKU: &armnetwork.PublicIPPrefixSKU{
+			Name: armnetwork.PublicIPPrefixSKUNameStandard.ToPtr(),
+		},
+	}
+	_, err = CreatePublicIPPrefix(ctx, publicIpPrefixName, publicIPPrefixPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip prefix: %+v", err)
 	}

@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestServiceEndpointPolicyDefinition(t *testing.T) {
@@ -38,7 +40,14 @@ func TestServiceEndpointPolicyDefinition(t *testing.T) {
 	}
 	t.Logf("created service endpoint policy")
 
-	err = CreateServiceEndpointPolicyDefinition(ctx, serviceEndpointPolicyName, serviceEndpointPolicyDefinitionName)
+	serviceEndpointPolicyDefinitionPro := armnetwork.ServiceEndpointPolicyDefinition{
+		Properties: &armnetwork.ServiceEndpointPolicyDefinitionPropertiesFormat{
+			Description:      to.StringPtr("Storage Service EndpointPolicy Definition"),
+			Service:          to.StringPtr("Microsoft.Storage"),
+			ServiceResources: &[]*string{to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName())},
+		},
+	}
+	err = CreateServiceEndpointPolicyDefinition(ctx, serviceEndpointPolicyName, serviceEndpointPolicyDefinitionName, serviceEndpointPolicyDefinitionPro)
 	if err != nil {
 		t.Fatalf("failed to create service endpoint policy definition: % +v", err)
 	}

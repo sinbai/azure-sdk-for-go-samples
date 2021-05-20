@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestFirewall(t *testing.T) {
@@ -31,25 +33,82 @@ func TestFirewall(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName)
+	virtualWANPro := armnetwork.VirtualWAN{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.VirtualWanProperties{
+			DisableVPNEncryption: to.BoolPtr(false),
+			Type:                 to.StringPtr("Basic"),
+		},
+	}
+	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName, virtualWANPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}
 	t.Logf("created virtual wan")
 
-	err = CreateVirtualHub(ctx, virtualHubName, virtualWanID)
+	virtualHubPro := armnetwork.VirtualHub{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.VirtualHubProperties{
+			AddressPrefix: to.StringPtr("10.168.0.0/24"),
+			SKU:           to.StringPtr("Basic"),
+			VirtualWan: &armnetwork.SubResource{
+				ID: &virtualWanID,
+			},
+		},
+	}
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
 	t.Logf("created virtual hub")
 
-	err = CreateFirewallPolicy(ctx, firewallPolicyName)
+	firewallPolicyPro := armnetwork.FirewallPolicy{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.FirewallPolicyPropertiesFormat{
+			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
+		},
+	}
+	firewallPolicyId, err := CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyPro)
 	if err != nil {
 		t.Fatalf("failed to create firewall policy: % +v", err)
 	}
 	t.Logf("created firewall policy")
 
-	err = CreateFirewall(ctx, firewallName, firewallPolicyName, virtualHubName)
+	azureFirewallPro := armnetwork.AzureFirewall{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.AzureFirewallPropertiesFormat{
+			SKU: &armnetwork.AzureFirewallSKU{
+				Name: armnetwork.AzureFirewallSKUNameAZFWHub.ToPtr(),
+				Tier: armnetwork.AzureFirewallSKUTierStandard.ToPtr(),
+			},
+			VirtualHub: &armnetwork.SubResource{
+				ID: &virtualHubId,
+			},
+			FirewallPolicy: &armnetwork.SubResource{
+				ID: &firewallPolicyId,
+			},
+			HubIPAddresses: &armnetwork.HubIPAddresses{
+				PublicIPs: &armnetwork.HubPublicIPAddresses{
+					Addresses: &[]*armnetwork.AzureFirewallPublicIPAddress{},
+					Count:     to.Int32Ptr(1),
+				},
+			},
+		},
+		Zones: &[]*string{},
+	}
+	err = CreateFirewall(ctx, firewallName, azureFirewallPro)
 	if err != nil {
 		t.Fatalf("failed to create firewall: % +v", err)
 	}

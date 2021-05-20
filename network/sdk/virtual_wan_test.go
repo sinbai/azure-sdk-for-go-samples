@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestVirtualWan(t *testing.T) {
@@ -30,7 +32,17 @@ func TestVirtualWan(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	_, err = CreateVirtualWan(ctx, virtualWanName)
+	virtualWANPro := armnetwork.VirtualWAN{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.VirtualWanProperties{
+			DisableVPNEncryption: to.BoolPtr(false),
+			Type:                 to.StringPtr("Basic"),
+		},
+	}
+	_, err = CreateVirtualWan(ctx, virtualWanName, virtualWANPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}

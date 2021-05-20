@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestWebApplicationFirewallPolicy(t *testing.T) {
@@ -29,7 +31,23 @@ func TestWebApplicationFirewallPolicy(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateWebApplicationFirewallPolicy(ctx, firewallPolicyName)
+	webApplicationFirewallPolicyPro := armnetwork.WebApplicationFirewallPolicy{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.WebApplicationFirewallPolicyPropertiesFormat{
+			CustomRules: &[]*armnetwork.WebApplicationFirewallCustomRule{},
+			ManagedRules: &armnetwork.ManagedRulesDefinition{
+				ManagedRuleSets: &[]*armnetwork.ManagedRuleSet{
+					{
+						RuleSetType:    to.StringPtr("OWASP"),
+						RuleSetVersion: to.StringPtr("3.0"),
+					},
+				},
+			},
+		},
+	}
+	err = CreateWebApplicationFirewallPolicy(ctx, firewallPolicyName, webApplicationFirewallPolicyPro)
 	if err != nil {
 		t.Fatalf("failed to create web application firewall policy: %+v", err)
 	}

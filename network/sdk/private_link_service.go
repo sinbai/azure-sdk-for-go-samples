@@ -27,62 +27,29 @@ func getPrivateLinkServicesClient() armnetwork.PrivateLinkServicesClient {
 }
 
 // Create PrivateLinkServices
-func CreatePrivateLinkService(ctx context.Context, privateLinkServiceName string, virtualNetworkName string, loadBalancerName string, ipConfigurationName string, subNetName string) error {
+func CreatePrivateLinkService(ctx context.Context, privateLinkServiceName string, privateLinkServicePro armnetwork.PrivateLinkService) (string, error) {
 	client := getPrivateLinkServicesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateLinkServiceName,
-		armnetwork.PrivateLinkService{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.PrivateLinkServiceProperties{
-				AutoApproval: &armnetwork.PrivateLinkServicePropertiesAutoApproval{
-					ResourceSet: armnetwork.ResourceSet{
-						Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
-					},
-				},
-				Fqdns: &[]*string{to.StringPtr("fqdn1"),
-					to.StringPtr("fqdn2"),
-					to.StringPtr("fqdn3")},
-				IPConfigurations: &[]*armnetwork.PrivateLinkServiceIPConfiguration{{
-					Name: &ipConfigurationName,
-					Properties: &armnetwork.PrivateLinkServiceIPConfigurationProperties{
-						PrivateIPAddress:          to.StringPtr("10.0.1.5"),
-						PrivateIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
-						PrivateIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
-						Subnet: &armnetwork.Subnet{
-							SubResource: armnetwork.SubResource{
-								ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworks/" + virtualNetworkName + "/subnets/" + subNetName),
-							},
-						},
-					},
-				}},
-				LoadBalancerFrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{{
-					SubResource: armnetwork.SubResource{
-						ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/frontendIPConfigurations/" + ipConfigurationName),
-					},
-				}},
-				Visibility: &armnetwork.PrivateLinkServicePropertiesVisibility{
-					ResourceSet: armnetwork.ResourceSet{
-						Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
-					},
-				},
-			},
-		},
+		privateLinkServicePro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.PrivateLinkService.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.PrivateLinkService.ID, nil
 }
 
 // Updates private endpoint connection

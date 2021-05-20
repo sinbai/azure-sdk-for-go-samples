@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getPrivateEndpointsClient() armnetwork.PrivateEndpointsClient {
@@ -27,30 +26,13 @@ func getPrivateEndpointsClient() armnetwork.PrivateEndpointsClient {
 }
 
 // Create PrivateEndpoints
-func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, serviceName string, virtualNetworkName string, subNetName string) error {
+func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, privateEndpointPro armnetwork.PrivateEndpoint) error {
 	client := getPrivateEndpointsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateEndpointName,
-		armnetwork.PrivateEndpoint{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.PrivateEndpointProperties{
-				PrivateLinkServiceConnections: &[]*armnetwork.PrivateLinkServiceConnection{{
-					Name: &serviceName,
-					Properties: &armnetwork.PrivateLinkServiceConnectionProperties{
-						PrivateLinkServiceID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/privateLinkServices/" + serviceName),
-					},
-				}},
-				Subnet: &armnetwork.Subnet{
-					SubResource: armnetwork.SubResource{
-						ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworks/" + virtualNetworkName + "/subnets/" + subNetName),
-					},
-				},
-			},
-		},
+		privateEndpointPro,
 		nil,
 	)
 

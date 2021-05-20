@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getWpFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClient {
@@ -27,29 +26,13 @@ func getWpFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClie
 }
 
 // Creates or update policy with specified rule set name within a resource group.
-func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string) error {
+func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string, webApplicationFirewallPolicyPro armnetwork.WebApplicationFirewallPolicy) error {
 	client := getWpFirewallPoliciesClient()
 	_, err := client.CreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallPolicyName,
-		armnetwork.WebApplicationFirewallPolicy{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.WebApplicationFirewallPolicyPropertiesFormat{
-				CustomRules: &[]*armnetwork.WebApplicationFirewallCustomRule{},
-				ManagedRules: &armnetwork.ManagedRulesDefinition{
-					Exclusions: &[]*armnetwork.OwaspCrsExclusionEntry{},
-					ManagedRuleSets: &[]*armnetwork.ManagedRuleSet{
-						{
-							RuleSetType:    to.StringPtr("OWASP"),
-							RuleSetVersion: to.StringPtr("3.0"),
-						},
-					},
-				},
-			},
-		},
+		webApplicationFirewallPolicyPro,
 		nil,
 	)
 

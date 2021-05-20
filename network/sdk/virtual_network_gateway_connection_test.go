@@ -50,12 +50,23 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 		},
 	}
 
-	_, err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	publicAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
+	virtualNetworkPro := armnetwork.VirtualNetwork{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+			},
+		},
+	}
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -63,7 +74,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 	body := `{
 		"addressPrefix": "10.0.1.0/24"
 		}`
-	_, err = CreateSubnet(ctx, virtualNetworkName, gatewaySubNetName, body)
+	subnetId, err := CreateSubnet(ctx, virtualNetworkName, gatewaySubNetName, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
@@ -91,10 +102,10 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 				Properties: &armnetwork.VirtualNetworkGatewayIPConfigurationPropertiesFormat{
 					PrivateIPAllocationMethod: armnetwork.IPAllocationMethodDynamic.ToPtr(),
 					PublicIPAddress: &armnetwork.SubResource{
-						ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/publicIPAddresses/" + publicIpAddressName + ""),
+						ID: &publicAddressId,
 					},
 					Subnet: &armnetwork.SubResource{
-						ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworks/" + virtualNetworkName + "/subnets/" + gatewaySubNetName),
+						ID: &subnetId,
 					},
 				},
 			}},
@@ -106,19 +117,90 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 		},
 	}
 
-	err = CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayPro)
+	gatewayId, err := CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network gateway: % +v", err)
 	}
 	t.Logf("created virtual network gateway")
 
-	err = CreateLocalNetworkGateway(ctx, localNetworkGatewayName)
+	localNetworkGatewayPro := armnetwork.LocalNetworkGateway{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
+			GatewayIPAddress: to.StringPtr("11.12.13.14"),
+			LocalNetworkAddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+			},
+		},
+	}
+	localGatewayId, err := CreateLocalNetworkGateway(ctx, localNetworkGatewayName, localNetworkGatewayPro)
 	if err != nil {
 		t.Fatalf("failed to create local network gateway: % +v", err)
 	}
 
-	err = CreateVirtualNetworkGatewayConnection(ctx, virtualNetworkName, virtualNetworkGatewayConnectionName, virtualNetworkGatewayName,
-		localNetworkGatewayName, publicIpAddressName, gatewaySubNetName, ipConfigName)
+	gatewayConnectionPro := armnetwork.VirtualNetworkGatewayConnection{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.VirtualNetworkGatewayConnectionPropertiesFormat{
+			ConnectionProtocol: armnetwork.VirtualNetworkGatewayConnectionProtocolIKEv2.ToPtr(),
+			ConnectionType:     armnetwork.VirtualNetworkGatewayConnectionTypeIPsec.ToPtr(),
+			EnableBgp:          to.BoolPtr(false),
+			LocalNetworkGateway2: &armnetwork.LocalNetworkGateway{
+				Resource: armnetwork.Resource{
+					ID: &localGatewayId,
+				},
+				Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
+					GatewayIPAddress: to.StringPtr("10.1.0.1"),
+					LocalNetworkAddressSpace: &armnetwork.AddressSpace{
+						AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+					},
+				},
+			},
+			RoutingWeight:                  to.Int32Ptr(0),
+			SharedKey:                      to.StringPtr("Abc123"),
+			UsePolicyBasedTrafficSelectors: to.BoolPtr(false),
+			VirtualNetworkGateway1: &armnetwork.VirtualNetworkGateway{
+				Resource: armnetwork.Resource{
+					ID:       &gatewayId,
+					Location: to.StringPtr(config.Location()),
+				},
+				Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
+					Active: to.BoolPtr(false),
+					BgpSettings: &armnetwork.BgpSettings{
+						Asn:               to.Int64Ptr(65515),
+						BgpPeeringAddress: to.StringPtr("10.0.2.30"),
+						PeerWeight:        to.Int32Ptr(0),
+					},
+					EnableBgp:   to.BoolPtr(false),
+					GatewayType: armnetwork.VirtualNetworkGatewayTypeVPN.ToPtr(),
+					IPConfigurations: &[]*armnetwork.VirtualNetworkGatewayIPConfiguration{{
+						SubResource: armnetwork.SubResource{
+							ID: to.StringPtr(gatewayId + "/ipConfigurations/" + ipConfigName + ""),
+						},
+						Name: &ipConfigName,
+						Properties: &armnetwork.VirtualNetworkGatewayIPConfigurationPropertiesFormat{
+							PrivateIPAllocationMethod: armnetwork.IPAllocationMethodDynamic.ToPtr(),
+							PublicIPAddress: &armnetwork.SubResource{
+								ID: &publicAddressId,
+							},
+							Subnet: &armnetwork.SubResource{
+								ID: &subnetId,
+							},
+						},
+					}},
+					SKU: &armnetwork.VirtualNetworkGatewaySKU{
+						Name: armnetwork.VirtualNetworkGatewaySKUNameVPNGw1.ToPtr(),
+						Tier: armnetwork.VirtualNetworkGatewaySKUTierVPNGw1.ToPtr(),
+					},
+					VPNType: armnetwork.VPNTypeRouteBased.ToPtr(),
+				},
+			},
+		},
+	}
+
+	err = CreateVirtualNetworkGatewayConnection(ctx, virtualNetworkGatewayConnectionName, gatewayConnectionPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network gateway connection: % +v", err)
 	}

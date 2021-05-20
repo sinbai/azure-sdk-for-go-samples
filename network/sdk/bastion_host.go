@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getBastionHostsClient() armnetwork.BastionHostsClient {
@@ -27,31 +26,13 @@ func getBastionHostsClient() armnetwork.BastionHostsClient {
 }
 
 // Create BastionHosts
-func CreateBastionHost(ctx context.Context, bastionHostName string, bastionSubnetId string, pipAddressId string) error {
+func CreateBastionHost(ctx context.Context, bastionHostName string, bastionHostPro armnetwork.BastionHost) error {
 	client := getBastionHostsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		bastionHostName,
-		armnetwork.BastionHost{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-
-			Properties: &armnetwork.BastionHostPropertiesFormat{
-				IPConfigurations: &[]*armnetwork.BastionHostIPConfiguration{{
-					Name: to.StringPtr("bastionHostIpConfiguration"),
-					Properties: &armnetwork.BastionHostIPConfigurationPropertiesFormat{
-						PublicIPAddress: &armnetwork.SubResource{
-							ID: &pipAddressId,
-						},
-						Subnet: &armnetwork.SubResource{
-							ID: &bastionSubnetId,
-						},
-					},
-				}},
-			},
-		},
+		bastionHostPro,
 		nil,
 	)
 

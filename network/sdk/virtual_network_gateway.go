@@ -27,7 +27,7 @@ func getVirtualNetworkGatewaysClient() armnetwork.VirtualNetworkGatewaysClient {
 }
 
 // Creates or updates a virtual network gateway in the specified resource group.
-func CreateVirtualNetworkGateway(ctx context.Context, virtualNetworkGatewayName string, virtualNetworkGateway armnetwork.VirtualNetworkGateway) error {
+func CreateVirtualNetworkGateway(ctx context.Context, virtualNetworkGatewayName string, virtualNetworkGateway armnetwork.VirtualNetworkGateway) (string, error) {
 	client := getVirtualNetworkGatewaysClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -38,14 +38,18 @@ func CreateVirtualNetworkGateway(ctx context.Context, virtualNetworkGatewayName 
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.VirtualNetworkGateway.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.VirtualNetworkGateway.ID, nil
 }
 
 // Gets all the connections in a virtual network gateway.

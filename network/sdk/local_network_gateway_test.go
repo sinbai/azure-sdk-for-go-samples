@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestLocalNetworkGateway(t *testing.T) {
@@ -29,7 +31,18 @@ func TestLocalNetworkGateway(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateLocalNetworkGateway(ctx, localNetworkGatewayName)
+	localNetworkGatewayPro := armnetwork.LocalNetworkGateway{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
+			GatewayIPAddress: to.StringPtr("11.12.13.14"),
+			LocalNetworkAddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+			},
+		},
+	}
+	_, err = CreateLocalNetworkGateway(ctx, localNetworkGatewayName, localNetworkGatewayPro)
 	if err != nil {
 		t.Fatalf("failed to create local network gateway: % +v", err)
 	}

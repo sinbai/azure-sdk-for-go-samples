@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func getVirtualNetworkPeeringsClient() armnetwork.VirtualNetworkPeeringsClient {
@@ -27,27 +26,14 @@ func getVirtualNetworkPeeringsClient() armnetwork.VirtualNetworkPeeringsClient {
 }
 
 // Create VirtualNetworkPeerings
-func CreateVirtualNetworkPeering(ctx context.Context, virtualNetworkName string, remoteVirtualNetworkName string, virtualNetworkPeeringName string) error {
+func CreateVirtualNetworkPeering(ctx context.Context, virtualNetworkName string, virtualNetworkPeeringName string, virtualNetworkPeeringPro armnetwork.VirtualNetworkPeering) error {
 	client := getVirtualNetworkPeeringsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
 		virtualNetworkPeeringName,
-		armnetwork.VirtualNetworkPeering{
-			SubResource: armnetwork.SubResource{},
-			Etag:        new(string),
-			Name:        new(string),
-			Properties: &armnetwork.VirtualNetworkPeeringPropertiesFormat{
-				AllowForwardedTraffic:     to.BoolPtr(true),
-				AllowGatewayTransit:       to.BoolPtr(false),
-				AllowVirtualNetworkAccess: to.BoolPtr(true),
-				RemoteVirtualNetwork: &armnetwork.SubResource{
-					ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworks/" + remoteVirtualNetworkName + ""),
-				},
-				UseRemoteGateways: to.BoolPtr(false),
-			},
-		},
+		virtualNetworkPeeringPro,
 		nil,
 	)
 

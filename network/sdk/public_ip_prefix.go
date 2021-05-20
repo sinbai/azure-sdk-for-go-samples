@@ -27,37 +27,29 @@ func getPublicIPPrefixClient() armnetwork.PublicIPPrefixesClient {
 }
 
 // Create public IP prefix
-func CreatePublicIPPrefix(ctx context.Context, prefixName string) error {
+func CreatePublicIPPrefix(ctx context.Context, prefixName string, publicIPPrefixPro armnetwork.PublicIPPrefix) (string, error) {
 	client := getPublicIPPrefixClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		prefixName,
-		armnetwork.PublicIPPrefix{
-			Resource: armnetwork.Resource{
-				Name:     to.StringPtr(prefixName),
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.PublicIPPrefixPropertiesFormat{
-				PrefixLength:           to.Int32Ptr(30),
-				PublicIPAddressVersion: armnetwork.IPVersionIPv4.ToPtr(),
-			},
-			SKU: &armnetwork.PublicIPPrefixSKU{
-				Name: armnetwork.PublicIPPrefixSKUNameStandard.ToPtr(),
-			},
-		},
+		publicIPPrefixPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.PublicIPPrefix.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.PublicIPPrefix.ID, nil
 }
 
 // Gets the specified public IP prefix in a specified resource group.

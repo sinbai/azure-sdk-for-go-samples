@@ -48,17 +48,13 @@ func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName str
 		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return "", err
 	}
 
-	return poller.RawResponse.Request.URL.Path, nil
-
-	// resp, err := poller.PollUntilDone(ctx, 30*time.Second)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// return *resp.Subnet.ID, nil
+	if resp.Subnet.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.Subnet.ID, nil
 }

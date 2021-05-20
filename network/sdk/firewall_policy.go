@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getFirewallPolicysClient() armnetwork.FirewallPoliciesClient {
@@ -27,33 +26,29 @@ func getFirewallPolicysClient() armnetwork.FirewallPoliciesClient {
 }
 
 //  Creates or updates the specified Firewall Policy.
-func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string) error {
+func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string, firewallPolicyPro armnetwork.FirewallPolicy) (string, error) {
 	client := getFirewallPolicysClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallPolicyName,
-		armnetwork.FirewallPolicy{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
-			},
-			Properties: &armnetwork.FirewallPolicyPropertiesFormat{
-				ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
-			},
-		},
+		firewallPolicyPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.FirewallPolicy.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.FirewallPolicy.ID, nil
 }
 
 // Gets the specified firewall policy in a specified resource group.

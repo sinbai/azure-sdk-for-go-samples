@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getExpressRouteCircuitsClient() armnetwork.ExpressRouteCircuitsClient {
@@ -27,42 +26,29 @@ func getExpressRouteCircuitsClient() armnetwork.ExpressRouteCircuitsClient {
 }
 
 // Create ExpressRouteCircuits
-func CreateExpressRouteCircuit(ctx context.Context, expressRouteCircuitName string) error {
+func CreateExpressRouteCircuit(ctx context.Context, expressRouteCircuitName string, expressRouteCircuitPro armnetwork.ExpressRouteCircuit) (string, error) {
 	client := getExpressRouteCircuitsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		expressRouteCircuitName,
-		armnetwork.ExpressRouteCircuit{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-
-			Properties: &armnetwork.ExpressRouteCircuitPropertiesFormat{
-				ServiceProviderProperties: &armnetwork.ExpressRouteCircuitServiceProviderProperties{
-					BandwidthInMbps:     to.Int32Ptr(200),
-					PeeringLocation:     to.StringPtr("Silicon Valley Test"),
-					ServiceProviderName: to.StringPtr("Equinix Test"),
-				},
-			},
-			SKU: &armnetwork.ExpressRouteCircuitSKU{
-				Family: armnetwork.ExpressRouteCircuitSKUFamilyMeteredData.ToPtr(),
-				Name:   to.StringPtr("Standard_MeteredData"),
-				Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
-			},
-		},
+		expressRouteCircuitPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.ExpressRouteCircuit.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.ExpressRouteCircuit.ID, nil
 }
 
 // Gets all stats from an express route circuit in a resource group.

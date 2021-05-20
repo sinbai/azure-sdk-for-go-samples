@@ -27,20 +27,13 @@ func getRouteFilterClient() armnetwork.RouteFiltersClient {
 }
 
 // Creates or updates a route filter in a specified resource group.
-func CreateRouteFilter(ctx context.Context, routeFilterName string) error {
+func CreateRouteFilter(ctx context.Context, routeFilterName string, routeFilterPro armnetwork.RouteFilter) error {
 	client := getRouteFilterClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		routeFilterName,
-		armnetwork.RouteFilter{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
-			},
-			Properties: &armnetwork.RouteFilterPropertiesFormat{
-				Rules: &[]*armnetwork.RouteFilterRule{}},
-		},
+		routeFilterPro,
 		nil,
 	)
 

@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestFirewallPolicy(t *testing.T) {
@@ -29,7 +31,16 @@ func TestFirewallPolicy(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateFirewallPolicy(ctx, firewallPolicyName)
+	firewallPolicyPro := armnetwork.FirewallPolicy{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+		},
+		Properties: &armnetwork.FirewallPolicyPropertiesFormat{
+			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
+		},
+	}
+	_, err = CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyPro)
 	if err != nil {
 		t.Fatalf("failed to create firewall policy: % +v", err)
 	}

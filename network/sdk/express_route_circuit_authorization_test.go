@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestExpressRouteCircuitAuthorization(t *testing.T) {
@@ -30,7 +32,25 @@ func TestExpressRouteCircuitAuthorization(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName)
+	expressRouteCircuitPro := armnetwork.ExpressRouteCircuit{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.ExpressRouteCircuitPropertiesFormat{
+			ServiceProviderProperties: &armnetwork.ExpressRouteCircuitServiceProviderProperties{
+				BandwidthInMbps:     to.Int32Ptr(200),
+				PeeringLocation:     to.StringPtr("Silicon Valley Test"),
+				ServiceProviderName: to.StringPtr("Equinix Test"),
+			},
+		},
+		SKU: &armnetwork.ExpressRouteCircuitSKU{
+			Family: armnetwork.ExpressRouteCircuitSKUFamilyMeteredData.ToPtr(),
+			Name:   to.StringPtr("Standard_MeteredData"),
+			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
+		},
+	}
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitPro)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit: % +v", err)
 	}

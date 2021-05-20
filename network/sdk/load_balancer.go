@@ -27,25 +27,29 @@ func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 }
 
 // Create LoadBalancers
-func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalancer armnetwork.LoadBalancer) error {
+func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalancerPro armnetwork.LoadBalancer) (string, error) {
 	client := getLoadBalancersClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
-		loadBalancer,
+		loadBalancerPro,
 		nil,
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.LoadBalancer.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.LoadBalancer.ID, nil
 }
 
 // Gets the specified load balancer in a specified resource group.

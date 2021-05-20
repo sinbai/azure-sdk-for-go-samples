@@ -8,8 +8,6 @@ package network
 import (
 	"context"
 	"log"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
@@ -29,48 +27,13 @@ func getFirewallsClient() armnetwork.AzureFirewallsClient {
 }
 
 // Create Firewalls
-func CreateFirewall(ctx context.Context, firewallName string, firewallPolicyName string, virtualHubName string) error {
+func CreateFirewall(ctx context.Context, firewallName string, azureFirewallPro armnetwork.AzureFirewall) error {
 	client := getFirewallsClient()
-
-	urlPathVirtualHub := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{virtualHubName}"
-	urlPathVirtualHub = strings.ReplaceAll(urlPathVirtualHub, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathVirtualHub = strings.ReplaceAll(urlPathVirtualHub, "{virtualHubName}", url.PathEscape(virtualHubName))
-	urlPathVirtualHub = strings.ReplaceAll(urlPathVirtualHub, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-
-	urlPathFirewallPolicy := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/firewallPolicies/{firewallPolicyName}"
-	urlPathFirewallPolicy = strings.ReplaceAll(urlPathFirewallPolicy, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathFirewallPolicy = strings.ReplaceAll(urlPathFirewallPolicy, "{firewallPolicyName}", url.PathEscape(firewallPolicyName))
-	urlPathFirewallPolicy = strings.ReplaceAll(urlPathFirewallPolicy, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
-
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallName,
-		armnetwork.AzureFirewall{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
-			},
-			Properties: &armnetwork.AzureFirewallPropertiesFormat{
-				SKU: &armnetwork.AzureFirewallSKU{
-					Name: armnetwork.AzureFirewallSKUNameAZFWHub.ToPtr(),
-					Tier: armnetwork.AzureFirewallSKUTierStandard.ToPtr(),
-				},
-				VirtualHub: &armnetwork.SubResource{
-					ID: &urlPathVirtualHub,
-				},
-				FirewallPolicy: &armnetwork.SubResource{
-					ID: &urlPathFirewallPolicy,
-				},
-				HubIPAddresses: &armnetwork.HubIPAddresses{
-					PublicIPs: &armnetwork.HubPublicIPAddresses{
-						Addresses: &[]*armnetwork.AzureFirewallPublicIPAddress{},
-						Count:     to.Int32Ptr(1),
-					},
-				},
-			},
-			Zones: &[]*string{},
-		},
+		azureFirewallPro,
 		nil,
 	)
 

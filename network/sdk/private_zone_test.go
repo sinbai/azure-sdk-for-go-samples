@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
+	"github.com/Azure/azure-sdk-for-go/services/privatedns/mgmt/2018-09-01/privatedns"
 )
 
 func TestPrivateZone(t *testing.T) {
@@ -29,7 +31,10 @@ func TestPrivateZone(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	_, err = CreatePrivateZone(ctx, privateZoneName)
+	privateZonePro := privatedns.PrivateZone{
+		Location: to.StringPtr("global"),
+	}
+	_, err = CreatePrivateZone(ctx, privateZoneName, privateZonePro)
 	if err != nil {
 		t.Fatalf("failed to create private zone: % +v", err)
 	}

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getRoutesClient() armnetwork.RoutesClient {
@@ -27,19 +26,14 @@ func getRoutesClient() armnetwork.RoutesClient {
 }
 
 // Creates or updates a route in the specified route table.
-func CreateRoute(ctx context.Context, routeTableName string, routeName string) error {
+func CreateRoute(ctx context.Context, routeTableName string, routeName string, routePro armnetwork.Route) error {
 	client := getRoutesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		routeTableName,
 		routeName,
-		armnetwork.Route{
-			Properties: &armnetwork.RoutePropertiesFormat{
-				AddressPrefix: to.StringPtr("10.0.3.0/24"),
-				NextHopType:   armnetwork.RouteNextHopTypeVirtualNetworkGateway.ToPtr(),
-			},
-		},
+		routePro,
 		nil,
 	)
 

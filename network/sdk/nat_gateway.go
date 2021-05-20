@@ -8,8 +8,6 @@ package network
 import (
 	"context"
 	"log"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
@@ -29,38 +27,14 @@ func getNatGatewayClient() armnetwork.NatGatewaysClient {
 }
 
 // Creates or updates a nat gateway.
-func CreateNatGateway(ctx context.Context, natGatewayName string, publicIdAddressId string, pipprefix string) error {
+func CreateNatGateway(ctx context.Context, natGatewayName string, natGatewayPro armnetwork.NatGateway) error {
 	client := getNatGatewayClient()
-
-	urlPathPrefix := "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/PublicIPPrefixes/{pipprefix}"
-	urlPathPrefix = strings.ReplaceAll(urlPathPrefix, "{resourceGroupName}", url.PathEscape(config.GroupName()))
-	urlPathPrefix = strings.ReplaceAll(urlPathPrefix, "{pipprefix}", url.PathEscape(pipprefix))
-	urlPathPrefix = strings.ReplaceAll(urlPathPrefix, "{subscriptionId}", url.PathEscape(config.SubscriptionID()))
 
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		natGatewayName,
-		armnetwork.NatGateway{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.NatGatewayPropertiesFormat{
-				PublicIPAddresses: &[]*armnetwork.SubResource{
-					{
-						ID: &publicIdAddressId,
-					},
-				},
-				PublicIPPrefixes: &[]*armnetwork.SubResource{
-					{
-						ID: &urlPathPrefix,
-					},
-				},
-			},
-			SKU: &armnetwork.NatGatewaySKU{
-				Name: armnetwork.NatGatewaySKUNameStandard.ToPtr(),
-			},
-		},
+		natGatewayPro,
 		nil,
 	)
 	if err != nil {

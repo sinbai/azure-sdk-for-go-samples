@@ -25,7 +25,7 @@ func TestPrivateEndpoint(t *testing.T) {
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
 	subNetName1 := config.AppendRandomSuffix("subnet1")
 	subNetName2 := config.AppendRandomSuffix("subnet2")
-	ipConfigName := config.AppendRandomSuffix("ipconfig")
+	ipConfigurationName := config.AppendRandomSuffix("ipconfig")
 	privateEndpointName := config.AppendRandomSuffix("privateendpoint")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
@@ -37,7 +37,18 @@ func TestPrivateEndpoint(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
+	virtualNetworkPro := armnetwork.VirtualNetwork{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+			},
+		},
+	}
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -55,7 +66,7 @@ func TestPrivateEndpoint(t *testing.T) {
 		"addressPrefix": "10.0.0.0/24",
 		"privateEndpointNetworkPolicies": "Disabled"
 		}`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName2, body)
+	subnet2ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName2, body)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
@@ -67,7 +78,7 @@ func TestPrivateEndpoint(t *testing.T) {
 		Properties: &armnetwork.LoadBalancerPropertiesFormat{
 			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
 				{
-					Name: &ipConfigName,
+					Name: &ipConfigurationName,
 					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
 						Subnet: &armnetwork.Subnet{
 							SubResource: armnetwork.SubResource{
@@ -83,17 +94,74 @@ func TestPrivateEndpoint(t *testing.T) {
 		},
 	}
 
-	err = CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
+	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}
 
-	err = CreatePrivateLinkService(ctx, privateLinkServiceName, virtualNetworkName, loadBalancerName, ipConfigName, subNetName1)
+	privateLinkServicePro := armnetwork.PrivateLinkService{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.PrivateLinkServiceProperties{
+			AutoApproval: &armnetwork.PrivateLinkServicePropertiesAutoApproval{
+				ResourceSet: armnetwork.ResourceSet{
+					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+				},
+			},
+			Fqdns: &[]*string{to.StringPtr("fqdn1"),
+				to.StringPtr("fqdn2"),
+				to.StringPtr("fqdn3")},
+			IPConfigurations: &[]*armnetwork.PrivateLinkServiceIPConfiguration{{
+				Name: &ipConfigurationName,
+				Properties: &armnetwork.PrivateLinkServiceIPConfigurationProperties{
+					PrivateIPAddress:          to.StringPtr("10.0.1.5"),
+					PrivateIPAddressVersion:   armnetwork.IPVersionIPv4.ToPtr(),
+					PrivateIPAllocationMethod: armnetwork.IPAllocationMethodStatic.ToPtr(),
+					Subnet: &armnetwork.Subnet{
+						SubResource: armnetwork.SubResource{
+							ID: &subnet1ID,
+						},
+					},
+				},
+			}},
+			LoadBalancerFrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{{
+				SubResource: armnetwork.SubResource{
+					ID: to.StringPtr(loadBalancerId + "/frontendIPConfigurations/" + ipConfigurationName),
+				},
+			}},
+			Visibility: &armnetwork.PrivateLinkServicePropertiesVisibility{
+				ResourceSet: armnetwork.ResourceSet{
+					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+				},
+			},
+		},
+	}
+	privateLinkServiceId, err := CreatePrivateLinkService(ctx, privateLinkServiceName, privateLinkServicePro)
 	if err != nil {
 		t.Fatalf("failed to create private link service: % +v", err)
 	}
 
-	err = CreatePrivateEndpoint(ctx, privateEndpointName, privateLinkServiceName, virtualNetworkName, subNetName2)
+	privateEndpointPro := armnetwork.PrivateEndpoint{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.PrivateEndpointProperties{
+			PrivateLinkServiceConnections: &[]*armnetwork.PrivateLinkServiceConnection{{
+				Name: &privateLinkServiceName,
+				Properties: &armnetwork.PrivateLinkServiceConnectionProperties{
+					PrivateLinkServiceID: &privateLinkServiceId,
+				},
+			}},
+			Subnet: &armnetwork.Subnet{
+				SubResource: armnetwork.SubResource{
+					ID: &subnet2ID,
+				},
+			},
+		},
+	}
+
+	err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointPro)
 	if err != nil {
 		t.Fatalf("failed to create private endpoint: % +v", err)
 	}

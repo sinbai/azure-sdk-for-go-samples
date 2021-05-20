@@ -10,7 +10,6 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/iam"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 	"github.com/Azure/azure-sdk-for-go/services/privatedns/mgmt/2018-09-01/privatedns"
 )
 
@@ -23,15 +22,13 @@ func getPrivateZonesClient() privatedns.PrivateZonesClient {
 }
 
 // creates or updates a Private DNS zone. Does not modify Links to virtual networks or DNS records
-func CreatePrivateZone(ctx context.Context, privateZoneName string) (privateZone privatedns.PrivateZone, err error) {
+func CreatePrivateZone(ctx context.Context, privateZoneName string, privateZonePro privatedns.PrivateZone) (privateZone privatedns.PrivateZone, err error) {
 	client := getPrivateZonesClient()
 	future, err := client.CreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateZoneName,
-		privatedns.PrivateZone{
-			Location: to.StringPtr("global"),
-		},
+		privateZonePro,
 		"",
 		"",
 	)

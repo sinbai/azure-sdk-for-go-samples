@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func getExpressRouteCircuitConnectionsClient() armnetwork.ExpressRouteCircuitConnectionsClient {
@@ -27,7 +26,7 @@ func getExpressRouteCircuitConnectionsClient() armnetwork.ExpressRouteCircuitCon
 }
 
 // Creates or updates a Express Route Circuit Connection in the specified express route circuits.
-func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string, circuitName2 string, peeringName string, connectionName string) error {
+func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string, peeringName string, connectionName string, expressRouteCircuitConnectionPro armnetwork.ExpressRouteCircuitConnection) error {
 	client := getExpressRouteCircuitConnectionsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -35,21 +34,7 @@ func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string
 		circuitName,
 		peeringName,
 		connectionName,
-		armnetwork.ExpressRouteCircuitConnection{
-			SubResource: armnetwork.SubResource{},
-			Etag:        new(string),
-			Name:        new(string),
-			Properties: &armnetwork.ExpressRouteCircuitConnectionPropertiesFormat{
-				AddressPrefix: to.StringPtr("104.0.0.0/29"),
-				ExpressRouteCircuitPeering: &armnetwork.SubResource{
-					ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/expressRouteCircuits/" + circuitName + "/peerings/" + peeringName),
-				},
-				PeerExpressRouteCircuitPeering: &armnetwork.SubResource{
-					ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/expressRouteCircuits/" + circuitName2 + "/peerings/" + peeringName),
-				},
-			},
-			Type: new(string),
-		},
+		expressRouteCircuitConnectionPro,
 		nil,
 	)
 

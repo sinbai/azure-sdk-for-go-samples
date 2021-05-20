@@ -27,75 +27,13 @@ func getVirtualNetworkGatewayConnectionsClient() armnetwork.VirtualNetworkGatewa
 }
 
 // Create VirtualNetworkGatewayConnections
-func CreateVirtualNetworkGatewayConnection(ctx context.Context, virtualNetworkName string, virtualNetworkGatewayConnectionName string,
-	virtualNetworkGatewayName string, localVirtualNetworkGatewayName string, pipAddressName string, gatewaySubNetName string, ipConfigName string) error {
+func CreateVirtualNetworkGatewayConnection(ctx context.Context, virtualNetworkGatewayConnectionName string, gatewayConnectionPro armnetwork.VirtualNetworkGatewayConnection) error {
 	client := getVirtualNetworkGatewayConnectionsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkGatewayConnectionName,
-		armnetwork.VirtualNetworkGatewayConnection{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-			Properties: &armnetwork.VirtualNetworkGatewayConnectionPropertiesFormat{
-				ConnectionProtocol: armnetwork.VirtualNetworkGatewayConnectionProtocolIKEv2.ToPtr(),
-				ConnectionType:     armnetwork.VirtualNetworkGatewayConnectionTypeIPsec.ToPtr(),
-				EnableBgp:          to.BoolPtr(false),
-				IPSecPolicies:      &[]*armnetwork.IPSecPolicy{},
-				LocalNetworkGateway2: &armnetwork.LocalNetworkGateway{
-					Resource: armnetwork.Resource{
-						ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/localNetworkGateways/" + localVirtualNetworkGatewayName + ""),
-					},
-					Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
-						GatewayIPAddress: to.StringPtr("10.1.0.1"),
-						LocalNetworkAddressSpace: &armnetwork.AddressSpace{
-							AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
-						},
-					},
-				},
-				RoutingWeight:                  to.Int32Ptr(0),
-				SharedKey:                      to.StringPtr("Abc123"),
-				TrafficSelectorPolicies:        &[]*armnetwork.TrafficSelectorPolicy{},
-				UsePolicyBasedTrafficSelectors: to.BoolPtr(false),
-				VirtualNetworkGateway1: &armnetwork.VirtualNetworkGateway{
-					Resource: armnetwork.Resource{
-						ID:       to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworkGateways/" + virtualNetworkGatewayName + ""),
-						Location: to.StringPtr(config.Location()),
-					},
-					Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
-						Active: to.BoolPtr(false),
-						BgpSettings: &armnetwork.BgpSettings{
-							Asn:               to.Int64Ptr(65515),
-							BgpPeeringAddress: to.StringPtr("10.0.2.30"),
-							PeerWeight:        to.Int32Ptr(0),
-						},
-						EnableBgp:   to.BoolPtr(false),
-						GatewayType: armnetwork.VirtualNetworkGatewayTypeVPN.ToPtr(),
-						IPConfigurations: &[]*armnetwork.VirtualNetworkGatewayIPConfiguration{{
-							SubResource: armnetwork.SubResource{
-								ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworkGateways/" + virtualNetworkGatewayName + "/ipConfigurations/" + ipConfigName + ""),
-							},
-							Name: &ipConfigName,
-							Properties: &armnetwork.VirtualNetworkGatewayIPConfigurationPropertiesFormat{
-								PrivateIPAllocationMethod: armnetwork.IPAllocationMethodDynamic.ToPtr(),
-								PublicIPAddress: &armnetwork.SubResource{
-									ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/publicIPAddresses/" + pipAddressName + ""),
-								},
-								Subnet: &armnetwork.SubResource{
-									ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/virtualNetworks/" + virtualNetworkName + "/subnets/" + gatewaySubNetName),
-								},
-							},
-						}},
-						SKU: &armnetwork.VirtualNetworkGatewaySKU{
-							Name: armnetwork.VirtualNetworkGatewaySKUNameVPNGw1.ToPtr(),
-							Tier: armnetwork.VirtualNetworkGatewaySKUTierVPNGw1.ToPtr(),
-						},
-						VPNType: armnetwork.VPNTypeRouteBased.ToPtr(),
-					},
-				},
-			},
-		},
+		gatewayConnectionPro,
 		nil,
 	)
 

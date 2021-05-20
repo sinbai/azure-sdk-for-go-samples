@@ -19,7 +19,7 @@ import (
 func TestNatGateWay(t *testing.T) {
 	natGatewayName := config.AppendRandomSuffix("natgateway")
 	publicIpAddressName := config.AppendRandomSuffix("pipaddress")
-	pipprefix := config.AppendRandomSuffix("pipprefix")
+	prefixName := config.AppendRandomSuffix("pipprefix")
 
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
@@ -53,12 +53,45 @@ func TestNatGateWay(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreatePublicIPPrefix(ctx, pipprefix)
+	publicIPPrefixPro := armnetwork.PublicIPPrefix{
+		Resource: armnetwork.Resource{
+			Name:     to.StringPtr(prefixName),
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.PublicIPPrefixPropertiesFormat{
+			PrefixLength:           to.Int32Ptr(30),
+			PublicIPAddressVersion: armnetwork.IPVersionIPv4.ToPtr(),
+		},
+		SKU: &armnetwork.PublicIPPrefixSKU{
+			Name: armnetwork.PublicIPPrefixSKUNameStandard.ToPtr(),
+		},
+	}
+	publicIpPrefixId, err := CreatePublicIPPrefix(ctx, prefixName, publicIPPrefixPro)
 	if err != nil {
 		t.Fatalf("failed to create public ip prefix: %+v", err)
 	}
 
-	err = CreateNatGateway(ctx, natGatewayName, publicIpAddressId, pipprefix)
+	natGatewayPro := armnetwork.NatGateway{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+		Properties: &armnetwork.NatGatewayPropertiesFormat{
+			PublicIPAddresses: &[]*armnetwork.SubResource{
+				{
+					ID: &publicIpAddressId,
+				},
+			},
+			PublicIPPrefixes: &[]*armnetwork.SubResource{
+				{
+					ID: &publicIpPrefixId,
+				},
+			},
+		},
+		SKU: &armnetwork.NatGatewaySKU{
+			Name: armnetwork.NatGatewaySKUNameStandard.ToPtr(),
+		},
+	}
+	err = CreateNatGateway(ctx, natGatewayName, natGatewayPro)
 	if err != nil {
 		t.Fatalf("failed to create nat gateway: %+v", err)
 	}

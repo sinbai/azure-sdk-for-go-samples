@@ -53,7 +53,18 @@ func TestVirtualNetworkGateway(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	err = CreateVirtualNetwork(ctx, virtualNetworkName, "10.0.0.0/16")
+	virtualNetworkPro := armnetwork.VirtualNetwork{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+
+		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+			},
+		},
+	}
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
@@ -104,7 +115,7 @@ func TestVirtualNetworkGateway(t *testing.T) {
 		},
 	}
 
-	err = CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayPro)
+	_, err = CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayPro)
 	if err != nil {
 		t.Fatalf("failed to create virtual network gateway: % +v", err)
 	}

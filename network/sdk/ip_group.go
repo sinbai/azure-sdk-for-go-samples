@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getIPGroupClient() armnetwork.IPGroupsClient {
@@ -27,21 +26,13 @@ func getIPGroupClient() armnetwork.IPGroupsClient {
 }
 
 // Creates or updates an ipGroups in a specified resource group.
-func CreateIPGroup(ctx context.Context, ipGroupName string) error {
+func CreateIPGroup(ctx context.Context, ipGroupName string, ipGroupPro armnetwork.IPGroup) error {
 	client := getIPGroupClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		ipGroupName,
-		armnetwork.IPGroup{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-				Tags:     &map[string]*string{"tag1": to.StringPtr("value1")},
-			},
-			Properties: &armnetwork.IPGroupPropertiesFormat{
-				IPAddresses: &[]*string{to.StringPtr("13.64.39.16/32"), to.StringPtr("40.74.146.80/31"), to.StringPtr("40.74.147.32/28")},
-			},
-		},
+		ipGroupPro,
 		nil,
 	)
 

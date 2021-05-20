@@ -57,6 +57,7 @@ func TestLoadBalancer(t *testing.T) {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
+	loadBalancerUrl := "/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName
 	loadBalancerPro := armnetwork.LoadBalancer{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
@@ -84,20 +85,20 @@ func TestLoadBalancer(t *testing.T) {
 					Name: &loadBalancingRuleName,
 					Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
 						BackendAddressPool: &armnetwork.SubResource{
-							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/backendAddressPools/" + backendAddressPoolName),
+							ID: to.StringPtr(loadBalancerUrl + "/backendAddressPools/" + backendAddressPoolName),
 						},
 						BackendPort:         to.Int32Ptr(80),
 						DisableOutboundSnat: to.BoolPtr(true),
 						EnableFloatingIP:    to.BoolPtr(true),
 						EnableTCPReset:      new(bool),
 						FrontendIPConfiguration: &armnetwork.SubResource{
-							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/frontendIPConfigurations/" + frontendIpConfigurationName),
+							ID: to.StringPtr(loadBalancerUrl + "/frontendIPConfigurations/" + frontendIpConfigurationName),
 						},
 						FrontendPort:         to.Int32Ptr(80),
 						IdleTimeoutInMinutes: to.Int32Ptr(15),
 						LoadDistribution:     armnetwork.LoadDistributionDefault.ToPtr(),
 						Probe: &armnetwork.SubResource{
-							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/probes/" + probeName),
+							ID: to.StringPtr(loadBalancerUrl + "/probes/" + probeName),
 						},
 						Protocol: armnetwork.TransportProtocolTCP.ToPtr(),
 					},
@@ -108,11 +109,11 @@ func TestLoadBalancer(t *testing.T) {
 					Name: &outBoundRuleName,
 					Properties: &armnetwork.OutboundRulePropertiesFormat{
 						BackendAddressPool: &armnetwork.SubResource{
-							ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/backendAddressPools/" + backendAddressPoolName),
+							ID: to.StringPtr(loadBalancerUrl + "/backendAddressPools/" + backendAddressPoolName),
 						},
 						FrontendIPConfigurations: &[]*armnetwork.SubResource{
 							{
-								ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName + "/frontendIPConfigurations/" + frontendIpConfigurationName),
+								ID: to.StringPtr(loadBalancerUrl + "/frontendIPConfigurations/" + frontendIpConfigurationName),
 							},
 						},
 						Protocol: armnetwork.LoadBalancerOutboundRuleProtocolAll.ToPtr(),
@@ -137,13 +138,26 @@ func TestLoadBalancer(t *testing.T) {
 		},
 	}
 
-	err = CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
+	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}
 	t.Logf("created load balancer")
 
-	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatRuleName, frontendIpConfigurationName)
+	inboundNatRulePro := armnetwork.InboundNatRule{
+		Properties: &armnetwork.InboundNatRulePropertiesFormat{
+			BackendPort:      to.Int32Ptr(3389),
+			EnableFloatingIP: to.BoolPtr(false),
+			EnableTCPReset:   to.BoolPtr(false),
+			FrontendIPConfiguration: &armnetwork.SubResource{
+				ID: to.StringPtr(loadBalancerId + "/frontendIPConfigurations/" + frontendIpConfigurationName),
+			},
+			FrontendPort:         to.Int32Ptr(3390),
+			IdleTimeoutInMinutes: to.Int32Ptr(4),
+			Protocol:             armnetwork.TransportProtocolTCP.ToPtr(),
+		},
+	}
+	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatRuleName, inboundNatRulePro)
 	if err != nil {
 		t.Fatalf("failed to get load balancer inbound nat rule: %+v", err)
 	}
