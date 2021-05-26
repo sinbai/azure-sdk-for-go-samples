@@ -31,7 +31,7 @@ func TestFirewallPolicy(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	firewallPolicyPro := armnetwork.FirewallPolicy{
+	firewallPolicyParameters := armnetwork.FirewallPolicy{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -40,7 +40,7 @@ func TestFirewallPolicy(t *testing.T) {
 			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
 		},
 	}
-	_, err = CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyPro)
+	_, err = CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyParameters)
 	if err != nil {
 		t.Fatalf("failed to create firewall policy: % +v", err)
 	}

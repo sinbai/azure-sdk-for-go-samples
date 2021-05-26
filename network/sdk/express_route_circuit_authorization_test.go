@@ -32,7 +32,7 @@ func TestExpressRouteCircuitAuthorization(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	expressRouteCircuitPro := armnetwork.ExpressRouteCircuit{
+	expressRouteCircuitParameters := armnetwork.ExpressRouteCircuit{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -50,7 +50,7 @@ func TestExpressRouteCircuitAuthorization(t *testing.T) {
 			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
 		},
 	}
-	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitPro)
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit: % +v", err)
 	}

@@ -38,13 +38,13 @@ func TestRoute(t *testing.T) {
 	}
 	t.Logf("created route table")
 
-	routePro := armnetwork.Route{
+	routeParameters := armnetwork.Route{
 		Properties: &armnetwork.RoutePropertiesFormat{
 			AddressPrefix: to.StringPtr("10.0.3.0/24"),
 			NextHopType:   armnetwork.RouteNextHopTypeVirtualNetworkGateway.ToPtr(),
 		},
 	}
-	err = CreateRoute(ctx, routeTableName, routeName, routePro)
+	err = CreateRoute(ctx, routeTableName, routeName, routeParameters)
 	if err != nil {
 		t.Fatalf("failed to create route: % +v", err)
 	}

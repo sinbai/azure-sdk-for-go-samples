@@ -26,13 +26,13 @@ func getExpressRouteCircuitsClient() armnetwork.ExpressRouteCircuitsClient {
 }
 
 // Create ExpressRouteCircuits
-func CreateExpressRouteCircuit(ctx context.Context, expressRouteCircuitName string, expressRouteCircuitPro armnetwork.ExpressRouteCircuit) (string, error) {
+func CreateExpressRouteCircuit(ctx context.Context, expressRouteCircuitName string, expressRouteCircuitParameters armnetwork.ExpressRouteCircuit) (string, error) {
 	client := getExpressRouteCircuitsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		expressRouteCircuitName,
-		expressRouteCircuitPro,
+		expressRouteCircuitParameters,
 		nil,
 	)
 

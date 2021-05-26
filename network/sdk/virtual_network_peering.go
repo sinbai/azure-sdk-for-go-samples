@@ -26,14 +26,14 @@ func getVirtualNetworkPeeringsClient() armnetwork.VirtualNetworkPeeringsClient {
 }
 
 // Create VirtualNetworkPeerings
-func CreateVirtualNetworkPeering(ctx context.Context, virtualNetworkName string, virtualNetworkPeeringName string, virtualNetworkPeeringPro armnetwork.VirtualNetworkPeering) error {
+func CreateVirtualNetworkPeering(ctx context.Context, virtualNetworkName string, virtualNetworkPeeringName string, virtualNetworkPeeringParameters armnetwork.VirtualNetworkPeering) error {
 	client := getVirtualNetworkPeeringsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
 		virtualNetworkPeeringName,
-		virtualNetworkPeeringPro,
+		virtualNetworkPeeringParameters,
 		nil,
 	)
 

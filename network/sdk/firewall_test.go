@@ -33,7 +33,7 @@ func TestFirewall(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualWANPro := armnetwork.VirtualWAN{
+	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -43,13 +43,13 @@ func TestFirewall(t *testing.T) {
 			Type:                 to.StringPtr("Basic"),
 		},
 	}
-	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName, virtualWANPro)
+	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName, virtualWANParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}
 	t.Logf("created virtual wan")
 
-	virtualHubPro := armnetwork.VirtualHub{
+	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -62,13 +62,13 @@ func TestFirewall(t *testing.T) {
 			},
 		},
 	}
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubPro)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
 	t.Logf("created virtual hub")
 
-	firewallPolicyPro := armnetwork.FirewallPolicy{
+	firewallPolicyParameters := armnetwork.FirewallPolicy{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -77,13 +77,13 @@ func TestFirewall(t *testing.T) {
 			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
 		},
 	}
-	firewallPolicyId, err := CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyPro)
+	firewallPolicyId, err := CreateFirewallPolicy(ctx, firewallPolicyName, firewallPolicyParameters)
 	if err != nil {
 		t.Fatalf("failed to create firewall policy: % +v", err)
 	}
 	t.Logf("created firewall policy")
 
-	azureFirewallPro := armnetwork.AzureFirewall{
+	azureFirewallParameters := armnetwork.AzureFirewall{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -108,7 +108,7 @@ func TestFirewall(t *testing.T) {
 		},
 		Zones: &[]*string{},
 	}
-	err = CreateFirewall(ctx, firewallName, azureFirewallPro)
+	err = CreateFirewall(ctx, firewallName, azureFirewallParameters)
 	if err != nil {
 		t.Fatalf("failed to create firewall: % +v", err)
 	}

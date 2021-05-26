@@ -26,13 +26,13 @@ func getPrivateEndpointsClient() armnetwork.PrivateEndpointsClient {
 }
 
 // Create PrivateEndpoints
-func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, privateEndpointPro armnetwork.PrivateEndpoint) error {
+func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, privateEndpointParameters armnetwork.PrivateEndpoint) error {
 	client := getPrivateEndpointsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateEndpointName,
-		privateEndpointPro,
+		privateEndpointParameters,
 		nil,
 	)
 

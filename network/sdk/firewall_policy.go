@@ -26,13 +26,13 @@ func getFirewallPolicysClient() armnetwork.FirewallPoliciesClient {
 }
 
 //  Creates or updates the specified Firewall Policy.
-func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string, firewallPolicyPro armnetwork.FirewallPolicy) (string, error) {
+func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string, firewallPolicyParameters armnetwork.FirewallPolicy) (string, error) {
 	client := getFirewallPolicysClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallPolicyName,
-		firewallPolicyPro,
+		firewallPolicyParameters,
 		nil,
 	)
 

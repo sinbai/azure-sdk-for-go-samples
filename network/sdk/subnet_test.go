@@ -34,7 +34,7 @@ func TestSubnet(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -45,17 +45,18 @@ func TestSubnet(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 	t.Logf("created virtual network")
 
-	body := `{
-		"addressPrefix": "10.0.0.0/16"
-	  }
-	`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.0.0/16"),
+		},
+	}
+	_, err = CreateSubnet(ctx, virtualNetworkName, subnetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}

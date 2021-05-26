@@ -26,7 +26,7 @@ func getServiceEndpointPolicyDefinitionsClient() armnetwork.ServiceEndpointPolic
 }
 
 // Create ServiceEndpointPolicyDefinitions
-func CreateServiceEndpointPolicyDefinition(ctx context.Context, serviceEndpointPolicyName string, serviceEndpointPolicyDefinitionName string, serviceEndpointPolicyDefinitionPro armnetwork.ServiceEndpointPolicyDefinition) error {
+func CreateServiceEndpointPolicyDefinition(ctx context.Context, serviceEndpointPolicyName string, serviceEndpointPolicyDefinitionName string, serviceEndpointPolicyDefinitionParameters armnetwork.ServiceEndpointPolicyDefinition) error {
 	client := getServiceEndpointPolicyDefinitionsClient()
 
 	poller, err := client.BeginCreateOrUpdate(
@@ -34,7 +34,7 @@ func CreateServiceEndpointPolicyDefinition(ctx context.Context, serviceEndpointP
 		config.GroupName(),
 		serviceEndpointPolicyName,
 		serviceEndpointPolicyDefinitionName,
-		serviceEndpointPolicyDefinitionPro,
+		serviceEndpointPolicyDefinitionParameters,
 		nil,
 	)
 

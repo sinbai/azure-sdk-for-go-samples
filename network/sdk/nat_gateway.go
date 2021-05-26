@@ -27,14 +27,14 @@ func getNatGatewayClient() armnetwork.NatGatewaysClient {
 }
 
 // Creates or updates a nat gateway.
-func CreateNatGateway(ctx context.Context, natGatewayName string, natGatewayPro armnetwork.NatGateway) error {
+func CreateNatGateway(ctx context.Context, natGatewayName string, natGatewayParameters armnetwork.NatGateway) error {
 	client := getNatGatewayClient()
 
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		natGatewayName,
-		natGatewayPro,
+		natGatewayParameters,
 		nil,
 	)
 	if err != nil {

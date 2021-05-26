@@ -26,13 +26,13 @@ func getVirtualWansClient() armnetwork.VirtualWansClient {
 }
 
 // Create VirtualWans
-func CreateVirtualWan(ctx context.Context, virtualWanName string, virtualWANPro armnetwork.VirtualWAN) (string, error) {
+func CreateVirtualWan(ctx context.Context, virtualWanName string, virtualWANParameters armnetwork.VirtualWAN) (string, error) {
 	client := getVirtualWansClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualWanName,
-		virtualWANPro,
+		virtualWANParameters,
 		nil,
 	)
 

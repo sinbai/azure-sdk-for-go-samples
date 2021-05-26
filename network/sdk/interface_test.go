@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	compute "github.com/Azure-Samples/azure-sdk-for-go-samples/compute/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
@@ -39,7 +40,7 @@ func TestInterface(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -50,32 +51,33 @@ func TestInterface(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 	t.Logf("created virtual network")
 
-	body := `{
-		"addressPrefix": "10.0.0.0/16"
-	  }
-	`
-	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.0.0/16"),
+		},
+	}
+	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	publicIPAddressPro := armnetwork.PublicIPAddress{
+	publicIPAddressParameters := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
 	}
-	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	networkInterfacePro := armnetwork.NetworkInterface{
+	networkInterfaceParameters := armnetwork.NetworkInterface{
 		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
 		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
 			EnableAcceleratedNetworking: to.BoolPtr(true),
@@ -95,7 +97,7 @@ func TestInterface(t *testing.T) {
 		},
 	}
 
-	interfaceId, _, err := CreateNetworkInterface(ctx, networkInterfaceName, networkInterfacePro)
+	interfaceId, _, err := CreateNetworkInterface(ctx, networkInterfaceName, networkInterfaceParameters)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
@@ -160,7 +162,7 @@ func TestInterface(t *testing.T) {
 		},
 	}
 
-	_, err = CreateVirtualMachine(ctx, virtualMachineName, virtualMachineProbably)
+	_, err = compute.CreateVirtualMachine(ctx, virtualMachineName, virtualMachineProbably)
 	if err != nil {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}
@@ -213,7 +215,7 @@ func TestInterface(t *testing.T) {
 	}
 	t.Logf("updated network interface tags")
 
-	err = DeleteVirtualMachine(ctx, virtualMachineName)
+	err = compute.DeleteVirtualMachine(ctx, virtualMachineName)
 	if err != nil {
 		t.Fatalf("failed to delete virtual machine: %+v", err)
 	}

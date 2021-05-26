@@ -26,7 +26,7 @@ func getExpressRouteCircuitConnectionsClient() armnetwork.ExpressRouteCircuitCon
 }
 
 // Creates or updates a Express Route Circuit Connection in the specified express route circuits.
-func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string, peeringName string, connectionName string, expressRouteCircuitConnectionPro armnetwork.ExpressRouteCircuitConnection) error {
+func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string, peeringName string, connectionName string, parameters armnetwork.ExpressRouteCircuitConnection) error {
 	client := getExpressRouteCircuitConnectionsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -34,7 +34,7 @@ func CreateExpressRouteCircuitConnection(ctx context.Context, circuitName string
 		circuitName,
 		peeringName,
 		connectionName,
-		expressRouteCircuitConnectionPro,
+		parameters,
 		nil,
 	)
 

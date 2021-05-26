@@ -26,14 +26,14 @@ func getRouteFilterRuleClient() armnetwork.RouteFilterRulesClient {
 }
 
 //Creates or updates a route in the specified route filter.
-func CreateRouteFilterRule(ctx context.Context, routeFilterName string, routeName string, routeFilterRulePro armnetwork.RouteFilterRule) error {
+func CreateRouteFilterRule(ctx context.Context, routeFilterName string, routeName string, routeFilterRuleParameters armnetwork.RouteFilterRule) error {
 	client := getRouteFilterRuleClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		routeFilterName,
 		routeName,
-		routeFilterRulePro,
+		routeFilterRuleParameters,
 		nil,
 	)
 

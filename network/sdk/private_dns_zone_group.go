@@ -26,14 +26,14 @@ func getPrivateDnsZoneGroupsClient() armnetwork.PrivateDNSZoneGroupsClient {
 }
 
 // Creates or updates a private dns zone group in the specified private endpoint.
-func CreatePrivateDnsZoneGroup(ctx context.Context, privateEndpointName string, privateDnsZoneGroupName string, privateDNSZoneGroupPro armnetwork.PrivateDNSZoneGroup) error {
+func CreatePrivateDnsZoneGroup(ctx context.Context, privateEndpointName string, privateDnsZoneGroupName string, privateDNSZoneGroupParameters armnetwork.PrivateDNSZoneGroup) error {
 	client := getPrivateDnsZoneGroupsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateEndpointName,
 		privateDnsZoneGroupName,
-		privateDNSZoneGroupPro,
+		privateDNSZoneGroupParameters,
 		nil,
 	)
 

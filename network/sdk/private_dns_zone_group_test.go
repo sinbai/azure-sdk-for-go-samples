@@ -40,7 +40,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -51,30 +51,34 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	body := `{
-	"addressPrefix": "10.0.1.0/24",
-	"privateLinkServiceNetworkPolicies": "Disabled"
-	}`
-	subnet1ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName1, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
+			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+		},
+	}
+	subnet1ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName1, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	body = `{
-		"addressPrefix": "10.0.0.0/24",
-		"privateEndpointNetworkPolicies": "Disabled"
-		}`
-	subnet2ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName2, body)
+	subnetParameters = armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix:                     to.StringPtr("10.0.0.0/24"),
+			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+		},
+	}
+	subnet2ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName2, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	loadBalancerPro := armnetwork.LoadBalancer{
+	loadBalancerParameters := armnetwork.LoadBalancer{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -97,12 +101,12 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 		},
 	}
 
-	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
+	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerParameters)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}
 
-	privateLinkServicePro := armnetwork.PrivateLinkService{
+	privateLinkServiceParameters := armnetwork.PrivateLinkService{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -140,12 +144,12 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 			},
 		},
 	}
-	privateLinkServiceId, err := CreatePrivateLinkService(ctx, privateLinkServiceName, privateLinkServicePro)
+	privateLinkServiceId, err := CreatePrivateLinkService(ctx, privateLinkServiceName, privateLinkServiceParameters)
 	if err != nil {
 		t.Fatalf("failed to create private link service: % +v", err)
 	}
 
-	privateEndpointPro := armnetwork.PrivateEndpoint{
+	privateEndpointParameters := armnetwork.PrivateEndpoint{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -164,22 +168,22 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 		},
 	}
 
-	err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointPro)
+	err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointParameters)
 	if err != nil {
 		t.Fatalf("failed to create private endpoint: % +v", err)
 	}
 	t.Logf("created private endpoint")
 
-	privateZonePro := privatedns.PrivateZone{
+	privateZoneParameters := privatedns.PrivateZone{
 		Location: to.StringPtr("global"),
 	}
-	privateZone, err := CreatePrivateZone(ctx, privateZoneName, privateZonePro)
+	privateZone, err := CreatePrivateZone(ctx, privateZoneName, privateZoneParameters)
 	if err != nil {
 		t.Fatalf("failed to create private zone: % +v", err)
 	}
 	t.Logf("created private zone")
 
-	privateDNSZoneGroupPro := armnetwork.PrivateDNSZoneGroup{
+	privateDNSZoneGroupParameters := armnetwork.PrivateDNSZoneGroup{
 		Name: &privateDnsZoneGroupName,
 		Properties: &armnetwork.PrivateDNSZoneGroupPropertiesFormat{
 			PrivateDNSZoneConfigs: &[]*armnetwork.PrivateDNSZoneConfig{{
@@ -190,7 +194,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 			}},
 		},
 	}
-	err = CreatePrivateDnsZoneGroup(ctx, privateEndpointName, privateDnsZoneGroupName, privateDNSZoneGroupPro)
+	err = CreatePrivateDnsZoneGroup(ctx, privateEndpointName, privateDnsZoneGroupName, privateDNSZoneGroupParameters)
 	if err != nil {
 		t.Fatalf("failed to create private dns zone group: % +v", err)
 	}

@@ -38,7 +38,7 @@ func TestInboundNatRule(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPAddressPro := armnetwork.PublicIPAddress{
+	publicIPAddressParameters := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -52,13 +52,13 @@ func TestInboundNatRule(t *testing.T) {
 			Name: armnetwork.PublicIPAddressSKUNameStandard.ToPtr(),
 		},
 	}
-	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
 	loadBalancerUrl := "/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/loadBalancers/" + loadBalancerName
-	loadBalancerPro := armnetwork.LoadBalancer{
+	loadBalancerParameters := armnetwork.LoadBalancer{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -138,13 +138,13 @@ func TestInboundNatRule(t *testing.T) {
 		},
 	}
 
-	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerPro)
+	loadBalancerId, err := CreateLoadBalancer(ctx, loadBalancerName, loadBalancerParameters)
 	if err != nil {
 		t.Fatalf("failed to create load balancer: % +v", err)
 	}
 	t.Logf("created load balancer")
 
-	inboundNatRulePro := armnetwork.InboundNatRule{
+	inboundNatRuleParameters := armnetwork.InboundNatRule{
 		Properties: &armnetwork.InboundNatRulePropertiesFormat{
 			BackendPort:      to.Int32Ptr(3389),
 			EnableFloatingIP: to.BoolPtr(false),
@@ -157,7 +157,7 @@ func TestInboundNatRule(t *testing.T) {
 			Protocol:             armnetwork.TransportProtocolTCP.ToPtr(),
 		},
 	}
-	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatRuleName, inboundNatRulePro)
+	err = CreateInboundNatRule(ctx, loadBalancerName, inboundNatRuleName, inboundNatRuleParameters)
 	if err != nil {
 		t.Fatalf("failed to get load balancer inbound nat rule: %+v", err)
 	}

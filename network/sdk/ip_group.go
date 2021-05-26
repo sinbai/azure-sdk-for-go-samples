@@ -26,13 +26,13 @@ func getIPGroupClient() armnetwork.IPGroupsClient {
 }
 
 // Creates or updates an ipGroups in a specified resource group.
-func CreateIPGroup(ctx context.Context, ipGroupName string, ipGroupPro armnetwork.IPGroup) error {
+func CreateIPGroup(ctx context.Context, ipGroupName string, ipGroupParameters armnetwork.IPGroup) error {
 	client := getIPGroupClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		ipGroupName,
-		ipGroupPro,
+		ipGroupParameters,
 		nil,
 	)
 

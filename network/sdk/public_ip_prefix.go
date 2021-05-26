@@ -27,13 +27,13 @@ func getPublicIPPrefixClient() armnetwork.PublicIPPrefixesClient {
 }
 
 // Create public IP prefix
-func CreatePublicIPPrefix(ctx context.Context, prefixName string, publicIPPrefixPro armnetwork.PublicIPPrefix) (string, error) {
+func CreatePublicIPPrefix(ctx context.Context, prefixName string, publicIPPrefixParameters armnetwork.PublicIPPrefix) (string, error) {
 	client := getPublicIPPrefixClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		prefixName,
-		publicIPPrefixPro,
+		publicIPPrefixParameters,
 		nil,
 	)
 

@@ -22,13 +22,13 @@ func getPrivateZonesClient() privatedns.PrivateZonesClient {
 }
 
 // creates or updates a Private DNS zone. Does not modify Links to virtual networks or DNS records
-func CreatePrivateZone(ctx context.Context, privateZoneName string, privateZonePro privatedns.PrivateZone) (privateZone privatedns.PrivateZone, err error) {
+func CreatePrivateZone(ctx context.Context, privateZoneName string, privateZoneParameters privatedns.PrivateZone) (privateZone privatedns.PrivateZone, err error) {
 	client := getPrivateZonesClient()
 	future, err := client.CreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateZoneName,
-		privateZonePro,
+		privateZoneParameters,
 		"",
 		"",
 	)

@@ -26,13 +26,13 @@ func getBastionHostsClient() armnetwork.BastionHostsClient {
 }
 
 // Create BastionHosts
-func CreateBastionHost(ctx context.Context, bastionHostName string, bastionHostPro armnetwork.BastionHost) error {
+func CreateBastionHost(ctx context.Context, bastionHostName string, bastionHostParameters armnetwork.BastionHost) error {
 	client := getBastionHostsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		bastionHostName,
-		bastionHostPro,
+		bastionHostParameters,
 		nil,
 	)
 

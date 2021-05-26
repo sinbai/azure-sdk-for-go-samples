@@ -26,14 +26,14 @@ func getInboundNatRulesClient() armnetwork.InboundNatRulesClient {
 }
 
 // Creates or updates a load balancer inbound nat rule.
-func CreateInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string, inboundNatRulePro armnetwork.InboundNatRule) error {
+func CreateInboundNatRule(ctx context.Context, loadBalancerName string, inboundNatRuleName string, inboundNatRuleParameters armnetwork.InboundNatRule) error {
 	client := getInboundNatRulesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
 		inboundNatRuleName,
-		inboundNatRulePro,
+		inboundNatRuleParameters,
 		nil,
 	)
 

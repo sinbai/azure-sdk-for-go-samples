@@ -40,14 +40,14 @@ func TestServiceEndpointPolicyDefinition(t *testing.T) {
 	}
 	t.Logf("created service endpoint policy")
 
-	serviceEndpointPolicyDefinitionPro := armnetwork.ServiceEndpointPolicyDefinition{
+	serviceEndpointPolicyDefinitionParameters := armnetwork.ServiceEndpointPolicyDefinition{
 		Properties: &armnetwork.ServiceEndpointPolicyDefinitionPropertiesFormat{
 			Description:      to.StringPtr("Storage Service EndpointPolicy Definition"),
 			Service:          to.StringPtr("Microsoft.Storage"),
 			ServiceResources: &[]*string{to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName())},
 		},
 	}
-	err = CreateServiceEndpointPolicyDefinition(ctx, serviceEndpointPolicyName, serviceEndpointPolicyDefinitionName, serviceEndpointPolicyDefinitionPro)
+	err = CreateServiceEndpointPolicyDefinition(ctx, serviceEndpointPolicyName, serviceEndpointPolicyDefinitionName, serviceEndpointPolicyDefinitionParameters)
 	if err != nil {
 		t.Fatalf("failed to create service endpoint policy definition: % +v", err)
 	}

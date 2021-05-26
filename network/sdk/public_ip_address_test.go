@@ -31,7 +31,7 @@ func TestPublicIPAddress(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPAddressPro := armnetwork.PublicIPAddress{
+	publicIPAddressParameters := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Name:     to.StringPtr(publicIpAddressName),
 			Location: to.StringPtr(config.Location()),
@@ -46,7 +46,7 @@ func TestPublicIPAddress(t *testing.T) {
 		},
 	}
 
-	_, err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	_, err = CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}

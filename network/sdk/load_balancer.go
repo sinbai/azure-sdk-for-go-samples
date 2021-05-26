@@ -27,13 +27,13 @@ func getLoadBalancersClient() armnetwork.LoadBalancersClient {
 }
 
 // Create LoadBalancers
-func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalancerPro armnetwork.LoadBalancer) (string, error) {
+func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalancerParameters armnetwork.LoadBalancer) (string, error) {
 	client := getLoadBalancersClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
-		loadBalancerPro,
+		loadBalancerParameters,
 		nil,
 	)
 

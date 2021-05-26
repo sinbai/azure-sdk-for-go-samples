@@ -26,14 +26,14 @@ func getExpressRouteCircuitPeeringsClient() armnetwork.ExpressRouteCircuitPeerin
 }
 
 // Create ExpressRouteCircuitPeerings
-func CreateExpressRouteCircuitPeering(ctx context.Context, circuitName string, expressRouteCircuitPeeringName string, expressRouteCircuitPeeringPro armnetwork.ExpressRouteCircuitPeering) (string, error) {
+func CreateExpressRouteCircuitPeering(ctx context.Context, circuitName string, expressRouteCircuitPeeringName string, expressRouteCircuitPeeringParameters armnetwork.ExpressRouteCircuitPeering) (string, error) {
 	client := getExpressRouteCircuitPeeringsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		circuitName,
 		expressRouteCircuitPeeringName,
-		expressRouteCircuitPeeringPro,
+		expressRouteCircuitPeeringParameters,
 		nil,
 	)
 

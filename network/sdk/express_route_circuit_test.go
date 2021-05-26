@@ -32,7 +32,7 @@ func TestExpressRouteCircuit(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	expressRouteCircuitPro := armnetwork.ExpressRouteCircuit{
+	expressRouteCircuitParameters := armnetwork.ExpressRouteCircuit{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -50,13 +50,13 @@ func TestExpressRouteCircuit(t *testing.T) {
 			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
 		},
 	}
-	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitPro)
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit: % +v", err)
 	}
 	t.Logf("created express route circuit")
 
-	expressRouteCircuitPeeringPro := armnetwork.ExpressRouteCircuitPeering{
+	expressRouteCircuitPeeringParameters := armnetwork.ExpressRouteCircuitPeering{
 		Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
 			PeerASN:                    to.Int64Ptr(10001),
 			PrimaryPeerAddressPrefix:   to.StringPtr("102.0.0.0/30"),
@@ -64,7 +64,7 @@ func TestExpressRouteCircuit(t *testing.T) {
 			VlanID:                     to.Int32Ptr(101),
 		},
 	}
-	_, err = CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitPeeringPro)
+	_, err = CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitPeeringParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit peering: % +v", err)
 	}

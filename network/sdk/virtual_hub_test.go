@@ -31,7 +31,7 @@ func TestVirtualHub(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualWANPro := armnetwork.VirtualWAN{
+	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -41,13 +41,13 @@ func TestVirtualHub(t *testing.T) {
 			Type:                 to.StringPtr("Basic"),
 		},
 	}
-	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName, virtualWANPro)
+	virtualWanID, err := CreateVirtualWan(ctx, virtualWanName, virtualWANParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}
 	t.Logf("created virtual wan")
 
-	virtualHubPro := armnetwork.VirtualHub{
+	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -60,7 +60,7 @@ func TestVirtualHub(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubPro)
+	_, err = CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}

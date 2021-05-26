@@ -26,13 +26,14 @@ func getWpFirewallPoliciesClient() armnetwork.WebApplicationFirewallPoliciesClie
 }
 
 // Creates or update policy with specified rule set name within a resource group.
-func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string, webApplicationFirewallPolicyPro armnetwork.WebApplicationFirewallPolicy) error {
+func CreateWebApplicationFirewallPolicy(ctx context.Context, firewallPolicyName string,
+	webApplicationFirewallPolicyParameters armnetwork.WebApplicationFirewallPolicy) error {
 	client := getWpFirewallPoliciesClient()
 	_, err := client.CreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallPolicyName,
-		webApplicationFirewallPolicyPro,
+		webApplicationFirewallPolicyParameters,
 		nil,
 	)
 

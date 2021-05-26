@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	compute "github.com/Azure-Samples/azure-sdk-for-go-samples/compute/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
@@ -41,7 +42,7 @@ func TestBastionHost(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -52,21 +53,21 @@ func TestBastionHost(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
-
-	body := `{
-		"addressPrefix": "10.0.0.0/24"
-	  }
-	`
-	subNetId, err := CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.0.0/24"),
+		},
+	}
+	subNetId, err := CreateSubnet(ctx, virtualNetworkName, subnetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	networkInterfacePro := armnetwork.NetworkInterface{
+	networkInterfaceParameters := armnetwork.NetworkInterface{
 		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
 		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
 			IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
@@ -80,7 +81,7 @@ func TestBastionHost(t *testing.T) {
 		},
 	}
 
-	nicId, _, err := CreateNetworkInterface(ctx, interfaceName, networkInterfacePro)
+	nicId, _, err := CreateNetworkInterface(ctx, interfaceName, networkInterfaceParameters)
 	if err != nil {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
@@ -144,12 +145,12 @@ func TestBastionHost(t *testing.T) {
 		},
 	}
 
-	_, err = CreateVirtualMachine(ctx, virtualMachineName, virtualMachineProbably)
+	_, err = compute.CreateVirtualMachine(ctx, virtualMachineName, virtualMachineProbably)
 	if err != nil {
 		t.Fatalf("failed to create virtual machine: % +v", err)
 	}
 
-	publicIPAddressPro := armnetwork.PublicIPAddress{
+	publicIPAddressParameters := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -162,12 +163,12 @@ func TestBastionHost(t *testing.T) {
 		},
 	}
 
-	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	virtualNetworkPro = armnetwork.VirtualNetwork{
+	virtualNetworkParameters = armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -178,21 +179,22 @@ func TestBastionHost(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, bastionVirtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, bastionVirtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	body = `{
-		"addressPrefix": "10.0.0.0/24"
-	  }
-	`
-	bastionSubnetId, err := CreateSubnet(ctx, bastionVirtualNetworkName, bastionSubnetName, body)
+	subnetParameters = armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.0.0/24"),
+		},
+	}
+	bastionSubnetId, err := CreateSubnet(ctx, bastionVirtualNetworkName, bastionSubnetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	bastionHostPro := armnetwork.BastionHost{
+	bastionHostParameters := armnetwork.BastionHost{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -211,7 +213,7 @@ func TestBastionHost(t *testing.T) {
 			}},
 		},
 	}
-	err = CreateBastionHost(ctx, bastionHostName, bastionHostPro)
+	err = CreateBastionHost(ctx, bastionHostName, bastionHostParameters)
 	if err != nil {
 		t.Fatalf("failed to create bastion host: % +v", err)
 	}

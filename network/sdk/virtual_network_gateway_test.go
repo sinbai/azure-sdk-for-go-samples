@@ -35,7 +35,7 @@ func TestVirtualNetworkGateway(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPAddressPro := armnetwork.PublicIPAddress{
+	publicIPAddressParameters := armnetwork.PublicIPAddress{
 		Resource: armnetwork.Resource{
 			Name:     to.StringPtr(publicIpAddressName),
 			Location: to.StringPtr(config.Location()),
@@ -48,12 +48,12 @@ func TestVirtualNetworkGateway(t *testing.T) {
 		},
 	}
 
-	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressPro)
+	publicIpAddressId, err := CreatePublicIPAddress(ctx, publicIpAddressName, publicIPAddressParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip address: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -64,20 +64,22 @@ func TestVirtualNetworkGateway(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	body := `{
-		"addressPrefix": "10.0.1.0/24"
-		}`
-	subnetId, err := CreateSubnet(ctx, virtualNetworkName, gatewaySubNetName, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.1.0/24"),
+		},
+	}
+	subnetId, err := CreateSubnet(ctx, virtualNetworkName, gatewaySubNetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	virtualNetWorkGatewayPro := armnetwork.VirtualNetworkGateway{
+	virtualNetWorkGatewayParameters := armnetwork.VirtualNetworkGateway{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -115,7 +117,7 @@ func TestVirtualNetworkGateway(t *testing.T) {
 		},
 	}
 
-	_, err = CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayPro)
+	_, err = CreateVirtualNetworkGateway(ctx, virtualNetworkGatewayName, virtualNetWorkGatewayParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network gateway: % +v", err)
 	}

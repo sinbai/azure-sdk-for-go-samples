@@ -34,7 +34,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualNetworkPro := armnetwork.VirtualNetwork{
+	virtualNetworkParameters := armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -45,12 +45,12 @@ func TestVirtualNetworkPeering(t *testing.T) {
 			},
 		},
 	}
-	remoteVirtualNetworkId, err := CreateVirtualNetwork(ctx, remoteVirtualNetworkName, virtualNetworkPro)
+	remoteVirtualNetworkId, err := CreateVirtualNetwork(ctx, remoteVirtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	virtualNetworkPro = armnetwork.VirtualNetwork{
+	virtualNetworkParameters = armnetwork.VirtualNetwork{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -61,21 +61,23 @@ func TestVirtualNetworkPeering(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkPro)
+	_, err = CreateVirtualNetwork(ctx, virtualNetworkName, virtualNetworkParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
 
-	body := `{
-		"addressPrefix": "10.0.1.0/24",
-		"privateLinkServiceNetworkPolicies": "Disabled"
-		}`
-	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, body)
+	subnetParameters := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
+			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+		},
+	}
+	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, subnetParameters)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
 
-	virtualNetworkPeeringPro := armnetwork.VirtualNetworkPeering{
+	virtualNetworkPeeringParameters := armnetwork.VirtualNetworkPeering{
 		Properties: &armnetwork.VirtualNetworkPeeringPropertiesFormat{
 			AllowForwardedTraffic:     to.BoolPtr(true),
 			AllowGatewayTransit:       to.BoolPtr(false),
@@ -86,7 +88,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 			UseRemoteGateways: to.BoolPtr(false),
 		},
 	}
-	err = CreateVirtualNetworkPeering(ctx, virtualNetworkName, virtualNetworkPeeringName, virtualNetworkPeeringPro)
+	err = CreateVirtualNetworkPeering(ctx, virtualNetworkName, virtualNetworkPeeringName, virtualNetworkPeeringParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual network peering: % +v", err)
 	}

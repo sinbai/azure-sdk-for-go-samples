@@ -7,7 +7,6 @@ package network
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"time"
 
@@ -27,20 +26,14 @@ func getSubnetsClient() armnetwork.SubnetsClient {
 }
 
 // Create SubNets
-func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName string, body string) (string, error) {
+func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName string, subnetParameters armnetwork.Subnet) (string, error) {
 	client := getSubnetsClient()
-
-	var subNetProps armnetwork.SubnetPropertiesFormat
-	if err := json.Unmarshal([]byte(body), &subNetProps); err != nil {
-		return "", err
-	}
-
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
 		subnetName,
-		armnetwork.Subnet{Properties: &subNetProps},
+		subnetParameters,
 		nil,
 	)
 

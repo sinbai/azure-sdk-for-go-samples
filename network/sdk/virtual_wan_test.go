@@ -32,7 +32,7 @@ func TestVirtualWan(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	virtualWANPro := armnetwork.VirtualWAN{
+	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -42,7 +42,7 @@ func TestVirtualWan(t *testing.T) {
 			Type:                 to.StringPtr("Basic"),
 		},
 	}
-	_, err = CreateVirtualWan(ctx, virtualWanName, virtualWANPro)
+	_, err = CreateVirtualWan(ctx, virtualWanName, virtualWANParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}

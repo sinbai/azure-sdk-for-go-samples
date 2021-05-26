@@ -27,13 +27,13 @@ func getFirewallsClient() armnetwork.AzureFirewallsClient {
 }
 
 // Create Firewalls
-func CreateFirewall(ctx context.Context, firewallName string, azureFirewallPro armnetwork.AzureFirewall) error {
+func CreateFirewall(ctx context.Context, firewallName string, azureFirewallParameters armnetwork.AzureFirewall) error {
 	client := getFirewallsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		firewallName,
-		azureFirewallPro,
+		azureFirewallParameters,
 		nil,
 	)
 

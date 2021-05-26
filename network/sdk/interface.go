@@ -27,13 +27,13 @@ func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
 }
 
 // Create NetworkInterfaces
-func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, networkInterface armnetwork.NetworkInterface) (string, *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat, error) {
+func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, networkInterfaceParameters armnetwork.NetworkInterface) (string, *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat, error) {
 	client := getNetworkInterfacesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		networkInterfaceName,
-		networkInterface,
+		networkInterfaceParameters,
 		nil,
 	)
 
@@ -53,11 +53,11 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, ne
 		id = *resp.NetworkInterface.ID
 	}
 
-	var ipConfigPro *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat
+	var ipConfigProperties *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat
 	if len((*(resp.NetworkInterface.Properties.IPConfigurations))) > 0 {
-		ipConfigPro = (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties
+		ipConfigProperties = (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties
 	}
-	return id, ipConfigPro, nil
+	return id, ipConfigProperties, nil
 }
 
 // Gets the specified network interface in a specified resource group.

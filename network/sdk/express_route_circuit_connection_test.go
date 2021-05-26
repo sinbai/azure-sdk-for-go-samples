@@ -34,7 +34,7 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	expressRouteCircuitPro := armnetwork.ExpressRouteCircuit{
+	expressRouteCircuitParameters := armnetwork.ExpressRouteCircuit{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -52,12 +52,12 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
 		},
 	}
-	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitPro)
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName, expressRouteCircuitParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit: % +v", err)
 	}
 
-	expressRouteCircuitPro = armnetwork.ExpressRouteCircuit{
+	expressRouteCircuitParameters = armnetwork.ExpressRouteCircuit{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -75,12 +75,12 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 			Tier:   armnetwork.ExpressRouteCircuitSKUTierStandard.ToPtr(),
 		},
 	}
-	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName2, expressRouteCircuitPro)
+	_, err = CreateExpressRouteCircuit(ctx, expressRouteCircuitName2, expressRouteCircuitParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit2: % +v", err)
 	}
 
-	expressRouteCircuitPeeringPro := armnetwork.ExpressRouteCircuitPeering{
+	expressRouteCircuitPeeringParameters := armnetwork.ExpressRouteCircuitPeering{
 		Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
 			PeerASN:                    to.Int64Ptr(10001),
 			PrimaryPeerAddressPrefix:   to.StringPtr("102.0.0.0/30"),
@@ -88,12 +88,12 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 			VlanID:                     to.Int32Ptr(101),
 		},
 	}
-	expressRouteCircuitPeeringId, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitPeeringPro)
+	expressRouteCircuitPeeringId, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitPeeringParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit peering: % +v", err)
 	}
 
-	expressRouteCircuitPeeringPro2 := armnetwork.ExpressRouteCircuitPeering{
+	expressRouteCircuitPeeringParameters = armnetwork.ExpressRouteCircuitPeering{
 		Properties: &armnetwork.ExpressRouteCircuitPeeringPropertiesFormat{
 			PeerASN:                    to.Int64Ptr(10002),
 			PrimaryPeerAddressPrefix:   to.StringPtr("104.0.0.0/30"),
@@ -101,12 +101,12 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 			VlanID:                     to.Int32Ptr(102),
 		},
 	}
-	expressRouteCircuitPeeringId2, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName2, expressRouteCircuitPeeringName, expressRouteCircuitPeeringPro2)
+	expressRouteCircuitPeeringId2, err := CreateExpressRouteCircuitPeering(ctx, expressRouteCircuitName2, expressRouteCircuitPeeringName, expressRouteCircuitPeeringParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit peering: % +v", err)
 	}
 
-	expressRouteCircuitConnectionPro := armnetwork.ExpressRouteCircuitConnection{
+	expressRouteCircuitConnectionParameters := armnetwork.ExpressRouteCircuitConnection{
 		Properties: &armnetwork.ExpressRouteCircuitConnectionPropertiesFormat{
 			AddressPrefix: to.StringPtr("104.0.0.0/29"),
 			ExpressRouteCircuitPeering: &armnetwork.SubResource{
@@ -118,7 +118,7 @@ func TestExpressRouteCircuitConnection(t *testing.T) {
 		},
 	}
 
-	err = CreateExpressRouteCircuitConnection(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitConnectionName, expressRouteCircuitConnectionPro)
+	err = CreateExpressRouteCircuitConnection(ctx, expressRouteCircuitName, expressRouteCircuitPeeringName, expressRouteCircuitConnectionName, expressRouteCircuitConnectionParameters)
 	if err != nil {
 		t.Fatalf("failed to create express route circuit connection: % +v", err)
 	}

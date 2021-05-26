@@ -31,7 +31,7 @@ func TestIPGroup(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	ipGroupPro := armnetwork.IPGroup{
+	ipGroupParameters := armnetwork.IPGroup{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"tag1": to.StringPtr("value1")},
@@ -40,7 +40,7 @@ func TestIPGroup(t *testing.T) {
 			IPAddresses: &[]*string{to.StringPtr("13.64.39.16/32"), to.StringPtr("40.74.146.80/31"), to.StringPtr("40.74.147.32/28")},
 		},
 	}
-	err = CreateIPGroup(ctx, ipGroupName, ipGroupPro)
+	err = CreateIPGroup(ctx, ipGroupName, ipGroupParameters)
 	if err != nil {
 		t.Fatalf("failed to create ip group: %+v", err)
 	}

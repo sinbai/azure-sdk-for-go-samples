@@ -27,13 +27,13 @@ func getLocalNetworkGatewaysClient() armnetwork.LocalNetworkGatewaysClient {
 }
 
 // Create LocalNetworkGateways
-func CreateLocalNetworkGateway(ctx context.Context, localNetworkGatewayName string, localNetworkGatewayPro armnetwork.LocalNetworkGateway) (string, error) {
+func CreateLocalNetworkGateway(ctx context.Context, localNetworkGatewayName string, localNetworkGatewayParameters armnetwork.LocalNetworkGateway) (string, error) {
 	client := getLocalNetworkGatewaysClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		localNetworkGatewayName,
-		localNetworkGatewayPro,
+		localNetworkGatewayParameters,
 		nil,
 	)
 

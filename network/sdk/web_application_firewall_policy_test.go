@@ -31,7 +31,7 @@ func TestWebApplicationFirewallPolicy(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	webApplicationFirewallPolicyPro := armnetwork.WebApplicationFirewallPolicy{
+	webApplicationFirewallPolicyParameters := armnetwork.WebApplicationFirewallPolicy{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -47,7 +47,7 @@ func TestWebApplicationFirewallPolicy(t *testing.T) {
 			},
 		},
 	}
-	err = CreateWebApplicationFirewallPolicy(ctx, firewallPolicyName, webApplicationFirewallPolicyPro)
+	err = CreateWebApplicationFirewallPolicy(ctx, firewallPolicyName, webApplicationFirewallPolicyParameters)
 	if err != nil {
 		t.Fatalf("failed to create web application firewall policy: %+v", err)
 	}

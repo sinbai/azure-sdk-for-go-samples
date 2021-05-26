@@ -31,10 +31,10 @@ func TestPrivateZone(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	privateZonePro := privatedns.PrivateZone{
+	privateZoneParameters := privatedns.PrivateZone{
 		Location: to.StringPtr("global"),
 	}
-	_, err = CreatePrivateZone(ctx, privateZoneName, privateZonePro)
+	_, err = CreatePrivateZone(ctx, privateZoneName, privateZoneParameters)
 	if err != nil {
 		t.Fatalf("failed to create private zone: % +v", err)
 	}

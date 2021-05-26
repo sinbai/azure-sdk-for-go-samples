@@ -27,13 +27,13 @@ func getVirtualNetworkGatewayConnectionsClient() armnetwork.VirtualNetworkGatewa
 }
 
 // Create VirtualNetworkGatewayConnections
-func CreateVirtualNetworkGatewayConnection(ctx context.Context, virtualNetworkGatewayConnectionName string, gatewayConnectionPro armnetwork.VirtualNetworkGatewayConnection) error {
+func CreateVirtualNetworkGatewayConnection(ctx context.Context, virtualNetworkGatewayConnectionName string, gatewayConnectionParameters armnetwork.VirtualNetworkGatewayConnection) error {
 	client := getVirtualNetworkGatewayConnectionsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkGatewayConnectionName,
-		gatewayConnectionPro,
+		gatewayConnectionParameters,
 		nil,
 	)
 

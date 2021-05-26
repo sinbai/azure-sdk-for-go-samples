@@ -26,14 +26,14 @@ func getRoutesClient() armnetwork.RoutesClient {
 }
 
 // Creates or updates a route in the specified route table.
-func CreateRoute(ctx context.Context, routeTableName string, routeName string, routePro armnetwork.Route) error {
+func CreateRoute(ctx context.Context, routeTableName string, routeName string, routeParameters armnetwork.Route) error {
 	client := getRoutesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		routeTableName,
 		routeName,
-		routePro,
+		routeParameters,
 		nil,
 	)
 

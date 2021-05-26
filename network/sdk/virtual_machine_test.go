@@ -56,11 +56,12 @@ func TestVirtualMachine(t *testing.T) {
 	}
 	t.Logf("created virtual network")
 
-	body := `{
-		"addressPrefix": "10.0.0.0/16"
-	  }
-	`
-	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, body)
+	subnetPro := armnetwork.Subnet{
+		Properties: &armnetwork.SubnetPropertiesFormat{
+			AddressPrefix: to.StringPtr("10.0.0.0/16"),
+		},
+	}
+	subNetID, err := CreateSubnet(ctx, virtualNetworkName, subnetName, subnetPro)
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}

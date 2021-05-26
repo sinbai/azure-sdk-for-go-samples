@@ -31,7 +31,7 @@ func TestLocalNetworkGateway(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	localNetworkGatewayPro := armnetwork.LocalNetworkGateway{
+	localNetworkGatewayParameters := armnetwork.LocalNetworkGateway{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 		},
@@ -42,7 +42,7 @@ func TestLocalNetworkGateway(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateLocalNetworkGateway(ctx, localNetworkGatewayName, localNetworkGatewayPro)
+	_, err = CreateLocalNetworkGateway(ctx, localNetworkGatewayName, localNetworkGatewayParameters)
 	if err != nil {
 		t.Fatalf("failed to create local network gateway: % +v", err)
 	}

@@ -31,7 +31,7 @@ func TestRouteFilter(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	routeFilterPro := armnetwork.RouteFilter{
+	routeFilterParameters := armnetwork.RouteFilter{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
@@ -39,7 +39,7 @@ func TestRouteFilter(t *testing.T) {
 		Properties: &armnetwork.RouteFilterPropertiesFormat{
 			Rules: &[]*armnetwork.RouteFilterRule{}},
 	}
-	err = CreateRouteFilter(ctx, routeFilterName, routeFilterPro)
+	err = CreateRouteFilter(ctx, routeFilterName, routeFilterParameters)
 	if err != nil {
 		t.Fatalf("failed to create route filter: %+v", err)
 	}

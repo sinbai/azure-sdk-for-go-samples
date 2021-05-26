@@ -31,7 +31,7 @@ func TestPublicIPPrefix(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	publicIPPrefixPro := armnetwork.PublicIPPrefix{
+	publicIPPrefixParameters := armnetwork.PublicIPPrefix{
 		Resource: armnetwork.Resource{
 			Name:     to.StringPtr(publicIpPrefixName),
 			Location: to.StringPtr(config.Location()),
@@ -44,7 +44,7 @@ func TestPublicIPPrefix(t *testing.T) {
 			Name: armnetwork.PublicIPPrefixSKUNameStandard.ToPtr(),
 		},
 	}
-	_, err = CreatePublicIPPrefix(ctx, publicIpPrefixName, publicIPPrefixPro)
+	_, err = CreatePublicIPPrefix(ctx, publicIpPrefixName, publicIPPrefixParameters)
 	if err != nil {
 		t.Fatalf("failed to create public ip prefix: %+v", err)
 	}

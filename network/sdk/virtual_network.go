@@ -27,13 +27,13 @@ func getVirtualNetworksClient() armnetwork.VirtualNetworksClient {
 }
 
 // Creates or updates a virtual network in the specified resource group
-func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, virtualNetworkPro armnetwork.VirtualNetwork) (string, error) {
+func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, virtualNetworkParameters armnetwork.VirtualNetwork) (string, error) {
 	client := getVirtualNetworksClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
-		virtualNetworkPro,
+		virtualNetworkParameters,
 		nil,
 	)
 

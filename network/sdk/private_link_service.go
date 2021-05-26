@@ -27,13 +27,13 @@ func getPrivateLinkServicesClient() armnetwork.PrivateLinkServicesClient {
 }
 
 // Create PrivateLinkServices
-func CreatePrivateLinkService(ctx context.Context, privateLinkServiceName string, privateLinkServicePro armnetwork.PrivateLinkService) (string, error) {
+func CreatePrivateLinkService(ctx context.Context, privateLinkServiceName string, privateLinkServiceParameters armnetwork.PrivateLinkService) (string, error) {
 	client := getPrivateLinkServicesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		privateLinkServiceName,
-		privateLinkServicePro,
+		privateLinkServiceParameters,
 		nil,
 	)
 
