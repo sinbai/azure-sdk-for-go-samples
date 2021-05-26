@@ -10,6 +10,7 @@ require (
 	github.com/Azure/azure-sdk-for-go v54.1.0+incompatible
 	github.com/Azure/azure-sdk-for-go/sdk/arm/compute v0.0.0-00010101000000-000000000000
 	github.com/Azure/azure-sdk-for-go/sdk/arm/network v0.0.0-00010101000000-000000000000
+	github.com/Azure/azure-sdk-for-go/sdk/arm/storage v0.0.0-20210524192354-2bc7350b1dcd
 	github.com/Azure/azure-sdk-for-go/sdk/armcore v0.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/to v0.1.4
