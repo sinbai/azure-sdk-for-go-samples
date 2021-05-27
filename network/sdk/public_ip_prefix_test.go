@@ -68,7 +68,10 @@ func TestPublicIPPrefix(t *testing.T) {
 	}
 	t.Logf("listed all public ip prefix")
 
-	err = UpdatePublicIPPrefixTags(ctx, publicIpPrefixName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdatePublicIPPrefixTags(ctx, publicIpPrefixName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for public ip prefix: %+v", err)
 	}

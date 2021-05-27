@@ -137,7 +137,11 @@ func TestFirewall(t *testing.T) {
 		t.Fatalf("failed to list all firewall: %+v", err)
 	}
 	t.Logf("listed all firewall")
-	err = UpdateFirewallTags(ctx, firewallName)
+
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateFirewallTags(ctx, firewallName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for firewall: %+v", err)
 	}

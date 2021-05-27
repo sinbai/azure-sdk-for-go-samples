@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func getNatGatewayClient() armnetwork.NatGatewaysClient {
@@ -92,15 +91,13 @@ func ListAllNatGateway(ctx context.Context) error {
 }
 
 // Updates nat gateway tags.
-func UpdateNatGateway(ctx context.Context, natGatewayName string) error {
+func UpdateNatGateway(ctx context.Context, natGatewayName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getNatGatewayClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		natGatewayName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

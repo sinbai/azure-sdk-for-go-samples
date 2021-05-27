@@ -244,7 +244,10 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 	//need to sleep for a period of time to run successfully, otherwise "Another operation on this or dependent resource is in progress." will be reported.
 	time.Sleep(time.Duration(60) * time.Second)
 
-	err = UpdateVirtualNetworkGatewayConnectionTags(ctx, virtualNetworkGatewayConnectionName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateVirtualNetworkGatewayConnectionTags(ctx, virtualNetworkGatewayConnectionName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for virtual network gateway connection: %+v", err)
 	}

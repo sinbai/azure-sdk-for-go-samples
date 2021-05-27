@@ -78,15 +78,13 @@ func ListDdosProtectionPlan(ctx context.Context) error {
 }
 
 // Updates ddos protection plan tags.
-func UpdateDdosProtectionPlanTags(ctx context.Context, ddosProtectionPlanName string) error {
+func UpdateDdosProtectionPlanTags(ctx context.Context, ddosProtectionPlanName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getDdosProtectionPlansClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		ddosProtectionPlanName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

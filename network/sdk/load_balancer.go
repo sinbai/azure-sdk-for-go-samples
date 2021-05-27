@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getLoadBalancersClient() armnetwork.LoadBalancersClient {
@@ -96,15 +95,13 @@ func ListAllLoadBalancer(ctx context.Context) error {
 }
 
 // Updates a load balancer tags.
-func UpdateLoadBalancerTags(ctx context.Context, loadBalancerName string) error {
+func UpdateLoadBalancerTags(ctx context.Context, loadBalancerName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getLoadBalancersClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		loadBalancerName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

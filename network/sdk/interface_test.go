@@ -209,7 +209,10 @@ func TestInterface(t *testing.T) {
 	}
 	t.Logf("got all route tables applied to a network interface")
 
-	err = UpdateNetworkInterfaceTags(ctx, networkInterfaceName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateNetworkInterfaceTags(ctx, networkInterfaceName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for network interface: %+v", err)
 	}

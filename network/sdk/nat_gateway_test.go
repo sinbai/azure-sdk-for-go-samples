@@ -115,6 +115,15 @@ func TestNatGateWay(t *testing.T) {
 	}
 	t.Logf("listed all nat gateway")
 
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateNatGateway(ctx, natGatewayName, tagsObjectParameters)
+	if err != nil {
+		t.Fatalf("failed to update nat gateway: %+v", err)
+	}
+	t.Logf("updated nat gateway")
+
 	err = DeleteNatGatewayGroup(ctx, natGatewayName)
 	if err != nil {
 		t.Fatalf("failed to delete nat gateway: %+v", err)

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getRouteFilterClient() armnetwork.RouteFiltersClient {
@@ -92,15 +91,13 @@ func ListRouteFilterByResourceGroup(ctx context.Context) error {
 }
 
 // Updates route filter client tags.
-func UpdateRouteFilterTags(ctx context.Context, routeFilterName string) error {
+func UpdateRouteFilterTags(ctx context.Context, routeFilterName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getRouteFilterClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		routeFilterName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getLocalNetworkGatewaysClient() armnetwork.LocalNetworkGatewaysClient {
@@ -80,15 +79,13 @@ func ListLocalNetworkGateway(ctx context.Context) error {
 }
 
 // Updates local network gateway tags.
-func UpdateLocalNetworkGatewayTags(ctx context.Context, localNetworkGatewayName string) error {
+func UpdateLocalNetworkGatewayTags(ctx context.Context, localNetworkGatewayName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getLocalNetworkGatewaysClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		localNetworkGatewayName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

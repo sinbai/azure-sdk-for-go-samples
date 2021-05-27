@@ -166,7 +166,10 @@ func TestVirtualNetworkGateway(t *testing.T) {
 	}
 	t.Logf("began reset virtual network gateway")
 
-	err = UpdateVirtualNetworkGatewayTags(ctx, virtualNetworkGatewayName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateVirtualNetworkGatewayTags(ctx, virtualNetworkGatewayName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for virtual network gateway: %+v", err)
 	}

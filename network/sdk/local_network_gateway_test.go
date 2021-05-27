@@ -60,7 +60,10 @@ func TestLocalNetworkGateway(t *testing.T) {
 	}
 	t.Logf("listed local network gateway")
 
-	err = UpdateLocalNetworkGatewayTags(ctx, localNetworkGatewayName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateLocalNetworkGatewayTags(ctx, localNetworkGatewayName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for local network gateway: %+v", err)
 	}

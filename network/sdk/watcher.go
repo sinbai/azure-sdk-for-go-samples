@@ -322,15 +322,13 @@ func SetNetworkWatcherFlowLogConfiguration(ctx context.Context, networkWatcherNa
 }
 
 // Updates a network watcher tags.
-func UpdateNetworkWatcherTags(ctx context.Context, networkWatcherName string) error {
+func UpdateNetworkWatcherTags(ctx context.Context, networkWatcherName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getNetworkWatchersClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		networkWatcherName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

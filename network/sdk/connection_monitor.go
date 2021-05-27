@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getConnectionMonitorsClient() armnetwork.ConnectionMonitorsClient {
@@ -71,16 +70,14 @@ func ListConnectionMonitor(ctx context.Context, networkWatcherName string) error
 }
 
 // Update tags of the specified connection monitor.
-func UpdateConnectionMonitorTags(ctx context.Context, networkWatcherName string, connectionMonitorName string) error {
+func UpdateConnectionMonitorTags(ctx context.Context, networkWatcherName string, connectionMonitorName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getConnectionMonitorsClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		networkWatcherName,
 		connectionMonitorName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
@@ -104,15 +103,13 @@ func ListAllNetworkInterface(ctx context.Context) error {
 }
 
 // Updates network interface tags.
-func UpdateNetworkInterfaceTags(ctx context.Context, networkInterfaceName string) error {
+func UpdateNetworkInterfaceTags(ctx context.Context, networkInterfaceName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getNetworkInterfacesClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		networkInterfaceName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

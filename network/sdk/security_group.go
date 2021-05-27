@@ -100,15 +100,13 @@ func ListAllNetworkSecurityGroup(ctx context.Context) error {
 }
 
 // Updates network security group tags.
-func UpdateNetworkSecurityGroupTags(ctx context.Context, networkSecurityGroupName string) error {
+func UpdateNetworkSecurityGroupTags(ctx context.Context, networkSecurityGroupName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getNetworkSecurityGroupsClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		networkSecurityGroupName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

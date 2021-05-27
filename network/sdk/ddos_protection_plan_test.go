@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestDdosProtectionPlan(t *testing.T) {
@@ -53,7 +55,10 @@ func TestDdosProtectionPlan(t *testing.T) {
 	}
 	t.Logf("listedddos protection plan by resource group")
 
-	err = UpdateDdosProtectionPlanTags(ctx, ddosProtectionPlanName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateDdosProtectionPlanTags(ctx, ddosProtectionPlanName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for ddos protection plan: %+v", err)
 	}

@@ -250,7 +250,10 @@ func TestLoadBalancer(t *testing.T) {
 	}
 	t.Logf("listed all the load balancer in a subscription")
 
-	err = UpdateLoadBalancerTags(ctx, loadBalancerName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateLoadBalancerTags(ctx, loadBalancerName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for load balancer: %+v", err)
 	}

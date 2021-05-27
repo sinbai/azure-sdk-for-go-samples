@@ -80,15 +80,13 @@ func ListServiceEndpointPolicy(ctx context.Context) error {
 }
 
 // Updates service endpoint policy tags.
-func UpdateServiceEndpointPolicyTags(ctx context.Context, serviceEndpointPolicyName string) error {
+func UpdateServiceEndpointPolicyTags(ctx context.Context, serviceEndpointPolicyName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getServiceEndpointPoliciesClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		serviceEndpointPolicyName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

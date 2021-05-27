@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getVirtualNetworksClient() armnetwork.VirtualNetworksClient {
@@ -123,15 +122,13 @@ func ListAllVirtualNetwork(ctx context.Context) error {
 }
 
 // Updates virtual network tags.
-func UpdateVirtualNetworkTags(ctx context.Context, virtualNetworkName string) error {
+func UpdateVirtualNetworkTags(ctx context.Context, virtualNetworkName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getVirtualNetworksClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		virtualNetworkName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

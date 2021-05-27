@@ -70,7 +70,10 @@ func TestPublicIPAddress(t *testing.T) {
 	}
 	t.Logf("listed all public ip address")
 
-	err = UpdatePublicIPAddressTags(ctx, publicIpAddressName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdatePublicIPAddressTags(ctx, publicIpAddressName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for public ip address: %+v", err)
 	}

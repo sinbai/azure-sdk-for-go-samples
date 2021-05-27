@@ -94,15 +94,13 @@ func ListAllRouteTable(ctx context.Context) error {
 }
 
 // Updates route table tags.
-func UpdateRouteTableTags(ctx context.Context, routeTableName string) error {
+func UpdateRouteTableTags(ctx context.Context, routeTableName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getRouteTablesClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		routeTableName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {

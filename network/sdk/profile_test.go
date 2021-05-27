@@ -159,7 +159,10 @@ func TestNetworkProfile(t *testing.T) {
 	}
 	t.Logf("listed all network profile")
 
-	err = UpdateNetworkProfileTags(ctx, networkProfileName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateNetworkProfileTags(ctx, networkProfileName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for network profile: %+v", err)
 	}

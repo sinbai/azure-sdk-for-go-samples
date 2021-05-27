@@ -408,7 +408,10 @@ func TestNetworkWatcher(t *testing.T) {
 	}
 	t.Logf("got network watcher")
 
-	err = UpdateNetworkWatcherTags(ctx, networkWatcherName)
+	tagsObjectParameters := armnetwork.TagsObject{
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+	}
+	err = UpdateNetworkWatcherTags(ctx, networkWatcherName, tagsObjectParameters)
 	if err != nil {
 		t.Fatalf("failed to update tags for network watcher: %+v", err)
 	}

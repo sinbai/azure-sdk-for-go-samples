@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getPublicIPPrefixClient() armnetwork.PublicIPPrefixesClient {
@@ -97,15 +96,13 @@ func ListAllPublicIPPrefix(ctx context.Context) error {
 }
 
 // Updates public IP prefix tags.
-func UpdatePublicIPPrefixTags(ctx context.Context, prefixName string) error {
+func UpdatePublicIPPrefixTags(ctx context.Context, prefixName string, tagsObjectParameters armnetwork.TagsObject) error {
 	client := getPublicIPPrefixClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
 		prefixName,
-		armnetwork.TagsObject{
-			Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
-		},
+		tagsObjectParameters,
 		nil,
 	)
 	if err != nil {
