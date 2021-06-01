@@ -69,7 +69,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 	subnetParameters := armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disabled"),
 		},
 	}
 	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, subnetParameters)

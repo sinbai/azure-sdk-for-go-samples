@@ -21,7 +21,6 @@ import (
 func TestInterface(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
 
 	networkInterfaceName := config.AppendRandomSuffix("networkinterface")
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
@@ -33,7 +32,6 @@ func TestInterface(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.DefaultLocation())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {

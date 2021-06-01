@@ -56,7 +56,7 @@ func TestPrivateEndpoint(t *testing.T) {
 	subnetParameters := armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disabled"),
 		},
 	}
 	subnet1ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName1, subnetParameters)
@@ -66,8 +66,8 @@ func TestPrivateEndpoint(t *testing.T) {
 
 	subnetParameters = armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
-			AddressPrefix:                     to.StringPtr("10.0.0.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disable"),
+			AddressPrefix:                  to.StringPtr("10.0.0.0/24"),
+			PrivateEndpointNetworkPolicies: to.StringPtr("Disabled"),
 		},
 	}
 	subnet2ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName2, subnetParameters)
@@ -165,7 +165,7 @@ func TestPrivateEndpoint(t *testing.T) {
 		},
 	}
 
-	err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointParameters)
+	_, err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointParameters)
 	if err != nil {
 		t.Fatalf("failed to create private endpoint: % +v", err)
 	}

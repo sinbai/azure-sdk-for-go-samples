@@ -26,8 +26,9 @@ func getPrivateEndpointsClient() armnetwork.PrivateEndpointsClient {
 }
 
 // Create PrivateEndpoints
-func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, privateEndpointParameters armnetwork.PrivateEndpoint) error {
+func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, privateEndpointParameters armnetwork.PrivateEndpoint) (string, error) {
 	client := getPrivateEndpointsClient()
+
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
@@ -37,14 +38,17 @@ func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, priv
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	if resp.PrivateEndpoint.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.PrivateEndpoint.ID, nil
 }
 
 // Gets the specified private endpoint in a specified resource group.

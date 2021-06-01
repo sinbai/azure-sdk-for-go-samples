@@ -21,7 +21,6 @@ import (
 func TestFlowLog(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
 
 	flowLogName := config.AppendRandomSuffix("flowlog")
 	networkWatcherName := config.AppendRandomSuffix("networkwatcher")
@@ -31,7 +30,6 @@ func TestFlowLog(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.Location())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {

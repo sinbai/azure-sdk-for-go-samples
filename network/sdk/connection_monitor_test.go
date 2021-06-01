@@ -21,7 +21,6 @@ import (
 func TestConnectionMonitor(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
 
 	connectionMonitorName := config.AppendRandomSuffix("connectionmonitor")
 	networkWatcherName := config.AppendRandomSuffix("networkwatcher")
@@ -34,7 +33,6 @@ func TestConnectionMonitor(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.Location())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {

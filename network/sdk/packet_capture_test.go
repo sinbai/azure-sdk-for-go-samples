@@ -23,7 +23,6 @@ import (
 func TestPacketCapture(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	config.SetLocation("eastus")
 
 	packetCaptureName := config.AppendRandomSuffix("packetcapture")
 	networkWatcherName := config.AppendRandomSuffix("networkwatcher")
@@ -35,10 +34,9 @@ func TestPacketCapture(t *testing.T) {
 	subnetName := config.AppendRandomSuffix("subnet")
 	virtualMachineExtensionName := config.AppendRandomSuffix("virtualmachineextension")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
-	defer config.SetLocation(config.Location())
 
 	_, err := resources.CreateGroup(ctx, groupName)
 	if err != nil {
