@@ -16,14 +16,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-func TestVirtualHub(t *testing.T) {
+func TestVpnSite(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
+	vpnSiteName := config.AppendRandomSuffix("vpnsite")
 	virtualWanName := config.AppendRandomSuffix("virtualwan")
-	virtualHubName := config.AppendRandomSuffix("virtualhub")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
@@ -47,62 +47,65 @@ func TestVirtualHub(t *testing.T) {
 		t.Fatalf("failed to create virtual wan: % +v", err)
 	}
 
-	virtualHubParameters := armnetwork.VirtualHub{
+	vpnSiteParameters := armnetwork.VPNSite{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
 		},
-		Properties: &armnetwork.VirtualHubProperties{
-			AddressPrefix: to.StringPtr("10.168.0.0/24"),
-			SKU:           to.StringPtr("Basic"),
+		Properties: &armnetwork.VPNSiteProperties{
+			AddressSpace: &armnetwork.AddressSpace{
+				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+			},
+			IsSecuritySite: to.BoolPtr(false),
+			VPNSiteLinks: &[]*armnetwork.VPNSiteLink{{
+				Name: to.StringPtr("vpnSiteLink1"),
+				Properties: &armnetwork.VPNSiteLinkProperties{
+					IPAddress: to.StringPtr("50.50.50.56"),
+					LinkProperties: &armnetwork.VPNLinkProviderProperties{
+						LinkProviderName: to.StringPtr("vendor1"),
+						LinkSpeedInMbps:  to.Int32Ptr(0),
+					},
+					BgpProperties: &armnetwork.VPNLinkBgpSettings{
+						Asn:               to.Int64Ptr(1234),
+						BgpPeeringAddress: to.StringPtr("192.168.0.0"),
+					},
+				},
+			}},
 			VirtualWan: &armnetwork.SubResource{
 				ID: &virtualWanId,
 			},
 		},
 	}
-
-	_, err = CreateVirtualHub(ctx, virtualHubName, virtualWanId, virtualHubParameters)
+	_, err = CreateVpnSite(ctx, vpnSiteName, vpnSiteParameters)
 	if err != nil {
-		t.Fatalf("failed to create virtual hub: % +v", err)
+		t.Fatalf("failed to create vpn site: % +v", err)
 	}
-	t.Logf("created virtual hub")
+	t.Logf("created vpn site")
 
-	err = GetVirtualHub(ctx, virtualHubName)
+	err = ListVpnSite(ctx)
 	if err != nil {
-		t.Fatalf("failed to get virtual hub: %+v", err)
+		t.Fatalf("failed to list vpn site: %+v", err)
 	}
-	t.Logf("got virtual hub")
+	t.Logf("listed vpn site")
 
-	err = ListVirtualHub(ctx)
+	err = ListVpnSiteByResourceGroup(ctx)
 	if err != nil {
-		t.Fatalf("failed to list virtual hub: %+v", err)
+		t.Fatalf("failed to listvpn site by resource group: %+v", err)
 	}
-	t.Logf("listed virtual hub")
-
-	err = ListVirtualHubByResourceGroup(ctx)
-	if err != nil {
-		t.Fatalf("failed to list virtual hub by resource group: %+v", err)
-	}
-	t.Logf("listed virtual hub by resource group")
+	t.Logf("listedvpn site by resource group")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"key1": to.StringPtr("value1"), "key2": to.StringPtr("value2")},
+		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
-	err = UpdateVirtualHubTags(ctx, virtualHubName, tagsObjectParameters)
+	err = UpdateVpnSiteTags(ctx, vpnSiteName, tagsObjectParameters)
 	if err != nil {
-		t.Fatalf("failed to update tags for virtual hub: %+v", err)
+		t.Fatalf("failed to update tags for vpn site: %+v", err)
 	}
-	t.Logf("updated virtual hub tags")
+	t.Logf("updated vpn site tags")
 
-	// Error Message: The specified operation 'DeleteVirtualHub' is not supported.
-	// Deletion is not supported when RoutingStatus on Hub is 'Provisioning'. Retry when state is not Provisioning
-	// waiting for routing status to be provisioned and deleting
-	time.Sleep(700 * time.Second)
-
-	err = DeleteVirtualHub(ctx, virtualHubName)
+	err = DeleteVpnSite(ctx, vpnSiteName)
 	if err != nil {
-		t.Fatalf("failed to delete virtual hub: %+v", err)
+		t.Fatalf("failed to delete vpn site: %+v", err)
 	}
-	t.Logf("deleted virtual hub")
-
+	t.Logf("deleted vpn site")
 }

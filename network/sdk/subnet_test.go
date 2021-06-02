@@ -47,7 +47,6 @@ func TestSubnet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create virtual network: % +v", err)
 	}
-	t.Logf("created virtual network")
 
 	subnetParameters := armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
@@ -58,4 +57,5 @@ func TestSubnet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create sub net: % +v", err)
 	}
+	t.Logf("created subnet")
 }

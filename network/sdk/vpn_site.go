@@ -16,23 +16,23 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
-func getVirtualWansClient() armnetwork.VirtualWansClient {
+func getVpnSitesClient() armnetwork.VPNSitesClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		log.Fatalf("failed to obtain a credential: %v", err)
 	}
-	client := armnetwork.NewVirtualWansClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
+	client := armnetwork.NewVPNSitesClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
 	return *client
 }
 
-// Create VirtualWans
-func CreateVirtualWan(ctx context.Context, virtualWanName string, virtualWANParameters armnetwork.VirtualWAN) (string, error) {
-	client := getVirtualWansClient()
+// Creates a VpnSite resource if it doesn't exist else updates the existing VpnSite.
+func CreateVpnSite(ctx context.Context, vpnSiteName string, vpnSiteParameters armnetwork.VPNSite) (string, error) {
+	client := getVpnSitesClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
-		virtualWanName,
-		virtualWANParameters,
+		vpnSiteName,
+		vpnSiteParameters,
 		nil,
 	)
 
@@ -44,26 +44,15 @@ func CreateVirtualWan(ctx context.Context, virtualWanName string, virtualWANPara
 	if err != nil {
 		return "", err
 	}
-
-	if resp.VirtualWAN.ID == nil {
+	if resp.VPNSite.ID == nil {
 		return poller.RawResponse.Request.URL.Path, nil
 	}
-	return *resp.VirtualWAN.ID, nil
+	return *resp.VPNSite.ID, nil
 }
 
-// Gets the specified virtual wan in a specified resource group.
-func GetVirtualWan(ctx context.Context, virtualWanName string) error {
-	client := getVirtualWansClient()
-	_, err := client.Get(ctx, config.GroupName(), virtualWanName, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Gets all the virtual wan in a subscription.
-func ListVirtualWan(ctx context.Context) error {
-	client := getVirtualWansClient()
+// Lists all the VpnSites in a subscription.
+func ListVpnSite(ctx context.Context) error {
+	client := getVpnSitesClient()
 	pager := client.List(nil)
 
 	for pager.NextPage(ctx) {
@@ -78,13 +67,13 @@ func ListVirtualWan(ctx context.Context) error {
 	return nil
 }
 
-// Updates virtual wan tags.
-func UpdateVirtualWanTags(ctx context.Context, virtualWanName string, tagsObjectParameters armnetwork.TagsObject) error {
-	client := getVirtualWansClient()
+// Updates vpn site tags.
+func UpdateVpnSiteTags(ctx context.Context, vpnSiteName string, tagsObjectParameters armnetwork.TagsObject) error {
+	client := getVpnSitesClient()
 	_, err := client.UpdateTags(
 		ctx,
 		config.GroupName(),
-		virtualWanName,
+		vpnSiteName,
 		tagsObjectParameters,
 		nil,
 	)
@@ -94,10 +83,10 @@ func UpdateVirtualWanTags(ctx context.Context, virtualWanName string, tagsObject
 	return nil
 }
 
-// Deletes the specified virtual wan.
-func DeleteVirtualWan(ctx context.Context, virtualWanName string) error {
-	client := getVirtualWansClient()
-	resp, err := client.BeginDelete(ctx, config.GroupName(), virtualWanName, nil)
+// Deletes a VpnSite
+func DeleteVpnSite(ctx context.Context, vpnSiteName string) error {
+	client := getVpnSitesClient()
+	resp, err := client.BeginDelete(ctx, config.GroupName(), vpnSiteName, nil)
 	if err != nil {
 		return err
 	}
@@ -108,9 +97,9 @@ func DeleteVirtualWan(ctx context.Context, virtualWanName string) error {
 	return nil
 }
 
-// Gets all virtual wan in a resource group.
-func ListVirtualWanByResourceGroup(ctx context.Context) error {
-	client := getVirtualWansClient()
+// Lists all the vpnSites in a resource group.
+func ListVpnSiteByResourceGroup(ctx context.Context) error {
+	client := getVpnSitesClient()
 	pager := client.ListByResourceGroup(config.GroupName(), nil)
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {

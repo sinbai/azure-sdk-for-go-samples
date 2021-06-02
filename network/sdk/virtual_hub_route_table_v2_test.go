@@ -16,14 +16,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
-func TestVirtualHub(t *testing.T) {
+func TestVirtualHubRouteTableV2(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
 
-	virtualWanName := config.AppendRandomSuffix("virtualwan")
 	virtualHubName := config.AppendRandomSuffix("virtualhub")
+	virtualWanName := config.AppendRandomSuffix("virtualwan")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
@@ -60,49 +60,14 @@ func TestVirtualHub(t *testing.T) {
 			},
 		},
 	}
-
 	_, err = CreateVirtualHub(ctx, virtualHubName, virtualWanId, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
-	t.Logf("created virtual hub")
 
-	err = GetVirtualHub(ctx, virtualHubName)
+	err = ListVirtualHubRouteTableV2(ctx, virtualHubName)
 	if err != nil {
-		t.Fatalf("failed to get virtual hub: %+v", err)
+		t.Fatalf("failed to list virtual hub route table v2: %+v", err)
 	}
-	t.Logf("got virtual hub")
-
-	err = ListVirtualHub(ctx)
-	if err != nil {
-		t.Fatalf("failed to list virtual hub: %+v", err)
-	}
-	t.Logf("listed virtual hub")
-
-	err = ListVirtualHubByResourceGroup(ctx)
-	if err != nil {
-		t.Fatalf("failed to list virtual hub by resource group: %+v", err)
-	}
-	t.Logf("listed virtual hub by resource group")
-
-	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"key1": to.StringPtr("value1"), "key2": to.StringPtr("value2")},
-	}
-	err = UpdateVirtualHubTags(ctx, virtualHubName, tagsObjectParameters)
-	if err != nil {
-		t.Fatalf("failed to update tags for virtual hub: %+v", err)
-	}
-	t.Logf("updated virtual hub tags")
-
-	// Error Message: The specified operation 'DeleteVirtualHub' is not supported.
-	// Deletion is not supported when RoutingStatus on Hub is 'Provisioning'. Retry when state is not Provisioning
-	// waiting for routing status to be provisioned and deleting
-	time.Sleep(700 * time.Second)
-
-	err = DeleteVirtualHub(ctx, virtualHubName)
-	if err != nil {
-		t.Fatalf("failed to delete virtual hub: %+v", err)
-	}
-	t.Logf("deleted virtual hub")
-
+	t.Logf("listed virtual hub route table v2")
 }
