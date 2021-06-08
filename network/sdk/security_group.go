@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func getNetworkSecurityGroupsClient() armnetwork.NetworkSecurityGroupsClient {
@@ -27,17 +26,13 @@ func getNetworkSecurityGroupsClient() armnetwork.NetworkSecurityGroupsClient {
 }
 
 // Create NetworkSecurityGroups
-func CreateNetworkSecurityGroup(ctx context.Context, networkSecurityGroupName string) (string, error) {
+func CreateNetworkSecurityGroup(ctx context.Context, networkSecurityGroupName string, networkSecurityGroupParameters armnetwork.NetworkSecurityGroup) (string, error) {
 	client := getNetworkSecurityGroupsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
 		config.GroupName(),
 		networkSecurityGroupName,
-		armnetwork.NetworkSecurityGroup{
-			Resource: armnetwork.Resource{
-				Location: to.StringPtr(config.Location()),
-			},
-		},
+		networkSecurityGroupParameters,
 		nil,
 	)
 

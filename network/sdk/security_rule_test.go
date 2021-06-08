@@ -32,7 +32,12 @@ func TestSecurityRule(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	_, err = CreateNetworkSecurityGroup(ctx, networkSecurityGroupName)
+	networkSecurityGroupParameters := armnetwork.NetworkSecurityGroup{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+	}
+	_, err = CreateNetworkSecurityGroup(ctx, networkSecurityGroupName, networkSecurityGroupParameters)
 	if err != nil {
 		t.Fatalf("failed to create network security group: % +v", err)
 	}

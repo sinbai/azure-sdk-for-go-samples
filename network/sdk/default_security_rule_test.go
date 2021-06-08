@@ -12,6 +12,8 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
 func TestDefaultSecurityRule(t *testing.T) {
@@ -30,7 +32,12 @@ func TestDefaultSecurityRule(t *testing.T) {
 		t.Fatalf("failed to create group: %+v", err)
 	}
 
-	_, err = CreateNetworkSecurityGroup(ctx, networkSecurityGroupName)
+	networkSecurityGroupParameters := armnetwork.NetworkSecurityGroup{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+	}
+	_, err = CreateNetworkSecurityGroup(ctx, networkSecurityGroupName, networkSecurityGroupParameters)
 	if err != nil {
 		t.Fatalf("failed to create network security group: % +v", err)
 	}

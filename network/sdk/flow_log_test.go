@@ -41,7 +41,12 @@ func TestFlowLog(t *testing.T) {
 		t.Fatalf("failed to create network watcher: % +v", err)
 	}
 
-	networkSecurityGroupId, err := CreateNetworkSecurityGroup(ctx, networkSecurityGroupName)
+	networkSecurityGroupParameters := armnetwork.NetworkSecurityGroup{
+		Resource: armnetwork.Resource{
+			Location: to.StringPtr(config.Location()),
+		},
+	}
+	networkSecurityGroupId, err := CreateNetworkSecurityGroup(ctx, networkSecurityGroupName, networkSecurityGroupParameters)
 	if err != nil {
 		t.Fatalf("failed to create network security group: % +v", err)
 	}
