@@ -19,6 +19,7 @@ import (
 func TestVirtualWan(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
+
 	virtualWanName := config.AppendRandomSuffix("virtualwan")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)

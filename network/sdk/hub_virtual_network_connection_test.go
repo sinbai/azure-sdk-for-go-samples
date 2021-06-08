@@ -60,7 +60,7 @@ func TestHubVirtualNetworkConnection(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualHub(ctx, virtualHubName, virtualWanId, virtualHubParameters)
+	_, err = CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}

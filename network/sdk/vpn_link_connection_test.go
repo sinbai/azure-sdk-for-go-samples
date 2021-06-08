@@ -99,7 +99,7 @@ func TestVpnLinkConnection(t *testing.T) {
 		},
 	}
 
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualWanId, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -116,8 +116,7 @@ func TestVpnLinkConnection(t *testing.T) {
 			},
 			Connections: &[]*armnetwork.VPNConnection{
 				{
-					SubResource: armnetwork.SubResource{},
-					Name:        &vpnConnectionName,
+					Name: &vpnConnectionName,
 					Properties: &armnetwork.VPNConnectionProperties{
 						RemoteVPNSite: &armnetwork.SubResource{
 							ID: &vpnSiteId,

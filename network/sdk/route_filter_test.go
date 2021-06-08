@@ -36,8 +36,6 @@ func TestRouteFilter(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
 		},
-		Properties: &armnetwork.RouteFilterPropertiesFormat{
-			Rules: &[]*armnetwork.RouteFilterRule{}},
 	}
 	err = CreateRouteFilter(ctx, routeFilterName, routeFilterParameters)
 	if err != nil {

@@ -36,7 +36,6 @@ func TestWebApplicationFirewallPolicy(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.WebApplicationFirewallPolicyPropertiesFormat{
-			CustomRules: &[]*armnetwork.WebApplicationFirewallCustomRule{},
 			ManagedRules: &armnetwork.ManagedRulesDefinition{
 				ManagedRuleSets: &[]*armnetwork.ManagedRuleSet{
 					{

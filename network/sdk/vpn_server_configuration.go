@@ -8,6 +8,7 @@ package network
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
@@ -15,7 +16,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
-func getVPNServerConfigurationsClient() armnetwork.VPNServerConfigurationsClient {
+func getVpnServerConfigurationsClient() armnetwork.VPNServerConfigurationsClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		log.Fatalf("failed to obtain a credential: %v", err)
@@ -24,11 +25,93 @@ func getVPNServerConfigurationsClient() armnetwork.VPNServerConfigurationsClient
 	return *client
 }
 
-// Lists all the VpnServerConfigurations in a subscription.
+// Creates a VpnServerConfiguration resource if it doesn't exist else updates the existing VpnServerConfiguration.
+func CreateVpnServerConfiguration(ctx context.Context, vpnServerConfigurationName string, vpnServerConfigurationParameters armnetwork.VPNServerConfiguration) (string, error) {
+	client := getVpnServerConfigurationsClient()
+	poller, err := client.BeginCreateOrUpdate(
+		ctx,
+		config.GroupName(),
+		vpnServerConfigurationName,
+		vpnServerConfigurationParameters,
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.VPNServerConfiguration.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.VPNServerConfiguration.ID, nil
+}
+
+// Gets the specified vpn server configuration in a specified resource group.
+func GetVpnServerConfiguration(ctx context.Context, vpnServerConfigurationName string) error {
+	client := getVpnServerConfigurationsClient()
+	_, err := client.Get(ctx, config.GroupName(), vpnServerConfigurationName, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Gets all the vpn server configuration in a subscription.
 func ListVpnServerConfiguration(ctx context.Context) error {
-	client := getVPNServerConfigurationsClient()
+	client := getVpnServerConfigurationsClient()
 	pager := client.List(nil)
 
+	for pager.NextPage(ctx) {
+		if pager.Err() != nil {
+			return pager.Err()
+		}
+	}
+
+	if pager.Err() != nil {
+		return pager.Err()
+	}
+	return nil
+}
+
+// Updates vpn server configuration tags.
+func UpdateVpnServerConfigurationTags(ctx context.Context, vpnServerConfigurationName string, vpnServerConfigurationParameters armnetwork.TagsObject) error {
+	client := getVpnServerConfigurationsClient()
+	_, err := client.UpdateTags(
+		ctx,
+		config.GroupName(),
+		vpnServerConfigurationName,
+		vpnServerConfigurationParameters,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Deletes the specified vpn server configuration.
+func DeleteVpnServerConfiguration(ctx context.Context, vpnServerConfigurationName string) error {
+	client := getVpnServerConfigurationsClient()
+	resp, err := client.BeginDelete(ctx, config.GroupName(), vpnServerConfigurationName, nil)
+	if err != nil {
+		return err
+	}
+	_, err = resp.PollUntilDone(ctx, 30*time.Second)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Gets all vpn server configuration in a resource group.
+func ListVpnServerConfigurationByResourceGroup(ctx context.Context) error {
+	client := getVpnServerConfigurationsClient()
+	pager := client.ListByResourceGroup(config.GroupName(), nil)
 	for pager.NextPage(ctx) {
 		if pager.Err() != nil {
 			return pager.Err()

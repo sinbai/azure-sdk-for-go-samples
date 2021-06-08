@@ -26,7 +26,7 @@ func getFirewallsClient() armnetwork.AzureFirewallsClient {
 }
 
 // Create Firewalls
-func CreateFirewall(ctx context.Context, firewallName string, azureFirewallParameters armnetwork.AzureFirewall) error {
+func CreateFirewall(ctx context.Context, firewallName string, azureFirewallParameters armnetwork.AzureFirewall) (string, error) {
 	client := getFirewallsClient()
 	poller, err := client.BeginCreateOrUpdate(
 		ctx,
@@ -37,14 +37,18 @@ func CreateFirewall(ctx context.Context, firewallName string, azureFirewallParam
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 120*time.Second)
+	resp, err := poller.PollUntilDone(ctx, 120*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	if resp.AzureFirewall.ID == nil {
+		return poller.RawResponse.Request.URL.Path, nil
+	}
+	return *resp.AzureFirewall.ID, nil
 }
 
 // Gets the specified firewall in a specified resource group.

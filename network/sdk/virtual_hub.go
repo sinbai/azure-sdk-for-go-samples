@@ -26,7 +26,7 @@ func getVirtualHubsClient() armnetwork.VirtualHubsClient {
 }
 
 // Create VirtualHubs
-func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualWanID string, virtualHubParameters armnetwork.VirtualHub) (string, error) {
+func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubParameters armnetwork.VirtualHub) (string, error) {
 	client := getVirtualHubsClient()
 
 	poller, err := client.BeginCreateOrUpdate(

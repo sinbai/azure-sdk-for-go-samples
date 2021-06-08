@@ -38,9 +38,6 @@ func TestSecurityRule(t *testing.T) {
 	}
 
 	securityRuleParameters := armnetwork.SecurityRule{
-		SubResource: armnetwork.SubResource{},
-		Etag:        new(string),
-		Name:        new(string),
 		Properties: &armnetwork.SecurityRulePropertiesFormat{
 			Access:                   armnetwork.SecurityRuleAccessDeny.ToPtr(),
 			DestinationAddressPrefix: to.StringPtr("11.0.0.0/8"),

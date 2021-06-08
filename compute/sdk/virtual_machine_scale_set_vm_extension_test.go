@@ -160,7 +160,6 @@ func TestVirtualMachineScaleSetVmExtension(t *testing.T) {
 		},
 		Properties: &armcompute.VirtualMachineExtensionProperties{
 			AutoUpgradeMinorVersion: to.BoolPtr(false),
-			InstanceView:            &armcompute.VirtualMachineExtensionInstanceView{},
 			Publisher:               to.StringPtr("Microsoft.Azure.NetworkWatcher"),
 			Type:                    to.StringPtr("NetworkWatcherAgentWindows"),
 			TypeHandlerVersion:      to.StringPtr("1.4"),

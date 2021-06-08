@@ -173,7 +173,6 @@ func TestPacketCapture(t *testing.T) {
 		Resource: armcompute.Resource{Location: to.StringPtr(config.Location())},
 		Properties: &armcompute.VirtualMachineExtensionProperties{
 			AutoUpgradeMinorVersion: to.BoolPtr(true),
-			InstanceView:            &armcompute.VirtualMachineExtensionInstanceView{},
 			Publisher:               to.StringPtr("Microsoft.Azure.NetworkWatcher"),
 			Type:                    to.StringPtr("NetworkWatcherAgentWindows"),
 			TypeHandlerVersion:      to.StringPtr("1.4"),

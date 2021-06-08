@@ -174,12 +174,13 @@ func TestVirtualMachine(t *testing.T) {
 	}
 	t.Logf("converted virtual machine disks from blob-based to managed disks")
 
+	// After synced with service team for ReimageVirtualMachine, currently they don’t support single VM. So we don’t need to add test case against it now.
 	// cannot use it successfully, error: "The Reimage and OSUpgrade Virtual Machine actions require that the virtual machine has Automatic OS Upgrades enabled.
-	err = ReimageVirtualMachine(ctx, virtualMachineName)
-	if err != nil {
-		t.Fatalf("failed to reimage the virtual machine: %+v", err)
-	}
-	t.Logf("reimaged the virtual machine")
+	// err = ReimageVirtualMachine(ctx, virtualMachineName)
+	// if err != nil {
+	// 	t.Fatalf("failed to reimage the virtual machine: %+v", err)
+	// }
+	// t.Logf("reimaged the virtual machine")
 
 	err = InstanceVirtualMachineView(ctx, virtualMachineName)
 	if err != nil {

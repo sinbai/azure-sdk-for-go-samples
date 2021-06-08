@@ -62,7 +62,7 @@ func TestFirewall(t *testing.T) {
 			},
 		},
 	}
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualWanID, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -101,14 +101,12 @@ func TestFirewall(t *testing.T) {
 			},
 			HubIPAddresses: &armnetwork.HubIPAddresses{
 				PublicIPs: &armnetwork.HubPublicIPAddresses{
-					Addresses: &[]*armnetwork.AzureFirewallPublicIPAddress{},
-					Count:     to.Int32Ptr(1),
+					Count: to.Int32Ptr(1),
 				},
 			},
 		},
-		Zones: &[]*string{},
 	}
-	err = CreateFirewall(ctx, firewallName, azureFirewallParameters)
+	_, err = CreateFirewall(ctx, firewallName, azureFirewallParameters)
 	if err != nil {
 		t.Fatalf("failed to create firewall: % +v", err)
 	}
