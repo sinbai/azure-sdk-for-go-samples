@@ -140,12 +140,13 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 	}
 	t.Logf("got the status of a virtual machine from a VM scale set by instanceid: %+v", instanceId)
 
+	// Do not test from feedback
 	// cannot use it successfully,error:"Operation 'performMaintenance' is not allowed since the Subscription of this VM is not eligible.
-	err = VirtualMachineScaleSetVmPerformMaintenance(ctx, virtualMachineScaleSetName, strconv.Itoa(instanceId))
-	if err != nil {
-		t.Fatalf("failed to perform maintenance on a virtual machines in a VM scale set: % +v", err)
-	}
-	t.Logf("performed maintenance on a virtual machines in a VM scale set")
+	// err = VirtualMachineScaleSetVmPerformMaintenance(ctx, virtualMachineScaleSetName, strconv.Itoa(instanceId))
+	// if err != nil {
+	// 	t.Fatalf("failed to perform maintenance on a virtual machines in a VM scale set: % +v", err)
+	// }
+	// t.Logf("performed maintenance on a virtual machines in a VM scale set")
 
 	err = RedeployVirtualMachineScaleSetVm(ctx, virtualMachineScaleSetName, strconv.Itoa(instanceId))
 	if err != nil {

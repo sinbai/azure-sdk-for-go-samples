@@ -270,12 +270,13 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 	}
 	t.Logf("reimaged all the disks ( including data disks ) in the virtual machines in a VM scale set")
 
+	// Do not test from feedback
 	//  "Operation 'performMaintenance' is not allowed on VM since the Subscription of this VM is not eligible."
-	err = VirtualMachineScaleSetPerformMaintenance(ctx, virtualMachineScaleSetName)
-	if err != nil {
-		t.Fatalf("failed to perform maintenance on one or more virtual machines in a VM scale set: % +v", err)
-	}
-	t.Logf("performed maintenance on one or more virtual machines in a VM scale set")
+	// err = VirtualMachineScaleSetPerformMaintenance(ctx, virtualMachineScaleSetName)
+	// if err != nil {
+	// 	t.Fatalf("failed to perform maintenance on one or more virtual machines in a VM scale set: % +v", err)
+	// }
+	// t.Logf("performed maintenance on one or more virtual machines in a VM scale set")
 
 	instanceId := 0
 	for i := 0; i < 4; i++ {

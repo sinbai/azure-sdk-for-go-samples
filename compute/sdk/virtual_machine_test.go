@@ -160,12 +160,13 @@ func TestVirtualMachine(t *testing.T) {
 	}
 	t.Logf("simulated the eviction of spot virtual machine")
 
+	// Do not test from feedback
 	// cannot use it successfully,error:"Operation 'performMaintenance' is not allowed since the Subscription of this VM is not eligible.
-	err = PerformMaintenanceVirtualMachine(ctx, virtualMachineName)
-	if err != nil {
-		t.Fatalf("failed to perform maintenance on a virtual machine: %+v", err)
-	}
-	t.Logf("performed maintenance on a virtual machine")
+	// err = PerformMaintenanceVirtualMachine(ctx, virtualMachineName)
+	// if err != nil {
+	// 	t.Fatalf("failed to perform maintenance on a virtual machine: %+v", err)
+	// }
+	// t.Logf("performed maintenance on a virtual machine")
 
 	// cannot use it successfully, error:(OperationNotAllowed) VM is already using managed disks
 	err = ConvertVirtualMachineToManagedDisk(ctx, virtualMachineName)
