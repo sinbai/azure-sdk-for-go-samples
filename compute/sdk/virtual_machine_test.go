@@ -13,9 +13,12 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	network "github.com/Azure-Samples/azure-sdk-for-go-samples/network/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	storage "github.com/Azure-Samples/azure-sdk-for-go-samples/storage/sdk"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
+	"github.com/marstr/randname"
 )
 
 func TestVirtualMachine(t *testing.T) {
@@ -28,6 +31,9 @@ func TestVirtualMachine(t *testing.T) {
 	subnetName := config.AppendRandomSuffix("subnet")
 	virtualMachineName := config.AppendRandomSuffix("vm")
 	ipConfigurationName := config.AppendRandomSuffix("ipconfiguration")
+	storageAccountName := randname.Prefixed{Prefix: "storageaccount", Acceptable: randname.LowercaseAlphabet, Len: 5}.Generate()
+	containerName := randname.Prefixed{Prefix: "blobcontainer", Acceptable: randname.LowercaseAlphabet, Len: 5}.Generate()
+	diskName := config.AppendRandomSuffix("disk")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 	defer cancel()
@@ -99,6 +105,24 @@ func TestVirtualMachine(t *testing.T) {
 		t.Fatalf("failed to create network interface: % +v", err)
 	}
 
+	storageAccountCreateParameters := armstorage.StorageAccountCreateParameters{
+		Kind:     armstorage.KindStorage.ToPtr(),
+		Location: to.StringPtr(config.Location()),
+		SKU: &armstorage.SKU{
+			Name: armstorage.SKUNameStandardLRS.ToPtr(),
+		},
+	}
+	_, err = storage.CreateStorageAccount(ctx, storageAccountName, storageAccountCreateParameters)
+	if err != nil {
+		t.Fatalf("failed to create storage account: % +v", err)
+	}
+
+	blobContainerParameters := armstorage.BlobContainer{}
+	_, err = storage.CreateBlobContainer(ctx, storageAccountName, containerName, blobContainerParameters)
+	if err != nil {
+		t.Fatalf("failed to create blob container: % +v", err)
+	}
+
 	virtualMachineProbably := armcompute.VirtualMachine{
 		Resource: armcompute.Resource{
 			Location: to.StringPtr(config.Location()),
@@ -135,9 +159,13 @@ func TestVirtualMachine(t *testing.T) {
 					Version:   to.StringPtr("latest"),
 				},
 				OSDisk: &armcompute.OSDisk{
+					OSType:       armcompute.OperatingSystemTypesWindows.ToPtr(),
 					Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
 					CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
 					Name:         to.StringPtr("myVMosdisk"),
+					Vhd: &armcompute.VirtualHardDisk{
+						URI: to.StringPtr("http://" + storageAccountName + ".blob.core.windows.net/" + containerName + "/" + diskName + ".vhd"),
+					},
 				},
 			},
 			EvictionPolicy: armcompute.VirtualMachineEvictionPolicyTypesDeallocate.ToPtr(),
@@ -154,12 +182,6 @@ func TestVirtualMachine(t *testing.T) {
 	}
 	t.Logf("created virtual machine")
 
-	err = SimulateEvictionVirtualMachine(ctx, virtualMachineName)
-	if err != nil {
-		t.Fatalf("failed to simulate the eviction of spot virtual machine: %+v", err)
-	}
-	t.Logf("simulated the eviction of spot virtual machine")
-
 	// Do not test from feedback
 	// cannot use it successfully,error:"Operation 'performMaintenance' is not allowed since the Subscription of this VM is not eligible.
 	// err = PerformMaintenanceVirtualMachine(ctx, virtualMachineName)
@@ -167,13 +189,6 @@ func TestVirtualMachine(t *testing.T) {
 	// 	t.Fatalf("failed to perform maintenance on a virtual machine: %+v", err)
 	// }
 	// t.Logf("performed maintenance on a virtual machine")
-
-	// cannot use it successfully, error:(OperationNotAllowed) VM is already using managed disks
-	err = ConvertVirtualMachineToManagedDisk(ctx, virtualMachineName)
-	if err != nil {
-		t.Fatalf("failed to convert virtual machine disks from blob-based to managed disks: %+v", err)
-	}
-	t.Logf("converted virtual machine disks from blob-based to managed disks")
 
 	// After synced with service team for ReimageVirtualMachine, currently they don’t support single VM. So we don’t need to add test case against it now.
 	// cannot use it successfully, error: "The Reimage and OSUpgrade Virtual Machine actions require that the virtual machine has Automatic OS Upgrades enabled.
@@ -283,17 +298,35 @@ func TestVirtualMachine(t *testing.T) {
 	}
 	t.Logf("updated virtual machine tags")
 
-	err = GenerializeVirtualMachine(ctx, virtualMachineName)
+	err = DeallocateVirtualMachine(ctx, virtualMachineName)
 	if err != nil {
-		t.Fatalf("failed to generialize virtual machine: %+v", err)
+		t.Fatalf("failed to deallocate virtual machine: %+v", err)
 	}
-	t.Logf("generialized virtual machine")
+	t.Logf("deallocated virtual machine")
+
+	err = ConvertVirtualMachineToManagedDisk(ctx, virtualMachineName)
+	if err != nil {
+		t.Fatalf("failed to convert virtual machine disks from blob-based to managed disks: %+v", err)
+	}
+	t.Logf("converted virtual machine disks from blob-based to managed disks")
+
+	err = SimulateEvictionVirtualMachine(ctx, virtualMachineName)
+	if err != nil {
+		t.Fatalf("failed to simulate the eviction of spot virtual machine: %+v", err)
+	}
+	t.Logf("simulated the eviction of spot virtual machine")
 
 	err = DeallocateVirtualMachine(ctx, virtualMachineName)
 	if err != nil {
 		t.Fatalf("failed to deallocate virtual machine: %+v", err)
 	}
 	t.Logf("deallocated virtual machine")
+
+	err = GenerializeVirtualMachine(ctx, virtualMachineName)
+	if err != nil {
+		t.Fatalf("failed to generialize virtual machine: %+v", err)
+	}
+	t.Logf("generialized virtual machine")
 
 	err = DeleteVirtualMachine(ctx, virtualMachineName)
 	if err != nil {

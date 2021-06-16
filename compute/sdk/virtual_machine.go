@@ -256,13 +256,18 @@ func RedeployVirtualMachine(ctx context.Context, virtualMachineName string) erro
 // The operation to update a virtual machine.
 func UpdateVirtualMachineTags(ctx context.Context, virtualMachineName string, virtualMachineUpdateParameters armcompute.VirtualMachineUpdate) error {
 	client := getVirtualMachinesClient()
-	_, err := client.BeginUpdate(
+	poller, err := client.BeginUpdate(
 		ctx,
 		config.GroupName(),
 		virtualMachineName,
 		virtualMachineUpdateParameters,
 		nil,
 	)
+	if err != nil {
+		return err
+	}
+
+	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return err
 	}
@@ -291,7 +296,7 @@ func GenerializeVirtualMachine(ctx context.Context, virtualMachineName string) e
 // uses.
 func DeallocateVirtualMachine(ctx context.Context, virtualMachineName string) error {
 	client := getVirtualMachinesClient()
-	_, err := client.BeginDeallocate(
+	poller, err := client.BeginDeallocate(
 		ctx,
 		config.GroupName(),
 		virtualMachineName,
@@ -301,6 +306,10 @@ func DeallocateVirtualMachine(ctx context.Context, virtualMachineName string) er
 		return err
 	}
 
+	_, err = poller.PollUntilDone(ctx, 30*time.Second)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

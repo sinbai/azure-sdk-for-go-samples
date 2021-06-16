@@ -12,46 +12,10 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
-
-func getStorageAccountsClient() armstorage.StorageAccountsClient {
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
-	}
-	client := armstorage.NewStorageAccountsClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
-	return *client
-}
-
-// Create StorageAccounts
-func CreateStorageAccount(ctx context.Context, storageAccountName string, storageAccountCreateParametersParameters armstorage.StorageAccountCreateParameters) (string, error) {
-	client := getStorageAccountsClient()
-	poller, err := client.BeginCreate(
-		ctx,
-		config.GroupName(),
-		storageAccountName,
-		storageAccountCreateParametersParameters,
-		nil,
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StorageAccount.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
-	return *resp.StorageAccount.ID, nil
-}
 
 func getNetworkWatchersClient() armnetwork.NetworkWatchersClient {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)

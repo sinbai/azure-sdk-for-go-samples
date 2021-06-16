@@ -12,6 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
+	storage "github.com/Azure-Samples/azure-sdk-for-go-samples/storage/sdk"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
@@ -58,7 +59,7 @@ func TestFlowLog(t *testing.T) {
 			Name: armstorage.SKUNameStandardLRS.ToPtr(),
 		},
 	}
-	stroageAountId, err := CreateStorageAccount(ctx, storageAccountName, storageAccountCreateParameters)
+	stroageAountId, err := storage.CreateStorageAccount(ctx, storageAccountName, storageAccountCreateParameters)
 	if err != nil {
 		t.Fatalf("failed to create storage account: % +v", err)
 	}
