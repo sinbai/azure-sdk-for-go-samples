@@ -46,6 +46,9 @@ func CreateSubnet(ctx context.Context, virtualNetworkName string, subnetName str
 		return "", err
 	}
 
+	// The SubnetResponse property doesn't return the resource id
+	// As a workaround, return poller.RawResponse.Request.URL.Path instead of *resp.Subnet.ID when the Subnet.ID in response is nil
+	// issue:https://github.com/Azure/azure-sdk-for-go/issues/14665
 	if resp.Subnet.ID == nil {
 		return poller.RawResponse.Request.URL.Path, nil
 	}

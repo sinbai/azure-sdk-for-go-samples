@@ -106,6 +106,12 @@ func TestPeerExpressRouteCircuitConnection(t *testing.T) {
 		t.Fatalf("failed to create express route circuit peering: % +v", err)
 	}
 
+	// it’s known issue. The service key generated has to be authorized by service team before creating er circuit connection.
+	// We have one authorized express route circuit. After tested, we found now it doesn’t work and throw below error message. Per the error message,
+	// seems some feature of this authorized resource has been disabled.
+
+	// Error Message: Put Global Reach Connection Initiating Circuit Subscription = XXXXXX-XXXX-XXXX-XXXXX-XXXX-XXXXXXXXXX,
+	// ServiceKey is Not Provisioned. Current Status NotProvisioned
 	expressRouteCircuitConnectionParameters := armnetwork.ExpressRouteCircuitConnection{
 		Properties: &armnetwork.ExpressRouteCircuitConnectionPropertiesFormat{
 			AddressPrefix: to.StringPtr("104.0.0.0/29"),

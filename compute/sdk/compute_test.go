@@ -15,24 +15,16 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	err := setupEnvironment()
-	if err != nil {
-		log.Fatalf("could not set up environment: %v\n", err)
-	}
-
-	os.Exit(m.Run())
-}
-
-func setupEnvironment() error {
 	err1 := config.ParseEnvironment()
 	err2 := config.AddFlags()
 
 	for _, err := range []error{err1, err2} {
 		if err != nil {
-			return err
+			log.Fatalf("could not set up environment: %v\n", err)
 		}
 	}
 
 	flag.Parse()
-	return nil
+
+	os.Exit(m.Run())
 }

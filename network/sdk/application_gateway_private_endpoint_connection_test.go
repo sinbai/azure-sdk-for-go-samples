@@ -21,7 +21,7 @@ import (
 func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 	groupName := config.GenerateGroupName("network")
 	config.SetGroupName(groupName)
-	connectionName := config.AppendRandomSuffix("agpeconnection")
+	//connectionName := config.AppendRandomSuffix("agpeconnection")
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
 	subnetAppgwName := config.AppendRandomSuffix("subnetappgw")
 	subnetLoadBalancerName := config.AppendRandomSuffix("subnetloadbalancer")
@@ -220,7 +220,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 		},
 	}
 
-	privateEndpointId, err := CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointParameters)
+	_, err = CreatePrivateEndpoint(ctx, privateEndpointName, privateEndpointParameters)
 	if err != nil {
 		t.Fatalf("failed to create private endpoint: % +v", err)
 	}
@@ -454,41 +454,42 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 		t.Fatalf("failed to create application gateway: % +v", err)
 	}
 
-	applicationGatewayPrivateEndpointConnectionParameters := armnetwork.ApplicationGatewayPrivateEndpointConnection{
-		Name: &connectionName,
-		Properties: &armnetwork.ApplicationGatewayPrivateEndpointConnectionProperties{
-			PrivateEndpoint: &armnetwork.PrivateEndpoint{
-				Resource: armnetwork.Resource{
-					ID: &privateEndpointId,
-				},
-			},
-			PrivateLinkServiceConnectionState: &armnetwork.PrivateLinkServiceConnectionState{
-				Description: to.StringPtr("approved it for some reason."),
-				Status:      to.StringPtr("Approved"),
-			},
-		},
-	}
-	err = UpdateApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName, applicationGatewayPrivateEndpointConnectionParameters)
-	if err != nil {
-		t.Fatalf("failed to update application gateway private endpoint connection: % +v", err)
-	}
-	t.Logf("updated application gateway private endpoint connection")
+	// no need to work on private endpoint connection related test cases since the connection has to be created by service team from feedback
+	// applicationGatewayPrivateEndpointConnectionParameters := armnetwork.ApplicationGatewayPrivateEndpointConnection{
+	// 	Name: &connectionName,
+	// 	Properties: &armnetwork.ApplicationGatewayPrivateEndpointConnectionProperties{
+	// 		PrivateEndpoint: &armnetwork.PrivateEndpoint{
+	// 			Resource: armnetwork.Resource{
+	// 				ID: &privateEndpointId,
+	// 			},
+	// 		},
+	// 		PrivateLinkServiceConnectionState: &armnetwork.PrivateLinkServiceConnectionState{
+	// 			Description: to.StringPtr("approved it for some reason."),
+	// 			Status:      to.StringPtr("Approved"),
+	// 		},
+	// 	},
+	// }
+	// err = UpdateApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName, applicationGatewayPrivateEndpointConnectionParameters)
+	// if err != nil {
+	// 	t.Fatalf("failed to update application gateway private endpoint connection: % +v", err)
+	// }
+	// t.Logf("updated application gateway private endpoint connection")
 
-	err = GetApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName)
-	if err != nil {
-		t.Fatalf("failed to get application gateway private endpoint connection: %+v", err)
-	}
-	t.Logf("got application gateway private endpoint connection")
+	// err = GetApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName)
+	// if err != nil {
+	// 	t.Fatalf("failed to get application gateway private endpoint connection: %+v", err)
+	// }
+	// t.Logf("got application gateway private endpoint connection")
 
-	err = ListApplicationGatewayPrivateEndpointConnection(ctx, connectionName)
-	if err != nil {
-		t.Fatalf("failed to list application gateway private endpoint connection: %+v", err)
-	}
-	t.Logf("listed application gateway private endpoint connection")
+	// err = ListApplicationGatewayPrivateEndpointConnection(ctx, connectionName)
+	// if err != nil {
+	// 	t.Fatalf("failed to list application gateway private endpoint connection: %+v", err)
+	// }
+	// t.Logf("listed application gateway private endpoint connection")
 
-	err = DeleteApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName)
-	if err != nil {
-		t.Fatalf("failed to delete application gateway private endpoint connection: %+v", err)
-	}
-	t.Logf("deleted application gateway private endpoint connection")
+	// err = DeleteApplicationGatewayPrivateEndpointConnection(ctx, applicationGatewayName, connectionName)
+	// if err != nil {
+	// 	t.Fatalf("failed to delete application gateway private endpoint connection: %+v", err)
+	// }
+	// t.Logf("deleted application gateway private endpoint connection")
 }

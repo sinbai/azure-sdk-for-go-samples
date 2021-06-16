@@ -232,7 +232,8 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 	}
 	t.Logf("listed virtual network gateway connection")
 
-	//need to sleep for a period of time to run successfully, otherwise "Another operation on this or dependent resource is in progress." will be reported.
+	// need to sleep for a period of time to run successfully, otherwise "Another operation on this or dependent resource is in progress." will be reported.
+	// have filed issue: https://github.com/Azure/azure-rest-api-specs/issues/14473
 	time.Sleep(time.Duration(60) * time.Second)
 
 	err = BeginResetVirtualNetworkGatewayConnectionSharedKey(ctx, virtualNetworkGatewayConnectionName)
@@ -242,6 +243,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 	t.Logf("began reset the virtual network gateway connection shared key")
 
 	//need to sleep for a period of time to run successfully, otherwise "Another operation on this or dependent resource is in progress." will be reported.
+	// have filed an issue: https://github.com/Azure/azure-rest-api-specs/issues/14473
 	time.Sleep(time.Duration(60) * time.Second)
 
 	tagsObjectParameters := armnetwork.TagsObject{
