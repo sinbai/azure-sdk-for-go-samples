@@ -23,7 +23,7 @@ func TestVirtualHub(t *testing.T) {
 	virtualWanName := config.AppendRandomSuffix("virtualwan")
 	virtualHubName := config.AppendRandomSuffix("virtualhub")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
@@ -93,11 +93,6 @@ func TestVirtualHub(t *testing.T) {
 		t.Fatalf("failed to update tags for virtual hub: %+v", err)
 	}
 	t.Logf("updated virtual hub tags")
-
-	// Error Message: The specified operation 'DeleteVirtualHub' is not supported.
-	// Deletion is not supported when RoutingStatus on Hub is 'Provisioning'. Retry when state is not Provisioning
-	// waiting for routing status to be provisioned and deleting
-	time.Sleep(700 * time.Second)
 
 	err = DeleteVirtualHub(ctx, virtualHubName)
 	if err != nil {

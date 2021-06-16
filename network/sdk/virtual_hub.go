@@ -7,10 +7,13 @@ package network
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
+	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/helper/resource"
 	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -23,6 +26,50 @@ func getVirtualHubsClient() armnetwork.VirtualHubsClient {
 	}
 	client := armnetwork.NewVirtualHubsClient(armcore.NewDefaultConnection(cred, nil), config.SubscriptionID())
 	return *client
+}
+
+func virtualHubCreateRefreshFunc(ctx context.Context, client *armnetwork.VirtualHubsClient, resourceGroup, name string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		res, err := client.Get(ctx, resourceGroup, name, nil)
+		if err != nil {
+			if res.RawResponse.StatusCode == http.StatusNotFound {
+				return nil, "", fmt.Errorf("virtual Hub %q (Resource Group %q) doesn't exist", resourceGroup, name)
+			}
+
+			return nil, "", fmt.Errorf("retrieving Virtual Hub %q (Resource Group %q): %+v", resourceGroup, name, err)
+		}
+		if res.VirtualHub.Properties == nil {
+			return nil, "", fmt.Errorf("unexpected nil properties of Virtual Hub %q (Resource Group %q)", resourceGroup, name)
+		}
+
+		state := *res.VirtualHub.Properties.RoutingState
+		if state == "Failed" {
+			return nil, "", fmt.Errorf("failed to provision routing on Virtual Hub %q (Resource Group %q)", resourceGroup, name)
+		}
+		return res, string(state), nil
+	}
+}
+
+func virtualHubUpdateRefreshFunc(ctx context.Context, client *armnetwork.VirtualHubsClient, resourceGroup, name string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		res, err := client.Get(ctx, resourceGroup, name, nil)
+		if err != nil {
+			if res.RawResponse.StatusCode == http.StatusNotFound {
+				return nil, "", fmt.Errorf("virtual Hub %q (Resource Group %q) doesn't exist", resourceGroup, name)
+			}
+
+			return nil, "", fmt.Errorf("retrieving Virtual Hub %q (Resource Group %q): %+v", resourceGroup, name, err)
+		}
+		if res.VirtualHub.Properties == nil {
+			return nil, "", fmt.Errorf("unexpected nil properties of Virtual Hub %q (Resource Group %q)", resourceGroup, name)
+		}
+
+		state := *res.VirtualHub.Properties.ProvisioningState
+		if state == "Failed" {
+			return nil, "", fmt.Errorf("failed to provision routing on Virtual Hub %q (Resource Group %q)", resourceGroup, name)
+		}
+		return res, string(state), nil
+	}
 }
 
 // Create VirtualHubs
@@ -41,15 +88,35 @@ func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubPara
 		return "", err
 	}
 
-	resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+	_, err = poller.PollUntilDone(ctx, 30*time.Second)
 	if err != nil {
 		return "", err
 	}
 
-	if resp.VirtualHub.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
+	// Hub returns provisioned while the routing state is still "provisining". This might cause issues with following hubvnet connection operations.
+	// https://github.com/Azure/azure-rest-api-specs/issues/10391
+	// As a workaround, we will poll the routing state and ensure it is "Provisioned".
+
+	// deadline is checked at the entry point of this function
+	timeout, _ := ctx.Deadline()
+	stateConf := &resource.StateChangeConf{
+		Pending:                   []string{"Provisioning"},
+		Target:                    []string{"Provisioned", "Failed", "None"},
+		Refresh:                   virtualHubCreateRefreshFunc(ctx, &client, config.GroupName(), virtualHubName),
+		PollInterval:              15 * time.Second,
+		ContinuousTargetOccurence: 3,
+		Timeout:                   time.Until(timeout),
 	}
-	return *resp.VirtualHub.ID, nil
+	respRaw, err := stateConf.WaitForState()
+	if err != nil {
+		return "", fmt.Errorf("waiting for Virtual Hub %q (Host Group Name %q) provisioning route: %+v", virtualHubName, config.GroupName(), err)
+	}
+	response := respRaw.(armnetwork.VirtualHubResponse)
+	if response.VirtualHub.ID == nil {
+		return "", fmt.Errorf("cannot read Virtual Hub %q (Resource Group %q) ID", virtualHubName, config.GroupName())
+	}
+
+	return *response.VirtualHub.ID, nil
 }
 
 // Retrieves the details of a VirtualHub
@@ -91,6 +158,27 @@ func UpdateVirtualHubTags(ctx context.Context, virtualHubName string, tagsObject
 	)
 	if err != nil {
 		return err
+	}
+
+	// Hub returns state is "updating". This might cause deletion to fail.
+	// As a workaround, we will poll the hub state and ensure it is "Succeeded".
+	// deadline is checked at the entry point of this function
+	timeout, _ := ctx.Deadline()
+	stateConf := &resource.StateChangeConf{
+		Pending:                   []string{"Updating"},
+		Target:                    []string{"Succeeded", "Failed", "None"},
+		Refresh:                   virtualHubUpdateRefreshFunc(ctx, &client, config.GroupName(), virtualHubName),
+		PollInterval:              15 * time.Second,
+		ContinuousTargetOccurence: 3,
+		Timeout:                   time.Until(timeout),
+	}
+	respRaw, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("waiting for Virtual Hub %q (Host Group Name %q) update: %+v", virtualHubName, config.GroupName(), err)
+	}
+	response := respRaw.(armnetwork.VirtualHubResponse)
+	if response.VirtualHub.ID == nil {
+		return fmt.Errorf("cannot read Virtual Hub %q (Resource Group %q) ID", virtualHubName, config.GroupName())
 	}
 	return nil
 }
