@@ -14,8 +14,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	network "github.com/Azure-Samples/azure-sdk-for-go-samples/network/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -27,7 +27,7 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 	virtualNetworkName := config.AppendRandomSuffix("virtualnetwork")
 	subNetName := config.AppendRandomSuffix("subnet")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 6000*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
@@ -43,7 +43,7 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -76,11 +76,11 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 			},
 			VirtualMachineProfile: &armcompute.VirtualMachineScaleSetVMProfile{
 				NetworkProfile: &armcompute.VirtualMachineScaleSetNetworkProfile{
-					NetworkInterfaceConfigurations: &[]armcompute.VirtualMachineScaleSetNetworkConfiguration{{
+					NetworkInterfaceConfigurations: []*armcompute.VirtualMachineScaleSetNetworkConfiguration{{
 						Name: to.StringPtr("testPC"),
 						Properties: &armcompute.VirtualMachineScaleSetNetworkConfigurationProperties{
 							EnableIPForwarding: to.BoolPtr(true),
-							IPConfigurations: &[]armcompute.VirtualMachineScaleSetIPConfiguration{{
+							IPConfigurations: []*armcompute.VirtualMachineScaleSetIPConfiguration{{
 								Name: to.StringPtr("testPC"),
 								Properties: &armcompute.VirtualMachineScaleSetIPConfigurationProperties{
 									Subnet: &armcompute.APIEntityReference{
@@ -107,9 +107,9 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 					OSDisk: &armcompute.VirtualMachineScaleSetOSDisk{
 						Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
 						CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
-						DiskSizeGb:   to.Int32Ptr(512),
+						DiskSizeGB:   to.Int32Ptr(512),
 						ManagedDisk: &armcompute.VirtualMachineScaleSetManagedDiskParameters{
-							StorageAccountType: armcompute.StorageAccountTypesStandardLrs.ToPtr(),
+							StorageAccountType: armcompute.StorageAccountTypesStandardLRS.ToPtr(),
 						},
 					},
 				},
@@ -180,7 +180,7 @@ func TestVirtualMachineScaleSetVm(t *testing.T) {
 
 	virtualMachineScaleSetVMParameters := armcompute.VirtualMachineScaleSetVM{
 		Resource: armcompute.Resource{
-			Tags: &map[string]string{"department": "HR"},
+			Tags: map[string]*string{"department": to.StringPtr("HR")},
 		},
 	}
 	err = UpdateVirtualMachineScaleSetVm(ctx, virtualMachineScaleSetName, strconv.Itoa(instanceId), virtualMachineScaleSetVMParameters)

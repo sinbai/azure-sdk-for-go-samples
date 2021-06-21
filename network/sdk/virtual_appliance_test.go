@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -37,7 +37,7 @@ func TestNetworkVirtualAppliance(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -52,7 +52,7 @@ func TestNetworkVirtualAppliance(t *testing.T) {
 	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualHubProperties{
 			AddressPrefix: to.StringPtr("10.168.0.0/24"),
@@ -63,7 +63,7 @@ func TestNetworkVirtualAppliance(t *testing.T) {
 		},
 	}
 
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters, false)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -71,13 +71,18 @@ func TestNetworkVirtualAppliance(t *testing.T) {
 	parametersNetworkVirtualAppliance := armnetwork.NetworkVirtualAppliance{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.NetworkVirtualAppliancePropertiesFormat{
+			// NvaSKU: &armnetwork.VirtualApplianceSKUProperties{
+			// 	BundledScaleUnit:   to.StringPtr("3"),
+			// 	MarketPlaceVersion: to.StringPtr("17.4.0928"),
+			// 	Vendor:             to.StringPtr("ciscosdwan"),
+			// },
 			NvaSKU: &armnetwork.VirtualApplianceSKUProperties{
-				BundledScaleUnit:   to.StringPtr("3"),
-				MarketPlaceVersion: to.StringPtr("17.4.0928"),
-				Vendor:             to.StringPtr("ciscosdwan"),
+				BundledScaleUnit:   to.StringPtr("2"),
+				MarketPlaceVersion: to.StringPtr("latest"),
+				Vendor:             to.StringPtr("vmwaresdwaninvwan"),
 			},
 			VirtualApplianceAsn: to.Int64Ptr(10000),
 			VirtualHub: &armnetwork.SubResource{

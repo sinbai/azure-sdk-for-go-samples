@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -63,12 +63,12 @@ func TestLoadBalancer(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.LoadBalancerPropertiesFormat{
-			BackendAddressPools: &[]*armnetwork.BackendAddressPool{
+			BackendAddressPools: []*armnetwork.BackendAddressPool{
 				{
 					Name: &backendAddressPoolName,
 				},
 			},
-			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+			FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 				{
 					Name: &frontendIpConfigurationName,
 					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
@@ -80,7 +80,7 @@ func TestLoadBalancer(t *testing.T) {
 					},
 				},
 			},
-			LoadBalancingRules: &[]*armnetwork.LoadBalancingRule{
+			LoadBalancingRules: []*armnetwork.LoadBalancingRule{
 				{
 					Name: &loadBalancingRuleName,
 					Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
@@ -104,14 +104,14 @@ func TestLoadBalancer(t *testing.T) {
 					},
 				},
 			},
-			OutboundRules: &[]*armnetwork.OutboundRule{
+			OutboundRules: []*armnetwork.OutboundRule{
 				{
 					Name: &outBoundRuleName,
 					Properties: &armnetwork.OutboundRulePropertiesFormat{
 						BackendAddressPool: &armnetwork.SubResource{
 							ID: to.StringPtr(loadBalancerUrl + "/backendAddressPools/" + backendAddressPoolName),
 						},
-						FrontendIPConfigurations: &[]*armnetwork.SubResource{
+						FrontendIPConfigurations: []*armnetwork.SubResource{
 							{
 								ID: to.StringPtr(loadBalancerUrl + "/frontendIPConfigurations/" + frontendIpConfigurationName),
 							},
@@ -120,7 +120,7 @@ func TestLoadBalancer(t *testing.T) {
 					},
 				},
 			},
-			Probes: &[]*armnetwork.Probe{
+			Probes: []*armnetwork.Probe{
 				{
 					Name: &probeName,
 					Properties: &armnetwork.ProbePropertiesFormat{
@@ -251,7 +251,7 @@ func TestLoadBalancer(t *testing.T) {
 	t.Logf("listed all the load balancer in a subscription")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateLoadBalancerTags(ctx, loadBalancerName, tagsObjectParameters)
 	if err != nil {

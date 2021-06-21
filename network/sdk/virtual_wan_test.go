@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -34,7 +34,7 @@ func TestVirtualWan(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -66,7 +66,7 @@ func TestVirtualWan(t *testing.T) {
 	t.Logf("listed virtual wan by resource group")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"key1": to.StringPtr("value1"), "key2": to.StringPtr("value2")},
+		Tags: map[string]*string{"key1": to.StringPtr("value1"), "key2": to.StringPtr("value2")},
 	}
 	err = UpdateVirtualWanTags(ctx, virtualWanName, tagsObjectParameters)
 	if err != nil {

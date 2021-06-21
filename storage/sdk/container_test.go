@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 	"github.com/marstr/randname"
 )

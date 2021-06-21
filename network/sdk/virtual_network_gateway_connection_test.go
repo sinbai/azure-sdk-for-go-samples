@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -62,7 +62,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -94,12 +94,12 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 				PeerWeight:        to.Int32Ptr(0),
 			},
 			CustomRoutes: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("101.168.0.6/32")},
+				AddressPrefixes: []*string{to.StringPtr("101.168.0.6/32")},
 			},
 			EnableBgp:           to.BoolPtr(false),
 			EnableDNSForwarding: to.BoolPtr(false),
 			GatewayType:         armnetwork.VirtualNetworkGatewayTypeVPN.ToPtr(),
-			IPConfigurations: &[]*armnetwork.VirtualNetworkGatewayIPConfiguration{{
+			IPConfigurations: []*armnetwork.VirtualNetworkGatewayIPConfiguration{{
 				Name: &ipConfigName,
 				Properties: &armnetwork.VirtualNetworkGatewayIPConfigurationPropertiesFormat{
 					PrivateIPAllocationMethod: armnetwork.IPAllocationMethodDynamic.ToPtr(),
@@ -132,7 +132,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 		Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
 			GatewayIPAddress: to.StringPtr("11.12.13.14"),
 			LocalNetworkAddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.1.0.0/16")},
 			},
 		},
 	}
@@ -141,6 +141,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 		t.Fatalf("failed to create local network gateway: % +v", err)
 	}
 
+	// Issue: https://github.com/Azure/azure-rest-api-specs/issues/14473
 	gatewayConnectionParameters := armnetwork.VirtualNetworkGatewayConnection{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
@@ -156,7 +157,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 				Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
 					GatewayIPAddress: to.StringPtr("10.1.0.1"),
 					LocalNetworkAddressSpace: &armnetwork.AddressSpace{
-						AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+						AddressPrefixes: []*string{to.StringPtr("10.1.0.0/16")},
 					},
 				},
 			},
@@ -177,7 +178,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 					},
 					EnableBgp:   to.BoolPtr(false),
 					GatewayType: armnetwork.VirtualNetworkGatewayTypeVPN.ToPtr(),
-					IPConfigurations: &[]*armnetwork.VirtualNetworkGatewayIPConfiguration{{
+					IPConfigurations: []*armnetwork.VirtualNetworkGatewayIPConfiguration{{
 						SubResource: armnetwork.SubResource{
 							ID: to.StringPtr(gatewayId + "/ipConfigurations/" + ipConfigName + ""),
 						},
@@ -247,7 +248,7 @@ func TestVirtualNetworkGatewayConnection(t *testing.T) {
 	time.Sleep(time.Duration(60) * time.Second)
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateVirtualNetworkGatewayConnectionTags(ctx, virtualNetworkGatewayConnectionName, tagsObjectParameters)
 	if err != nil {

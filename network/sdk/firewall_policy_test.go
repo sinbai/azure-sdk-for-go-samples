@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -34,7 +34,7 @@ func TestFirewallPolicy(t *testing.T) {
 	firewallPolicyParameters := armnetwork.FirewallPolicy{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.FirewallPolicyPropertiesFormat{
 			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),

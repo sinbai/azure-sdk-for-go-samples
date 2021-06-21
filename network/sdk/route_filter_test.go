@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -34,7 +34,7 @@ func TestRouteFilter(t *testing.T) {
 	routeFilterParameters := armnetwork.RouteFilter{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 	}
 	err = CreateRouteFilter(ctx, routeFilterName, routeFilterParameters)
@@ -62,7 +62,7 @@ func TestRouteFilter(t *testing.T) {
 	t.Logf("listed route filter by resource group")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateRouteFilterTags(ctx, routeFilterName, tagsObjectParameters)
 	if err != nil {

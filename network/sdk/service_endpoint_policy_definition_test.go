@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -42,7 +42,7 @@ func TestServiceEndpointPolicyDefinition(t *testing.T) {
 		Properties: &armnetwork.ServiceEndpointPolicyDefinitionPropertiesFormat{
 			Description:      to.StringPtr("Storage Service EndpointPolicy Definition"),
 			Service:          to.StringPtr("Microsoft.Storage"),
-			ServiceResources: &[]*string{to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName())},
+			ServiceResources: []*string{to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName())},
 		},
 	}
 	err = CreateServiceEndpointPolicyDefinition(ctx, serviceEndpointPolicyName, serviceEndpointPolicyDefinitionName, serviceEndpointPolicyDefinitionParameters)

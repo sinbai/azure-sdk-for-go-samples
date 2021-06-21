@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute"
 )
 
 func getVirtualMachineScaleSetRollingUpgradesClient() armcompute.VirtualMachineScaleSetRollingUpgradesClient {

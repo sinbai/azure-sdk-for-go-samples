@@ -14,9 +14,9 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/helper/resource"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 )
 
 func getVirtualHubsClient() armnetwork.VirtualHubsClient {
@@ -73,7 +73,7 @@ func virtualHubUpdateRefreshFunc(ctx context.Context, client *armnetwork.Virtual
 }
 
 // Create VirtualHubs
-func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubParameters armnetwork.VirtualHub) (string, error) {
+func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubParameters armnetwork.VirtualHub, isWaitfor bool) (string, error) {
 	client := getVirtualHubsClient()
 
 	poller, err := client.BeginCreateOrUpdate(
@@ -88,35 +88,47 @@ func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubPara
 		return "", err
 	}
 
-	_, err = poller.PollUntilDone(ctx, 30*time.Second)
-	if err != nil {
-		return "", err
-	}
+	if isWaitfor {
+		_, err = poller.PollUntilDone(ctx, 30*time.Second)
+		if err != nil {
+			return "", err
+		}
 
-	// Hub returns provisioned while the routing state is still "provisining". This might cause issues with following hubvnet connection operations.
-	// https://github.com/Azure/azure-rest-api-specs/issues/10391
-	// As a workaround, we will poll the routing state and ensure it is "Provisioned".
+		// Hub returns provisioned while the routing state is still "provisining". This might cause issues with following hubvnet connection operations.
+		// https://github.com/Azure/azure-rest-api-specs/issues/10391
+		// As a workaround, we will poll the routing state and ensure it is "Provisioned".
 
-	// deadline is checked at the entry point of this function
-	timeout, _ := ctx.Deadline()
-	stateConf := &resource.StateChangeConf{
-		Pending:                   []string{"Provisioning"},
-		Target:                    []string{"Provisioned", "Failed", "None"},
-		Refresh:                   virtualHubCreateRefreshFunc(ctx, &client, config.GroupName(), virtualHubName),
-		PollInterval:              15 * time.Second,
-		ContinuousTargetOccurence: 3,
-		Timeout:                   time.Until(timeout),
-	}
-	respRaw, err := stateConf.WaitForState()
-	if err != nil {
-		return "", fmt.Errorf("waiting for Virtual Hub %q (Host Group Name %q) provisioning route: %+v", virtualHubName, config.GroupName(), err)
-	}
-	response := respRaw.(armnetwork.VirtualHubResponse)
-	if response.VirtualHub.ID == nil {
-		return "", fmt.Errorf("cannot read Virtual Hub %q (Resource Group %q) ID", virtualHubName, config.GroupName())
-	}
+		// deadline is checked at the entry point of this function
+		timeout, _ := ctx.Deadline()
+		stateConf := &resource.StateChangeConf{
+			Pending:                   []string{"Provisioning"},
+			Target:                    []string{"Provisioned", "Failed", "None"},
+			Refresh:                   virtualHubCreateRefreshFunc(ctx, &client, config.GroupName(), virtualHubName),
+			PollInterval:              15 * time.Second,
+			ContinuousTargetOccurence: 3,
+			Timeout:                   time.Until(timeout),
+		}
+		respRaw, err := stateConf.WaitForState()
+		if err != nil {
+			return "", fmt.Errorf("waiting for Virtual Hub %q (Host Group Name %q) provisioning route: %+v", virtualHubName, config.GroupName(), err)
+		}
+		response := respRaw.(armnetwork.VirtualHubResponse)
+		if response.VirtualHub.ID == nil {
+			return "", fmt.Errorf("cannot read Virtual Hub %q (Resource Group %q) ID", virtualHubName, config.GroupName())
+		}
 
-	return *response.VirtualHub.ID, nil
+		return *response.VirtualHub.ID, nil
+	} else {
+		resp, err := poller.PollUntilDone(ctx, 30*time.Second)
+		if err != nil {
+			return "", err
+		}
+
+		if resp.VirtualHub.ID == nil {
+			return poller.RawResponse.Request.URL.Path, nil
+		}
+		return *resp.VirtualHub.ID, nil
+	}
 }
 
 // Retrieves the details of a VirtualHub

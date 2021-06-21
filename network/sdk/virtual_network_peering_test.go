@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -41,7 +41,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.2.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.2.0.0/16")},
 			},
 		},
 	}
@@ -57,7 +57,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -69,7 +69,7 @@ func TestVirtualNetworkPeering(t *testing.T) {
 	subnetParameters := armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disabled"),
+			PrivateLinkServiceNetworkPolicies: armnetwork.VirtualNetworkPrivateLinkServiceNetworkPoliciesDisabled.ToPtr(),
 		},
 	}
 	_, err = CreateSubnet(ctx, virtualNetworkName, subNetName, subnetParameters)

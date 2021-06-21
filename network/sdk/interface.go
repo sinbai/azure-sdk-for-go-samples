@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 )
 
 func getNetworkInterfacesClient() armnetwork.NetworkInterfacesClient {
@@ -53,8 +53,8 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, ne
 	}
 
 	var ipConfigProperties *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat
-	if len((*(resp.NetworkInterface.Properties.IPConfigurations))) > 0 {
-		ipConfigProperties = (*resp.NetworkInterface.Properties.IPConfigurations)[0].Properties
+	if len((resp.NetworkInterface.Properties.IPConfigurations)) > 0 {
+		ipConfigProperties = (resp.NetworkInterface.Properties.IPConfigurations)[0].Properties
 	}
 	return id, ipConfigProperties, nil
 }

@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -36,7 +36,7 @@ func TestVpnSiteLink(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -51,14 +51,14 @@ func TestVpnSiteLink(t *testing.T) {
 	vpnSiteParameters := armnetwork.VPNSite{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VPNSiteProperties{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 			IsSecuritySite: to.BoolPtr(false),
-			VPNSiteLinks: &[]*armnetwork.VPNSiteLink{{
+			VPNSiteLinks: []*armnetwork.VPNSiteLink{{
 				Name: to.StringPtr("vpnSiteLink1"),
 				Properties: &armnetwork.VPNSiteLinkProperties{
 					IPAddress: to.StringPtr("50.50.50.56"),

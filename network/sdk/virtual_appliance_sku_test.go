@@ -21,12 +21,14 @@ func TestVirtualApplianceSku(t *testing.T) {
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
+	// issue ID 14769 in GO SKD
 	err := GetVirtualApplianceSku(ctx, virtualApplianceSkuName)
 	if err != nil {
 		t.Fatalf("failed to get virtual appliance sku: %+v", err)
 	}
 	t.Logf("got virtual appliance sku")
 
+	// issue ID 14769 in GO SKD
 	err = ListVirtualApplianceSku(ctx)
 	if err != nil {
 		t.Fatalf("failed to list virtual appliance sku: %+v", err)

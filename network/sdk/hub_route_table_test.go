@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -38,7 +38,7 @@ func TestHubRouteTable(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -53,7 +53,7 @@ func TestHubRouteTable(t *testing.T) {
 	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualHubProperties{
 			AddressPrefix: to.StringPtr("10.168.0.0/24"),
@@ -63,7 +63,7 @@ func TestHubRouteTable(t *testing.T) {
 			},
 		},
 	}
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters, false)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -71,7 +71,7 @@ func TestHubRouteTable(t *testing.T) {
 	firewallPolicyParameters := armnetwork.FirewallPolicy{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.FirewallPolicyPropertiesFormat{
 			ThreatIntelMode: armnetwork.AzureFirewallThreatIntelModeAlert.ToPtr(),
@@ -85,7 +85,7 @@ func TestHubRouteTable(t *testing.T) {
 	azureFirewallParameters := armnetwork.AzureFirewall{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.AzureFirewallPropertiesFormat{
 			SKU: &armnetwork.AzureFirewallSKU{
@@ -112,12 +112,12 @@ func TestHubRouteTable(t *testing.T) {
 
 	routeTableParameters := armnetwork.HubRouteTable{
 		Properties: &armnetwork.HubRouteTableProperties{
-			Labels: &[]*string{to.StringPtr("label1"),
+			Labels: []*string{to.StringPtr("label1"),
 				to.StringPtr("label2")},
-			Routes: &[]*armnetwork.HubRoute{{
+			Routes: []*armnetwork.HubRoute{{
 				Name:            to.StringPtr("route1"),
 				DestinationType: to.StringPtr("CIDR"),
-				Destinations: &[]*string{
+				Destinations: []*string{
 					to.StringPtr("10.0.0.0/8"),
 					to.StringPtr("20.0.0.0/8"),
 					to.StringPtr("30.0.0.0/8")},

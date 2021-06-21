@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -21,7 +21,7 @@ func TestVirtualApplianceSite(t *testing.T) {
 	config.SetGroupName(groupName)
 
 	networkVirtualApplianceName := config.AppendRandomSuffix("virtualappliancesite")
-	siteName := config.AppendRandomSuffix("site")
+	//	siteName := config.AppendRandomSuffix("site")
 	virtualWanName := config.AppendRandomSuffix("virtualwan")
 	virtualHubName := config.AppendRandomSuffix("virtualhub")
 
@@ -37,7 +37,7 @@ func TestVirtualApplianceSite(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -52,7 +52,7 @@ func TestVirtualApplianceSite(t *testing.T) {
 	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualHubProperties{
 			AddressPrefix: to.StringPtr("10.168.0.0/24"),
@@ -63,7 +63,7 @@ func TestVirtualApplianceSite(t *testing.T) {
 		},
 	}
 
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters, false)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -71,11 +71,11 @@ func TestVirtualApplianceSite(t *testing.T) {
 	parametersNetworkVirtualAppliance := armnetwork.NetworkVirtualAppliance{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.NetworkVirtualAppliancePropertiesFormat{
 			NvaSKU: &armnetwork.VirtualApplianceSKUProperties{
-				BundledScaleUnit:   to.StringPtr("3"),
+				BundledScaleUnit:   to.StringPtr("2"),
 				MarketPlaceVersion: to.StringPtr("17.4.0928"),
 				Vendor:             to.StringPtr("ciscosdwan"),
 			},
@@ -90,40 +90,42 @@ func TestVirtualApplianceSite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create network virtual appliance: % +v", err)
 	}
-	virtualApplianceSiteParameters := armnetwork.VirtualApplianceSite{
-		Properties: &armnetwork.VirtualApplianceSiteProperties{
-			AddressPrefix: to.StringPtr("192.168.1.0/24"),
-			O365Policy: &armnetwork.Office365PolicyProperties{
-				BreakOutCategories: &armnetwork.BreakOutCategoryPolicies{
-					Allow:    to.BoolPtr(true),
-					Default:  to.BoolPtr(true),
-					Optimize: to.BoolPtr(true),
-				},
-			},
-		},
-	}
-	err = CreateVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName, virtualApplianceSiteParameters)
-	if err != nil {
-		t.Fatalf("failed to create virtual appliance site: % +v", err)
-	}
-	t.Logf("created virtual appliance site")
 
-	err = GetVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName)
-	if err != nil {
-		t.Fatalf("failed to get virtual appliance site: %+v", err)
-	}
-	t.Logf("got virtual appliance site")
+	// This API (Virtual Appliance Sites) is deprecated and no longer supported.
+	// virtualApplianceSiteParameters := armnetwork.VirtualApplianceSite{
+	// 	Properties: &armnetwork.VirtualApplianceSiteProperties{
+	// 		AddressPrefix: to.StringPtr("192.168.1.0/24"),
+	// 		O365Policy: &armnetwork.Office365PolicyProperties{
+	// 			BreakOutCategories: &armnetwork.BreakOutCategoryPolicies{
+	// 				Allow:    to.BoolPtr(true),
+	// 				Default:  to.BoolPtr(true),
+	// 				Optimize: to.BoolPtr(true),
+	// 			},
+	// 		},
+	// 	},
+	// }
+	// err = CreateVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName, virtualApplianceSiteParameters)
+	// if err != nil {
+	// 	t.Fatalf("failed to create virtual appliance site: % +v", err)
+	// }
+	// t.Logf("created virtual appliance site")
 
-	err = ListVirtualApplianceSite(ctx, networkVirtualApplianceName)
-	if err != nil {
-		t.Fatalf("failed to list virtual appliance site: %+v", err)
-	}
-	t.Logf("listed virtual appliance site")
+	// err = GetVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName)
+	// if err != nil {
+	// 	t.Fatalf("failed to get virtual appliance site: %+v", err)
+	// }
+	// t.Logf("got virtual appliance site")
 
-	err = DeleteVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName)
-	if err != nil {
-		t.Fatalf("failed to delete virtual appliance site: %+v", err)
-	}
-	t.Logf("deleted virtual appliance site")
+	// err = ListVirtualApplianceSite(ctx, networkVirtualApplianceName)
+	// if err != nil {
+	// 	t.Fatalf("failed to list virtual appliance site: %+v", err)
+	// }
+	// t.Logf("listed virtual appliance site")
+
+	// err = DeleteVirtualApplianceSite(ctx, networkVirtualApplianceName, siteName)
+	// if err != nil {
+	// 	t.Fatalf("failed to delete virtual appliance site: %+v", err)
+	// }
+	// t.Logf("deleted virtual appliance site")
 
 }

@@ -7,12 +7,12 @@ require (
 	github.com/Azure/azure-amqp-common-go v1.1.4
 	github.com/Azure/azure-event-hubs-go v1.3.0
 	github.com/Azure/azure-pipeline-go v0.1.9 // indirect
-	github.com/Azure/azure-sdk-for-go v54.1.0+incompatible
-	github.com/Azure/azure-sdk-for-go/sdk/arm/compute v0.0.0-00010101000000-000000000000
-	github.com/Azure/azure-sdk-for-go/sdk/arm/network v0.0.0-00010101000000-000000000000
-	github.com/Azure/azure-sdk-for-go/sdk/arm/storage v0.0.0-20210524192354-2bc7350b1dcd
-	github.com/Azure/azure-sdk-for-go/sdk/armcore v0.7.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.8.0
+	github.com/Azure/azure-sdk-for-go v54.3.0+incompatible
+	github.com/Azure/azure-sdk-for-go/sdk/armcore v0.7.1
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.9.1
+	github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute v0.1.0
+	github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork v0.1.0
+	github.com/Azure/azure-sdk-for-go/sdk/storage/armstorage v0.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/to v0.1.4
 	github.com/Azure/azure-storage-blob-go v0.0.0-20181023070848-cf01652132cc
 	github.com/Azure/go-autorest/autorest v0.11.18
@@ -30,7 +30,3 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0
 )
-
-replace github.com/Azure/azure-sdk-for-go/sdk/arm/compute => github.com/ArcturusZhang/azure-sdk-for-go/sdk/arm/compute v0.3.0
-
-replace github.com/Azure/azure-sdk-for-go/sdk/arm/network => github.com/ArcturusZhang/azure-sdk-for-go/sdk/arm/network v0.4.3

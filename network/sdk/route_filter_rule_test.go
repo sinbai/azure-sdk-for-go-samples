@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -35,7 +35,7 @@ func TestRouteFilterRule(t *testing.T) {
 	routeFilterParameters := armnetwork.RouteFilter{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 	}
 	err = CreateRouteFilter(ctx, routeFilterName, routeFilterParameters)
@@ -46,7 +46,7 @@ func TestRouteFilterRule(t *testing.T) {
 	routeFilterRuleParameters := armnetwork.RouteFilterRule{
 		Properties: &armnetwork.RouteFilterRulePropertiesFormat{
 			Access:              armnetwork.AccessAllow.ToPtr(),
-			Communities:         &[]*string{to.StringPtr("12076:51004")},
+			Communities:         []*string{to.StringPtr("12076:51004")},
 			RouteFilterRuleType: armnetwork.RouteFilterRuleTypeCommunity.ToPtr(),
 		},
 	}

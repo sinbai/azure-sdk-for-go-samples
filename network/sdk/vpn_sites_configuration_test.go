@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -35,7 +35,7 @@ func TestVpnSitesConfiguration(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -50,14 +50,14 @@ func TestVpnSitesConfiguration(t *testing.T) {
 	vpnSiteParameters := armnetwork.VPNSite{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VPNSiteProperties{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 			IsSecuritySite: to.BoolPtr(false),
-			VPNSiteLinks: &[]*armnetwork.VPNSiteLink{{
+			VPNSiteLinks: []*armnetwork.VPNSiteLink{{
 				Name: to.StringPtr("vpnSiteLink1"),
 				Properties: &armnetwork.VPNSiteLinkProperties{
 					IPAddress: to.StringPtr("50.50.50.56"),
@@ -83,7 +83,7 @@ func TestVpnSitesConfiguration(t *testing.T) {
 
 	request := armnetwork.GetVPNSitesConfigurationRequest{
 		OutputBlobSasURL: to.StringPtr("https://blobcortextesturl.blob.core.windows.net/folderforconfig/vpnFile?sp=rw&se=2018-01-10T03%3A42%3A04Z&sv=2017-04-17&sig=WvXrT5bDmDFfgHs%2Brz%2BjAu123eRCNE9BO0eQYcPDT7pY%3D&sr=b"),
-		VPNSites:         &[]*string{&vpnSiteId},
+		VPNSites:         []*string{&vpnSiteId},
 	}
 	err = DownloadVpnSitesConfiguration(ctx, virtualWanName, request)
 	if err != nil {

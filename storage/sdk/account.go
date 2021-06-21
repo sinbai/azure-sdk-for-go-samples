@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/armstorage"
 )
 
 func getStorageAccountsClient() armstorage.StorageAccountsClient {

@@ -13,8 +13,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	network "github.com/Azure-Samples/azure-sdk-for-go-samples/network/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -46,7 +46,7 @@ func TestVirtualMachineScaleSetVmExtension(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -79,7 +79,7 @@ func TestVirtualMachineScaleSetVmExtension(t *testing.T) {
 		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
 		Properties: &armnetwork.NetworkInterfacePropertiesFormat{
 			EnableAcceleratedNetworking: to.BoolPtr(true),
-			IPConfigurations: &[]*armnetwork.NetworkInterfaceIPConfiguration{
+			IPConfigurations: []*armnetwork.NetworkInterfaceIPConfiguration{
 				{
 					Name: &ipConfigurationName,
 					Properties: &armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat{
@@ -109,7 +109,7 @@ func TestVirtualMachineScaleSetVmExtension(t *testing.T) {
 				VMSize: armcompute.VirtualMachineSizeTypesStandardD2V2.ToPtr(),
 			},
 			NetworkProfile: &armcompute.NetworkProfile{
-				NetworkInterfaces: &[]armcompute.NetworkInterfaceReference{
+				NetworkInterfaces: []*armcompute.NetworkInterfaceReference{
 					{
 						SubResource: armcompute.SubResource{
 							ID: &nicId,

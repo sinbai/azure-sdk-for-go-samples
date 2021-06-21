@@ -13,8 +13,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	network "github.com/Azure-Samples/azure-sdk-for-go-samples/network/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -42,7 +42,7 @@ func TestVirtualMachineScaleSetRollingUpgrade(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -76,11 +76,11 @@ func TestVirtualMachineScaleSetRollingUpgrade(t *testing.T) {
 			Overprovision: to.BoolPtr(true),
 			VirtualMachineProfile: &armcompute.VirtualMachineScaleSetVMProfile{
 				NetworkProfile: &armcompute.VirtualMachineScaleSetNetworkProfile{
-					NetworkInterfaceConfigurations: &[]armcompute.VirtualMachineScaleSetNetworkConfiguration{{
+					NetworkInterfaceConfigurations: []*armcompute.VirtualMachineScaleSetNetworkConfiguration{{
 						Name: to.StringPtr("testPC"),
 						Properties: &armcompute.VirtualMachineScaleSetNetworkConfigurationProperties{
 							EnableIPForwarding: to.BoolPtr(true),
-							IPConfigurations: &[]armcompute.VirtualMachineScaleSetIPConfiguration{{
+							IPConfigurations: []*armcompute.VirtualMachineScaleSetIPConfiguration{{
 								Name: to.StringPtr("testPC"),
 								Properties: &armcompute.VirtualMachineScaleSetIPConfigurationProperties{
 									Subnet: &armcompute.APIEntityReference{
@@ -107,9 +107,9 @@ func TestVirtualMachineScaleSetRollingUpgrade(t *testing.T) {
 					OSDisk: &armcompute.VirtualMachineScaleSetOSDisk{
 						Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
 						CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
-						DiskSizeGb:   to.Int32Ptr(512),
+						DiskSizeGB:   to.Int32Ptr(512),
 						ManagedDisk: &armcompute.VirtualMachineScaleSetManagedDiskParameters{
-							StorageAccountType: armcompute.StorageAccountTypesStandardLrs.ToPtr(),
+							StorageAccountType: armcompute.StorageAccountTypesStandardLRS.ToPtr(),
 						},
 					},
 				},

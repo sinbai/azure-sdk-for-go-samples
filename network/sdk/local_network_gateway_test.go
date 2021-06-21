@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -38,7 +38,7 @@ func TestLocalNetworkGateway(t *testing.T) {
 		Properties: &armnetwork.LocalNetworkGatewayPropertiesFormat{
 			GatewayIPAddress: to.StringPtr("11.12.13.14"),
 			LocalNetworkAddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.1.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.1.0.0/16")},
 			},
 		},
 	}
@@ -61,7 +61,7 @@ func TestLocalNetworkGateway(t *testing.T) {
 	t.Logf("listed local network gateway")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateLocalNetworkGatewayTags(ctx, localNetworkGatewayName, tagsObjectParameters)
 	if err != nil {

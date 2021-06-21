@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -34,10 +34,10 @@ func TestIPGroup(t *testing.T) {
 	ipGroupParameters := armnetwork.IPGroup{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"tag1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"tag1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.IPGroupPropertiesFormat{
-			IPAddresses: &[]*string{to.StringPtr("13.64.39.16/32"), to.StringPtr("40.74.146.80/31"), to.StringPtr("40.74.147.32/28")},
+			IPAddresses: []*string{to.StringPtr("13.64.39.16/32"), to.StringPtr("40.74.146.80/31"), to.StringPtr("40.74.147.32/28")},
 		},
 	}
 	err = CreateIPGroup(ctx, ipGroupName, ipGroupParameters)

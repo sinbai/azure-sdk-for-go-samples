@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/armcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -128,8 +128,8 @@ func GetPrivateLinkService(ctx context.Context, privateLinkServiceName string) (
 	if err != nil {
 		return "", err
 	}
-	if len((*(result.PrivateLinkService.Properties.PrivateEndpointConnections))) > 0 {
-		return *((*(result.PrivateLinkService.Properties.PrivateEndpointConnections))[0].Name), nil
+	if len((result.PrivateLinkService.Properties.PrivateEndpointConnections)) > 0 {
+		return *((result.PrivateLinkService.Properties.PrivateEndpointConnections)[0].Name), nil
 	}
 
 	return "", nil

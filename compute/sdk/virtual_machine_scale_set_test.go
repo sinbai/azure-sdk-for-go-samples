@@ -14,8 +14,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	network "github.com/Azure-Samples/azure-sdk-for-go-samples/network/sdk"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/compute/2020-09-30/armcompute"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/compute/armcompute"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -34,7 +34,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 	frontendIpConfigurationName := config.AppendRandomSuffix("frontendipconfiguration")
 	backendAddressPoolName := config.AppendRandomSuffix("backendaddresspool")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 8000*time.Second)
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
@@ -50,7 +50,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -94,12 +94,12 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.LoadBalancerPropertiesFormat{
-			BackendAddressPools: &[]*armnetwork.BackendAddressPool{
+			BackendAddressPools: []*armnetwork.BackendAddressPool{
 				{
 					Name: &backendAddressPoolName,
 				},
 			},
-			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+			FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 				{
 					Name: &frontendIpConfigurationName,
 					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
@@ -111,7 +111,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 					},
 				},
 			},
-			LoadBalancingRules: &[]*armnetwork.LoadBalancingRule{
+			LoadBalancingRules: []*armnetwork.LoadBalancingRule{
 				{
 					Name: &loadBalancingRuleName,
 					Properties: &armnetwork.LoadBalancingRulePropertiesFormat{
@@ -135,14 +135,14 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 					},
 				},
 			},
-			OutboundRules: &[]*armnetwork.OutboundRule{
+			OutboundRules: []*armnetwork.OutboundRule{
 				{
 					Name: &outBoundRuleName,
 					Properties: &armnetwork.OutboundRulePropertiesFormat{
 						BackendAddressPool: &armnetwork.SubResource{
 							ID: to.StringPtr(loadBalancerUrl + "/backendAddressPools/" + backendAddressPoolName),
 						},
-						FrontendIPConfigurations: &[]*armnetwork.SubResource{
+						FrontendIPConfigurations: []*armnetwork.SubResource{
 							{
 								ID: to.StringPtr(loadBalancerUrl + "/frontendIPConfigurations/" + frontendIpConfigurationName),
 							},
@@ -151,7 +151,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 					},
 				},
 			},
-			Probes: &[]*armnetwork.Probe{
+			Probes: []*armnetwork.Probe{
 				{
 					Name: &probeName,
 					Properties: &armnetwork.ProbePropertiesFormat{
@@ -191,17 +191,17 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 			},
 			VirtualMachineProfile: &armcompute.VirtualMachineScaleSetVMProfile{
 				NetworkProfile: &armcompute.VirtualMachineScaleSetNetworkProfile{
-					NetworkInterfaceConfigurations: &[]armcompute.VirtualMachineScaleSetNetworkConfiguration{{
+					NetworkInterfaceConfigurations: []*armcompute.VirtualMachineScaleSetNetworkConfiguration{{
 						Name: to.StringPtr("testPC"),
 						Properties: &armcompute.VirtualMachineScaleSetNetworkConfigurationProperties{
 							EnableIPForwarding: to.BoolPtr(true),
-							IPConfigurations: &[]armcompute.VirtualMachineScaleSetIPConfiguration{{
+							IPConfigurations: []*armcompute.VirtualMachineScaleSetIPConfiguration{{
 								Name: to.StringPtr("testPC"),
 								Properties: &armcompute.VirtualMachineScaleSetIPConfigurationProperties{
 									Subnet: &armcompute.APIEntityReference{
 										ID: &subnetId,
 									},
-									LoadBalancerBackendAddressPools: &[]armcompute.SubResource{
+									LoadBalancerBackendAddressPools: []*armcompute.SubResource{
 										{ID: &backedPoolsUri},
 									},
 								},
@@ -227,9 +227,9 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 					OSDisk: &armcompute.VirtualMachineScaleSetOSDisk{
 						Caching:      armcompute.CachingTypesReadWrite.ToPtr(),
 						CreateOption: armcompute.DiskCreateOptionTypesFromImage.ToPtr(),
-						DiskSizeGb:   to.Int32Ptr(512),
+						DiskSizeGB:   to.Int32Ptr(512),
 						ManagedDisk: &armcompute.VirtualMachineScaleSetManagedDiskParameters{
-							StorageAccountType: armcompute.StorageAccountTypesStandardLrs.ToPtr(),
+							StorageAccountType: armcompute.StorageAccountTypesStandardLRS.ToPtr(),
 						},
 					},
 				},
@@ -293,7 +293,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 	t.Logf("got the status of a virtual machine from a VM scale set by instanceid: %+v", instanceId)
 
 	vmInstanceIDs := armcompute.VirtualMachineScaleSetVMInstanceRequiredIDs{
-		InstanceIDs: &[]string{strconv.Itoa(instanceId)},
+		InstanceIDs: []*string{to.StringPtr(strconv.Itoa(instanceId))},
 	}
 	err = UpdateVirtualMachineScaleSetInstance(ctx, virtualMachineScaleSetName, vmInstanceIDs)
 	if err != nil {
@@ -302,7 +302,7 @@ func TestVirtualMachineScaleSet(t *testing.T) {
 	t.Logf("updated virtual machine scale instance")
 
 	vmInstanceIDs = armcompute.VirtualMachineScaleSetVMInstanceRequiredIDs{
-		InstanceIDs: &[]string{strconv.Itoa(instanceId)},
+		InstanceIDs: []*string{to.StringPtr(strconv.Itoa(instanceId))},
 	}
 	err = DeleteVirtualMachineScaleSetInstance(ctx, virtualMachineScaleSetName, vmInstanceIDs)
 	if err != nil {

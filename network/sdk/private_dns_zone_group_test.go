@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 	"github.com/Azure/azure-sdk-for-go/services/privatedns/mgmt/2018-09-01/privatedns"
 )
@@ -47,7 +47,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -59,7 +59,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 	subnetParameters := armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disabled"),
+			PrivateLinkServiceNetworkPolicies: armnetwork.VirtualNetworkPrivateLinkServiceNetworkPoliciesDisabled.ToPtr(),
 		},
 	}
 	subnet1ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName1, subnetParameters)
@@ -70,7 +70,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 	subnetParameters = armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                  to.StringPtr("10.0.0.0/24"),
-			PrivateEndpointNetworkPolicies: to.StringPtr("Disabled"),
+			PrivateEndpointNetworkPolicies: armnetwork.VirtualNetworkPrivateEndpointNetworkPoliciesDisabled.ToPtr(),
 		},
 	}
 	subnet2ID, err := CreateSubnet(ctx, virtualNetworkName, subNetName2, subnetParameters)
@@ -83,7 +83,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.LoadBalancerPropertiesFormat{
-			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+			FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 				{
 					Name: &ipConfigurationName,
 					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
@@ -113,13 +113,13 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 		Properties: &armnetwork.PrivateLinkServiceProperties{
 			AutoApproval: &armnetwork.PrivateLinkServicePropertiesAutoApproval{
 				ResourceSet: armnetwork.ResourceSet{
-					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+					Subscriptions: []*string{to.StringPtr(config.SubscriptionID())},
 				},
 			},
-			Fqdns: &[]*string{to.StringPtr("fqdn1"),
+			Fqdns: []*string{to.StringPtr("fqdn1"),
 				to.StringPtr("fqdn2"),
 				to.StringPtr("fqdn3")},
-			IPConfigurations: &[]*armnetwork.PrivateLinkServiceIPConfiguration{{
+			IPConfigurations: []*armnetwork.PrivateLinkServiceIPConfiguration{{
 				Name: &ipConfigurationName,
 				Properties: &armnetwork.PrivateLinkServiceIPConfigurationProperties{
 					PrivateIPAddress:          to.StringPtr("10.0.1.5"),
@@ -132,14 +132,14 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 					},
 				},
 			}},
-			LoadBalancerFrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{{
+			LoadBalancerFrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{{
 				SubResource: armnetwork.SubResource{
 					ID: to.StringPtr(loadBalancerId + "/frontendIPConfigurations/" + ipConfigurationName),
 				},
 			}},
 			Visibility: &armnetwork.PrivateLinkServicePropertiesVisibility{
 				ResourceSet: armnetwork.ResourceSet{
-					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+					Subscriptions: []*string{to.StringPtr(config.SubscriptionID())},
 				},
 			},
 		},
@@ -154,7 +154,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.PrivateEndpointProperties{
-			PrivateLinkServiceConnections: &[]*armnetwork.PrivateLinkServiceConnection{{
+			PrivateLinkServiceConnections: []*armnetwork.PrivateLinkServiceConnection{{
 				Name: &privateLinkServiceName,
 				Properties: &armnetwork.PrivateLinkServiceConnectionProperties{
 					PrivateLinkServiceID: &privateLinkServiceId,
@@ -186,7 +186,7 @@ func TestPrivateDnsZoneGroup(t *testing.T) {
 	privateDNSZoneGroupParameters := armnetwork.PrivateDNSZoneGroup{
 		Name: &privateDnsZoneGroupName,
 		Properties: &armnetwork.PrivateDNSZoneGroupPropertiesFormat{
-			PrivateDNSZoneConfigs: &[]*armnetwork.PrivateDNSZoneConfig{{
+			PrivateDNSZoneConfigs: []*armnetwork.PrivateDNSZoneConfig{{
 				Name: &privateZoneName,
 				Properties: &armnetwork.PrivateDNSZonePropertiesFormat{
 					PrivateDNSZoneID: privateZone.ID,

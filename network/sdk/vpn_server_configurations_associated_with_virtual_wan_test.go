@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -40,7 +40,7 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -55,14 +55,14 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 	vpnSiteParameters := armnetwork.VPNSite{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VPNSiteProperties{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 			IsSecuritySite: to.BoolPtr(false),
-			VPNSiteLinks: &[]*armnetwork.VPNSiteLink{{
+			VPNSiteLinks: []*armnetwork.VPNSiteLink{{
 				Name: to.StringPtr("vpnSiteLink1"),
 				Properties: &armnetwork.VPNSiteLinkProperties{
 					IPAddress: to.StringPtr("50.50.50.56"),
@@ -89,7 +89,7 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualHubProperties{
 			AddressPrefix: to.StringPtr("10.168.0.0/24"),
@@ -100,7 +100,7 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 		},
 	}
 
-	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
+	virtualHubId, err := CreateVirtualHub(ctx, virtualHubName, virtualHubParameters, false)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -108,21 +108,21 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 	vpnGatewayParameters := armnetwork.VPNGateway{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VPNGatewayProperties{
 			BgpSettings: &armnetwork.BgpSettings{
 				Asn:        to.Int64Ptr(65515),
 				PeerWeight: to.Int32Ptr(0),
 			},
-			Connections: &[]*armnetwork.VPNConnection{
+			Connections: []*armnetwork.VPNConnection{
 				{
 					Name: to.StringPtr("vpnConnection1"),
 					Properties: &armnetwork.VPNConnectionProperties{
 						RemoteVPNSite: &armnetwork.SubResource{
 							ID: &vpnSiteId,
 						},
-						VPNLinkConnections: &[]*armnetwork.VPNSiteLinkConnection{
+						VPNLinkConnections: []*armnetwork.VPNSiteLinkConnection{
 							{
 								Name: to.StringPtr("Connection-Link1"),
 								Properties: &armnetwork.VPNSiteLinkConnectionProperties{
@@ -158,7 +158,7 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 				AADIssuer:   to.StringPtr("https://sts.windows.net/" + config.TenantID() + "/"),
 				AADTenant:   to.StringPtr("https://login.microsoftonline.com/" + config.TenantID()),
 			},
-			VPNAuthenticationTypes: &[]*armnetwork.VPNAuthenticationType{armnetwork.VPNAuthenticationTypeAAD.ToPtr()},
+			VPNAuthenticationTypes: []*armnetwork.VPNAuthenticationType{armnetwork.VPNAuthenticationTypeAAD.ToPtr()},
 		},
 	}
 	vpnServerConfigurationId, err := CreateVpnServerConfiguration(ctx, vpnServerConfigurationName, vpnServerConfigurationParameters)
@@ -169,17 +169,17 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 	p2SVPNGatewayParameters := armnetwork.P2SVPNGateway{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.P2SVPNGatewayProperties{
-			P2SConnectionConfigurations: &[]*armnetwork.P2SConnectionConfiguration{{
+			P2SConnectionConfigurations: []*armnetwork.P2SConnectionConfiguration{{
 				SubResource: armnetwork.SubResource{
 					ID: to.StringPtr("/subscriptions/" + config.SubscriptionID() + "/resourceGroups/" + config.GroupName() + "/providers/Microsoft.Network/p2sVpnGateways/" + p2sVpnGatewayName + "/p2sConnectionConfigurations/" + p2sConnectionConfigurationName),
 				},
 				Name: to.StringPtr("P2SConnectionConfig1"),
 				Properties: &armnetwork.P2SConnectionConfigurationProperties{
 					VPNClientAddressPool: &armnetwork.AddressSpace{
-						AddressPrefixes: &[]*string{to.StringPtr("101.3.0.0/16")},
+						AddressPrefixes: []*string{to.StringPtr("101.3.0.0/16")},
 					},
 				},
 			}},
@@ -190,7 +190,7 @@ func TestVpnServerConfigurationsAssociatedWithVirtualWan(t *testing.T) {
 			VirtualHub: &armnetwork.SubResource{
 				ID: &virtualHubId,
 			},
-			CustomDNSServers: &[]*string{
+			CustomDNSServers: []*string{
 				to.StringPtr("1.1.1.1"),
 				to.StringPtr("2.2.2.2"),
 			},

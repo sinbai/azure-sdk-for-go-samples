@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -76,12 +76,12 @@ func TestNatGateWay(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.NatGatewayPropertiesFormat{
-			PublicIPAddresses: &[]*armnetwork.SubResource{
+			PublicIPAddresses: []*armnetwork.SubResource{
 				{
 					ID: &publicIpAddressId,
 				},
 			},
-			PublicIPPrefixes: &[]*armnetwork.SubResource{
+			PublicIPPrefixes: []*armnetwork.SubResource{
 				{
 					ID: &publicIpPrefixId,
 				},
@@ -116,7 +116,7 @@ func TestNatGateWay(t *testing.T) {
 	t.Logf("listed all nat gateway")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateNatGateway(ctx, natGatewayName, tagsObjectParameters)
 	if err != nil {

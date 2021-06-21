@@ -14,7 +14,7 @@ import (
 
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 )
 
@@ -62,7 +62,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -74,7 +74,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 	networkSecurityGroupParameters := armnetwork.NetworkSecurityGroup{
 		Resource: armnetwork.Resource{Location: to.StringPtr(config.Location())},
 		Properties: &armnetwork.NetworkSecurityGroupPropertiesFormat{
-			SecurityRules: &[]*armnetwork.SecurityRule{{
+			SecurityRules: []*armnetwork.SecurityRule{{
 				Name: to.StringPtr("rule1"),
 				Properties: &armnetwork.SecurityRulePropertiesFormat{
 					Access:                   armnetwork.SecurityRuleAccessAllow.ToPtr(),
@@ -111,7 +111,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 	subnetParameters = armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                     to.StringPtr("10.0.1.0/24"),
-			PrivateLinkServiceNetworkPolicies: to.StringPtr("Disabled"),
+			PrivateLinkServiceNetworkPolicies: armnetwork.VirtualNetworkPrivateLinkServiceNetworkPoliciesDisabled.ToPtr(),
 		},
 	}
 	subnetLoadBalancerId, err := CreateSubnet(ctx, virtualNetworkName, subnetLoadBalancerName, subnetParameters)
@@ -122,7 +122,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 	subnetParameters = armnetwork.Subnet{
 		Properties: &armnetwork.SubnetPropertiesFormat{
 			AddressPrefix:                  to.StringPtr("10.0.2.0/24"),
-			PrivateEndpointNetworkPolicies: to.StringPtr("Disabled"),
+			PrivateEndpointNetworkPolicies: armnetwork.VirtualNetworkPrivateEndpointNetworkPoliciesDisabled.ToPtr(),
 		},
 	}
 	subnetEndpointId, err := CreateSubnet(ctx, virtualNetworkName, subnetEndpointName, subnetParameters)
@@ -135,7 +135,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.LoadBalancerPropertiesFormat{
-			FrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{
+			FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 				{
 					Name: &ipConfigurationName,
 					Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
@@ -165,13 +165,13 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 		Properties: &armnetwork.PrivateLinkServiceProperties{
 			AutoApproval: &armnetwork.PrivateLinkServicePropertiesAutoApproval{
 				ResourceSet: armnetwork.ResourceSet{
-					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+					Subscriptions: []*string{to.StringPtr(config.SubscriptionID())},
 				},
 			},
-			Fqdns: &[]*string{to.StringPtr("fqdn1"),
+			Fqdns: []*string{to.StringPtr("fqdn1"),
 				to.StringPtr("fqdn2"),
 				to.StringPtr("fqdn3")},
-			IPConfigurations: &[]*armnetwork.PrivateLinkServiceIPConfiguration{{
+			IPConfigurations: []*armnetwork.PrivateLinkServiceIPConfiguration{{
 				Name: &ipConfigurationName,
 				Properties: &armnetwork.PrivateLinkServiceIPConfigurationProperties{
 					PrivateIPAddress:          to.StringPtr("10.0.1.5"),
@@ -184,14 +184,14 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			}},
-			LoadBalancerFrontendIPConfigurations: &[]*armnetwork.FrontendIPConfiguration{{
+			LoadBalancerFrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{{
 				SubResource: armnetwork.SubResource{
 					ID: to.StringPtr(loadBalancerId + "/frontendIPConfigurations/" + ipConfigurationName),
 				},
 			}},
 			Visibility: &armnetwork.PrivateLinkServicePropertiesVisibility{
 				ResourceSet: armnetwork.ResourceSet{
-					Subscriptions: &[]*string{to.StringPtr(config.SubscriptionID())},
+					Subscriptions: []*string{to.StringPtr(config.SubscriptionID())},
 				},
 			},
 		},
@@ -206,7 +206,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 			Location: to.StringPtr(config.Location()),
 		},
 		Properties: &armnetwork.PrivateEndpointProperties{
-			PrivateLinkServiceConnections: &[]*armnetwork.PrivateLinkServiceConnection{{
+			PrivateLinkServiceConnections: []*armnetwork.PrivateLinkServiceConnection{{
 				Name: &privateLinkServiceName,
 				Properties: &armnetwork.PrivateLinkServiceConnectionProperties{
 					PrivateLinkServiceID: &privateLinkServiceId,
@@ -255,7 +255,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 				Name:     armnetwork.ApplicationGatewaySKUNameStandardV2.ToPtr(),
 				Tier:     armnetwork.ApplicationGatewayTierStandardV2.ToPtr(),
 			},
-			GatewayIPConfigurations: &[]*armnetwork.ApplicationGatewayIPConfiguration{{
+			GatewayIPConfigurations: []*armnetwork.ApplicationGatewayIPConfiguration{{
 				Name: &gatewayIpConfiguration,
 				Properties: &armnetwork.ApplicationGatewayIPConfigurationPropertiesFormat{
 					Subnet: &armnetwork.SubResource{
@@ -263,7 +263,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			}},
-			SSLCertificates: &[]*armnetwork.ApplicationGatewaySSLCertificate{
+			SSLCertificates: []*armnetwork.ApplicationGatewaySSLCertificate{
 				{
 					Name: &sslCertificateName1,
 					Properties: &armnetwork.ApplicationGatewaySSLCertificatePropertiesFormat{
@@ -273,7 +273,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 				},
 			},
 
-			FrontendIPConfigurations: &[]*armnetwork.ApplicationGatewayFrontendIPConfiguration{{
+			FrontendIPConfigurations: []*armnetwork.ApplicationGatewayFrontendIPConfiguration{{
 				Name: &frontendIpConfigurationName,
 				Properties: &armnetwork.ApplicationGatewayFrontendIPConfigurationPropertiesFormat{
 					PublicIPAddress: &armnetwork.SubResource{
@@ -281,7 +281,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			}},
-			FrontendPorts: &[]*armnetwork.ApplicationGatewayFrontendPort{{
+			FrontendPorts: []*armnetwork.ApplicationGatewayFrontendPort{{
 				Name: &frontendPortName,
 				Properties: &armnetwork.ApplicationGatewayFrontendPortPropertiesFormat{
 					Port: to.Int32Ptr(443),
@@ -293,11 +293,11 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 				},
 			}},
 
-			BackendAddressPools: &[]*armnetwork.ApplicationGatewayBackendAddressPool{
+			BackendAddressPools: []*armnetwork.ApplicationGatewayBackendAddressPool{
 				{
 					Name: &backendAddressPoolName,
 					Properties: &armnetwork.ApplicationGatewayBackendAddressPoolPropertiesFormat{
-						BackendAddresses: &[]*armnetwork.ApplicationGatewayBackendAddress{
+						BackendAddresses: []*armnetwork.ApplicationGatewayBackendAddress{
 							{
 								IPAddress: to.StringPtr("10.0.1.1"),
 							},
@@ -308,7 +308,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			},
-			BackendHTTPSettingsCollection: &[]*armnetwork.ApplicationGatewayBackendHTTPSettings{{
+			BackendHTTPSettingsCollection: []*armnetwork.ApplicationGatewayBackendHTTPSettings{{
 				Name: &backendHttpSettingsCollectionName,
 				Properties: &armnetwork.ApplicationGatewayBackendHTTPSettingsPropertiesFormat{
 					CookieBasedAffinity: armnetwork.ApplicationGatewayCookieBasedAffinityDisabled.ToPtr(),
@@ -317,7 +317,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					RequestTimeout:      to.Int32Ptr(30),
 				},
 			}},
-			SSLProfiles: &[]*armnetwork.ApplicationGatewaySSLProfile{{
+			SSLProfiles: []*armnetwork.ApplicationGatewaySSLProfile{{
 				Name: &sslProfileName,
 				Properties: &armnetwork.ApplicationGatewaySSLProfilePropertiesFormat{
 					ClientAuthConfiguration: &armnetwork.ApplicationGatewayClientAuthConfiguration{
@@ -329,7 +329,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			}},
-			HTTPListeners: &[]*armnetwork.ApplicationGatewayHTTPListener{{
+			HTTPListeners: []*armnetwork.ApplicationGatewayHTTPListener{{
 				Name: &httpListenerName1,
 				Properties: &armnetwork.ApplicationGatewayHTTPListenerPropertiesFormat{
 					FrontendIPConfiguration: &armnetwork.SubResource{
@@ -359,7 +359,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					Protocol: armnetwork.ApplicationGatewayProtocolHTTP.ToPtr(),
 				},
 			}},
-			URLPathMaps: &[]*armnetwork.ApplicationGatewayURLPathMap{{
+			URLPathMaps: []*armnetwork.ApplicationGatewayURLPathMap{{
 				Name: &urlPathMapName,
 				Properties: &armnetwork.ApplicationGatewayURLPathMapPropertiesFormat{
 					DefaultBackendAddressPool: &armnetwork.SubResource{
@@ -371,7 +371,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					DefaultRewriteRuleSet: &armnetwork.SubResource{
 						ID: to.StringPtr(applicationGatewayUrl + "/rewriteRuleSets/" + rewriteRuleSetName),
 					},
-					PathRules: &[]*armnetwork.ApplicationGatewayPathRule{{
+					PathRules: []*armnetwork.ApplicationGatewayPathRule{{
 						Name: to.StringPtr("apiPaths"),
 						Properties: &armnetwork.ApplicationGatewayPathRulePropertiesFormat{
 							BackendAddressPool: &armnetwork.SubResource{
@@ -380,7 +380,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 							BackendHTTPSettings: &armnetwork.SubResource{
 								ID: to.StringPtr(applicationGatewayUrl + "/backendHttpSettingsCollection/" + backendHttpSettingsCollectionName),
 							},
-							Paths: &[]*string{to.StringPtr("/api"), to.StringPtr("/v1/api")},
+							Paths: []*string{to.StringPtr("/api"), to.StringPtr("/v1/api")},
 							RewriteRuleSet: &armnetwork.SubResource{
 								ID: to.StringPtr(applicationGatewayUrl + "/rewriteRuleSets/" + rewriteRuleSetName),
 							},
@@ -388,7 +388,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					}},
 				},
 			}},
-			RequestRoutingRules: &[]*armnetwork.ApplicationGatewayRequestRoutingRule{{
+			RequestRoutingRules: []*armnetwork.ApplicationGatewayRequestRoutingRule{{
 				Name: to.StringPtr("appgwrule"),
 				Properties: &armnetwork.ApplicationGatewayRequestRoutingRulePropertiesFormat{
 					BackendAddressPool: &armnetwork.SubResource{
@@ -419,16 +419,16 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 					},
 				},
 			}},
-			RewriteRuleSets: &[]*armnetwork.ApplicationGatewayRewriteRuleSet{{
+			RewriteRuleSets: []*armnetwork.ApplicationGatewayRewriteRuleSet{{
 				Name: &rewriteRuleSetName,
 				Properties: &armnetwork.ApplicationGatewayRewriteRuleSetPropertiesFormat{
-					RewriteRules: &[]*armnetwork.ApplicationGatewayRewriteRule{{
+					RewriteRules: []*armnetwork.ApplicationGatewayRewriteRule{{
 						ActionSet: &armnetwork.ApplicationGatewayRewriteRuleActionSet{
-							RequestHeaderConfigurations: &[]*armnetwork.ApplicationGatewayHeaderConfiguration{{
+							RequestHeaderConfigurations: []*armnetwork.ApplicationGatewayHeaderConfiguration{{
 								HeaderName:  to.StringPtr("X-Forwarded-For"),
 								HeaderValue: to.StringPtr("{var_add_x_forwarded_for_proxy}"),
 							}},
-							ResponseHeaderConfigurations: &[]*armnetwork.ApplicationGatewayHeaderConfiguration{{
+							ResponseHeaderConfigurations: []*armnetwork.ApplicationGatewayHeaderConfiguration{{
 								HeaderName:  to.StringPtr("Strict-Transport-Security"),
 								HeaderValue: to.StringPtr("max-age=31536000"),
 							}},
@@ -436,7 +436,7 @@ func TestApplicationGatewayPrivateEndpointConnection(t *testing.T) {
 								ModifiedPath: to.StringPtr("/abc"),
 							},
 						},
-						Conditions: &[]*armnetwork.ApplicationGatewayRewriteRuleCondition{{
+						Conditions: []*armnetwork.ApplicationGatewayRewriteRuleCondition{{
 							IgnoreCase: to.BoolPtr(true),
 							Negate:     to.BoolPtr(false),
 							Pattern:    to.StringPtr("^Bearer"),

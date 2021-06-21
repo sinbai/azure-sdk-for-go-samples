@@ -13,8 +13,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 	storage "github.com/Azure-Samples/azure-sdk-for-go-samples/storage/sdk"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 	"github.com/marstr/randname"
 )
@@ -42,7 +42,7 @@ func TestNetworkProfile(t *testing.T) {
 	virtualWANParameters := armnetwork.VirtualWAN{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualWanProperties{
 			DisableVPNEncryption: to.BoolPtr(false),
@@ -57,7 +57,7 @@ func TestNetworkProfile(t *testing.T) {
 	virtualHubParameters := armnetwork.VirtualHub{
 		Resource: armnetwork.Resource{
 			Location: to.StringPtr(config.Location()),
-			Tags:     &map[string]*string{"key1": to.StringPtr("value1")},
+			Tags:     map[string]*string{"key1": to.StringPtr("value1")},
 		},
 		Properties: &armnetwork.VirtualHubProperties{
 			AddressPrefix: to.StringPtr("10.168.0.0/24"),
@@ -67,7 +67,7 @@ func TestNetworkProfile(t *testing.T) {
 			},
 		},
 	}
-	_, err = CreateVirtualHub(ctx, virtualHubName, virtualHubParameters)
+	_, err = CreateVirtualHub(ctx, virtualHubName, virtualHubParameters, false)
 	if err != nil {
 		t.Fatalf("failed to create virtual hub: % +v", err)
 	}
@@ -91,7 +91,7 @@ func TestNetworkProfile(t *testing.T) {
 
 		Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 			AddressSpace: &armnetwork.AddressSpace{
-				AddressPrefixes: &[]*string{to.StringPtr("10.0.0.0/16")},
+				AddressPrefixes: []*string{to.StringPtr("10.0.0.0/16")},
 			},
 		},
 	}
@@ -116,10 +116,10 @@ func TestNetworkProfile(t *testing.T) {
 		},
 
 		Properties: &armnetwork.NetworkProfilePropertiesFormat{
-			ContainerNetworkInterfaceConfigurations: &[]*armnetwork.ContainerNetworkInterfaceConfiguration{{
+			ContainerNetworkInterfaceConfigurations: []*armnetwork.ContainerNetworkInterfaceConfiguration{{
 				Name: to.StringPtr("eth1"),
 				Properties: &armnetwork.ContainerNetworkInterfaceConfigurationPropertiesFormat{
-					IPConfigurations: &[]*armnetwork.IPConfigurationProfile{
+					IPConfigurations: []*armnetwork.IPConfigurationProfile{
 						{
 							Name: to.StringPtr("ipconfig1"),
 							Properties: &armnetwork.IPConfigurationProfilePropertiesFormat{
@@ -161,7 +161,7 @@ func TestNetworkProfile(t *testing.T) {
 	t.Logf("listed all network profile")
 
 	tagsObjectParameters := armnetwork.TagsObject{
-		Tags: &map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
+		Tags: map[string]*string{"tag1": to.StringPtr("value1"), "tag2": to.StringPtr("value2")},
 	}
 	err = UpdateNetworkProfileTags(ctx, networkProfileName, tagsObjectParameters)
 	if err != nil {

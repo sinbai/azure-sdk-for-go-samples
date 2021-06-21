@@ -13,8 +13,8 @@ import (
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/internal/config"
 	"github.com/Azure-Samples/azure-sdk-for-go-samples/resources"
 	storage "github.com/Azure-Samples/azure-sdk-for-go-samples/storage/sdk"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/network/2020-07-01/armnetwork"
-	"github.com/Azure/azure-sdk-for-go/sdk/arm/storage/2021-01-01/armstorage"
+	"github.com/Azure/azure-sdk-for-go/sdk/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/armstorage"
 	"github.com/Azure/azure-sdk-for-go/sdk/to"
 	"github.com/marstr/randname"
 )
