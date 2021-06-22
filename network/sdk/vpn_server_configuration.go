@@ -45,9 +45,6 @@ func CreateVpnServerConfiguration(ctx context.Context, vpnServerConfigurationNam
 		return "", err
 	}
 
-	if resp.VPNServerConfiguration.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.VPNServerConfiguration.ID, nil
 }
 

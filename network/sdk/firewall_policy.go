@@ -45,9 +45,6 @@ func CreateFirewallPolicy(ctx context.Context, firewallPolicyName string, firewa
 		return "", err
 	}
 
-	if resp.FirewallPolicy.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.FirewallPolicy.ID, nil
 }
 

@@ -45,12 +45,7 @@ func CreateNetworkInterface(ctx context.Context, networkInterfaceName string, ne
 		return "", nil, err
 	}
 
-	id := ""
-	if resp.NetworkInterface.ID == nil {
-		id = poller.RawResponse.Request.URL.Path
-	} else {
-		id = *resp.NetworkInterface.ID
-	}
+	id := *resp.NetworkInterface.ID
 
 	var ipConfigProperties *armnetwork.NetworkInterfaceIPConfigurationPropertiesFormat
 	if len((resp.NetworkInterface.Properties.IPConfigurations)) > 0 {

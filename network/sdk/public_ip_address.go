@@ -45,9 +45,6 @@ func CreatePublicIPAddress(ctx context.Context, addressName string, publicIPAddr
 		return "", err
 	}
 
-	if resp.PublicIPAddress.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.PublicIPAddress.ID, nil
 }
 

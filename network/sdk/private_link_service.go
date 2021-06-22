@@ -46,9 +46,6 @@ func CreatePrivateLinkService(ctx context.Context, privateLinkServiceName string
 		return "", err
 	}
 
-	if resp.PrivateLinkService.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.PrivateLinkService.ID, nil
 }
 

@@ -113,9 +113,6 @@ func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubPara
 			return "", fmt.Errorf("waiting for Virtual Hub %q (Host Group Name %q) provisioning route: %+v", virtualHubName, config.GroupName(), err)
 		}
 		response := respRaw.(armnetwork.VirtualHubResponse)
-		if response.VirtualHub.ID == nil {
-			return "", fmt.Errorf("cannot read Virtual Hub %q (Resource Group %q) ID", virtualHubName, config.GroupName())
-		}
 
 		return *response.VirtualHub.ID, nil
 	} else {
@@ -124,9 +121,6 @@ func CreateVirtualHub(ctx context.Context, virtualHubName string, virtualHubPara
 			return "", err
 		}
 
-		if resp.VirtualHub.ID == nil {
-			return poller.RawResponse.Request.URL.Path, nil
-		}
 		return *resp.VirtualHub.ID, nil
 	}
 }

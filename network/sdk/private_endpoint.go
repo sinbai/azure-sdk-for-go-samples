@@ -45,9 +45,6 @@ func CreatePrivateEndpoint(ctx context.Context, privateEndpointName string, priv
 	if err != nil {
 		return "", err
 	}
-	if resp.PrivateEndpoint.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.PrivateEndpoint.ID, nil
 }
 

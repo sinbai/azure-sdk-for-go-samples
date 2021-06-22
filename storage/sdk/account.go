@@ -45,8 +45,5 @@ func CreateStorageAccount(ctx context.Context, storageAccountName string, storag
 		return "", err
 	}
 
-	if resp.StorageAccount.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.StorageAccount.ID, nil
 }

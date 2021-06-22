@@ -45,9 +45,6 @@ func CreatePublicIPPrefix(ctx context.Context, prefixName string, publicIPPrefix
 		return "", err
 	}
 
-	if resp.PublicIPPrefix.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.PublicIPPrefix.ID, nil
 }
 

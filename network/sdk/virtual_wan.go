@@ -45,9 +45,6 @@ func CreateVirtualWan(ctx context.Context, virtualWanName string, virtualWANPara
 		return "", err
 	}
 
-	if resp.VirtualWAN.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.VirtualWAN.ID, nil
 }
 

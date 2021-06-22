@@ -45,9 +45,6 @@ func CreateExpressRouteCircuit(ctx context.Context, expressRouteCircuitName stri
 		return "", err
 	}
 
-	if resp.ExpressRouteCircuit.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.ExpressRouteCircuit.ID, nil
 }
 

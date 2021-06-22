@@ -45,9 +45,6 @@ func CreateFirewall(ctx context.Context, firewallName string, azureFirewallParam
 		return "", err
 	}
 
-	if resp.AzureFirewall.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.AzureFirewall.ID, nil
 }
 

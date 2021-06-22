@@ -46,9 +46,6 @@ func CreateExpressRouteCircuitPeering(ctx context.Context, circuitName string, e
 		return "", err
 	}
 
-	if resp.ExpressRouteCircuitPeering.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.ExpressRouteCircuitPeering.ID, nil
 }
 

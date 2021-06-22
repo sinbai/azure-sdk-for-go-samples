@@ -45,9 +45,6 @@ func CreateNetworkSecurityGroup(ctx context.Context, networkSecurityGroupName st
 		return "", err
 	}
 
-	if resp.NetworkSecurityGroup.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.NetworkSecurityGroup.ID, nil
 }
 

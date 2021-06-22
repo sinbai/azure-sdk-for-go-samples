@@ -45,9 +45,6 @@ func CreateLocalNetworkGateway(ctx context.Context, localNetworkGatewayName stri
 		return "", err
 	}
 
-	if resp.LocalNetworkGateway.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.LocalNetworkGateway.ID, nil
 }
 

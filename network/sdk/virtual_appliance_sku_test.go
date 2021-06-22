@@ -21,14 +21,16 @@ func TestVirtualApplianceSku(t *testing.T) {
 	defer cancel()
 	defer resources.Cleanup(ctx)
 
-	// issue ID 14769 in GO SKD
+	// Cannot unmarshal string into Go struct field
+	// https://github.com/Azure/azure-sdk-for-go/issues/14769
 	err := GetVirtualApplianceSku(ctx, virtualApplianceSkuName)
 	if err != nil {
 		t.Fatalf("failed to get virtual appliance sku: %+v", err)
 	}
 	t.Logf("got virtual appliance sku")
 
-	// issue ID 14769 in GO SKD
+	// Cannot unmarshal string into Go struct field
+	// https://github.com/Azure/azure-sdk-for-go/issues/14769
 	err = ListVirtualApplianceSku(ctx)
 	if err != nil {
 		t.Fatalf("failed to list virtual appliance sku: %+v", err)

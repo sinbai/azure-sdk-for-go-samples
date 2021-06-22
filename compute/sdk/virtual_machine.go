@@ -45,6 +45,7 @@ func CreateVirtualMachine(ctx context.Context, virtualMachineName string, virtua
 		return "", err
 	}
 
+	// As a workaround due to issue https://github.com/Azure/azure-sdk-for-go/issues/14730
 	if resp.VirtualMachine.ID == nil {
 		return poller.RawResponse.Request.URL.Path, nil
 	}

@@ -45,9 +45,6 @@ func CreateVirtualNetworkGateway(ctx context.Context, virtualNetworkGatewayName 
 		return "", err
 	}
 
-	if resp.VirtualNetworkGateway.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.VirtualNetworkGateway.ID, nil
 }
 

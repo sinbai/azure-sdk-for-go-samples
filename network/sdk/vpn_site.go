@@ -44,9 +44,6 @@ func CreateVpnSite(ctx context.Context, vpnSiteName string, vpnSiteParameters ar
 	if err != nil {
 		return "", err
 	}
-	if resp.VPNSite.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.VPNSite.ID, nil
 }
 

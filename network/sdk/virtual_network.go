@@ -45,9 +45,6 @@ func CreateVirtualNetwork(ctx context.Context, virtualNetworkName string, virtua
 		return "", err
 	}
 
-	if resp.VirtualNetwork.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.VirtualNetwork.ID, nil
 }
 

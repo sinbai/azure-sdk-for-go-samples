@@ -45,9 +45,6 @@ func CreateLoadBalancer(ctx context.Context, loadBalancerName string, loadBalanc
 		return "", err
 	}
 
-	if resp.LoadBalancer.ID == nil {
-		return poller.RawResponse.Request.URL.Path, nil
-	}
 	return *resp.LoadBalancer.ID, nil
 }
 
